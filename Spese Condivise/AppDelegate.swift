@@ -10,19 +10,22 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata
     ) {
         let persistenceController = PersistenceController.shared
-        guard let sharedStore = persistenceController.sharedPersistentStore else {
-            print("❌ Shared persistent store non trovato")
-            return
-        }
-
-        persistenceController.container.acceptShareInvitations(
-            from: [cloudKitShareMetadata],
-            into: sharedStore
-        ) { _, error in
-            if let error = error {
-                print("❌ Errore accettazione condivisione: \(error.localizedDescription)")
-            } else {
-                print("✅ Condivisione accettata tramite AppDelegate")
+        // Gli store si caricano in modo asincrono: attendiamo che siano pronti
+        // prima di chiamare acceptShareInvitations, altrimenti sharedPersistentStore è nil.
+        persistenceController.executeWhenReady {
+            guard let sharedStore = persistenceController.sharedPersistentStore else {
+                print("❌ Shared persistent store non trovato")
+                return
+            }
+            persistenceController.container.acceptShareInvitations(
+                from: [cloudKitShareMetadata],
+                into: sharedStore
+            ) { _, error in
+                if let error = error {
+                    print("❌ Errore accettazione condivisione: \(error.localizedDescription)")
+                } else {
+                    print("✅ Condivisione accettata tramite AppDelegate")
+                }
             }
         }
     }

@@ -12,7 +12,32 @@ final class PersistenceController: ObservableObject {
             $0.configurationName == "CloudSharing"
         }
     }
-    
+
+    // MARK: - Store readiness
+
+    private var loadedStoreCount = 0
+    private var pendingReadyActions: [() -> Void] = []
+
+    // Esegue `block` subito se gli store sono già caricati, altrimenti attende.
+    func executeWhenReady(_ block: @escaping () -> Void) {
+        DispatchQueue.main.async {
+            if self.loadedStoreCount >= 2 {
+                block()
+            } else {
+                self.pendingReadyActions.append(block)
+            }
+        }
+    }
+
+    private func storeDidLoad() {
+        loadedStoreCount += 1
+        if loadedStoreCount >= 2 {
+            let actions = pendingReadyActions
+            pendingReadyActions = []
+            actions.forEach { $0() }
+        }
+    }
+
     private init(inMemory: Bool = false) {
         container = NSPersistentCloudKitContainer(name: "SharedExpenses")
         
@@ -59,6 +84,7 @@ final class PersistenceController: ObservableObject {
                 fatalError("Unresolved error \(error)")
             } else {
                 print("✅ Store caricato: \(storeDescription.configuration ?? "N/A")")
+                DispatchQueue.main.async { self.storeDidLoad() }
             }
         }
         

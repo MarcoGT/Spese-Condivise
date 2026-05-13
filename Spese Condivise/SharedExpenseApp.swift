@@ -115,24 +115,23 @@ struct SharedExpensesApp: App {
             print("📋 Titolo condivisione: \( metadata.share.url?.absoluteString ?? "N/A")")
             print("👤 Proprietario: \(metadata.ownerIdentity.nameComponents?.formatted() ?? "N/A")")
 
-            guard let sharedStore = PersistenceController.shared.sharedPersistentStore else {
-                print("❌ Shared persistent store non trovato")
-                return
-            }
-
-                // Usa NSPersistentCloudKitContainer per accettare la condivisione,
-                // così i dati vengono correttamente sincronizzati in Core Data.
-            PersistenceController.shared.container.acceptShareInvitations(
-                from: [metadata],
-                into: sharedStore
-            ) { _, error in
-                DispatchQueue.main.async {
-                    if let error = error {
-                        print("❌ Errore nell'accettare la condivisione: \(error)")
-                        self.showSharingError(error: error)
-                    } else {
-                        print("✅ Condivisione accettata con successo")
-                        self.showingShareSuccess = true
+            PersistenceController.shared.executeWhenReady {
+                guard let sharedStore = PersistenceController.shared.sharedPersistentStore else {
+                    print("❌ Shared persistent store non trovato")
+                    return
+                }
+                PersistenceController.shared.container.acceptShareInvitations(
+                    from: [metadata],
+                    into: sharedStore
+                ) { _, error in
+                    DispatchQueue.main.async {
+                        if let error = error {
+                            print("❌ Errore nell'accettare la condivisione: \(error)")
+                            self.showSharingError(error: error)
+                        } else {
+                            print("✅ Condivisione accettata con successo")
+                            self.showingShareSuccess = true
+                        }
                     }
                 }
             }
