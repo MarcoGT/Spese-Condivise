@@ -227,7 +227,20 @@
       }
     },
     "Errore condivisione" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sharing Error"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Errore condivisione"
+          }
+        }
+      }
     },
     "Es. Cena, benzina…" : {
       "comment" : "example",

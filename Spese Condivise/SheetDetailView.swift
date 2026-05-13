@@ -154,56 +154,59 @@ struct SheetDetailView: View {
         let coreDataContainer = PersistenceController.shared.container
         let ckContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
 
-            // Salva prima di condividere
         if coreDataContainer.viewContext.hasChanges {
             try? coreDataContainer.viewContext.save()
         }
 
-            // preparationHandler: viene chiamato prima che il controller mostri l'UI.
-            // Creiamo/recuperiamo la share, la salviamo esplicitamente su CloudKit
-            // (così ha un URL), poi chiamiamo il completion.
-        let sharingController = UICloudSharingController { _, completion in
-            Task {
-                do {
-                    let share = try await CloudShareManager.shared.createOrFetchShare(
-                        for: self.sheet.objectID,
-                        in: coreDataContainer.viewContext,
-                        container: coreDataContainer
-                    )
-                    share[CKShare.SystemFieldKey.title] = self.sheet.name ?? "Foglio Condiviso"
+            // Se esiste già una share, usala direttamente senza ricrearla
+        if let existing = (try? coreDataContainer.fetchShares(matching: [sheet.objectID]))?[sheet.objectID] {
+            existing[CKShare.SystemFieldKey.title] = sheet.name ?? "Foglio Condiviso"
+            existing.publicPermission = .readOnly
+            uploadAndPresent(existing, using: ckContainer)
+            return
+        }
 
-                        // Se la share ha già un URL è già salvata su CloudKit.
-                    if share.url != nil {
-                        completion(share, ckContainer, nil)
-                        return
-                    }
+            // Altrimenti crea una nuova share
+        coreDataContainer.share([sheet], to: nil) { _, share, _, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    self.shareErrorMessage = self.errorMessage(for: error)
+                    self.showingShareError = true
+                }
+                return
+            }
+            guard let ckShare = share else {
+                DispatchQueue.main.async {
+                    self.shareErrorMessage = "Impossibile creare la condivisione."
+                    self.showingShareError = true
+                }
+                return
+            }
+            ckShare[CKShare.SystemFieldKey.title] = self.sheet.name ?? "Foglio Condiviso"
+            ckShare.publicPermission = .readOnly
+            self.uploadAndPresent(ckShare, using: ckContainer)
+        }
+    }
 
-                        // Altrimenti la carichiamo esplicitamente sul private database
-                        // prima di passarla al controller (serve per generare l'URL).
-                    let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
-                    op.savePolicy = .changedKeys
-                    op.modifyRecordsResultBlock = { result in
-                        switch result {
-                            case .success:
-                                completion(share, ckContainer, nil)
-                            case .failure(let error):
-                                completion(nil, nil, error)
-                        }
-                    }
-                    ckContainer.privateCloudDatabase.add(op)
-                } catch {
-                    completion(nil, nil, error)
+    private func uploadAndPresent(_ share: CKShare, using ckContainer: CKContainer) {
+            // Carica la share su CloudKit (con publicPermission già impostato) prima
+            // di aprire il controller, così lui non deve modificarla.
+        let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
+        op.savePolicy = .changedKeys
+        op.configuration.timeoutIntervalForRequest = 15
+        op.configuration.timeoutIntervalForResource = 15
+        op.modifyRecordsResultBlock = { result in
+            DispatchQueue.main.async {
+                switch result {
+                    case .success:
+                        self.activeModal = .share(share)
+                    case .failure(let error):
+                        self.shareErrorMessage = self.errorMessage(for: error)
+                        self.showingShareError = true
                 }
             }
         }
-
-        sharingController.delegate = SharingDelegate.shared
-        sharingController.availablePermissions = [.allowPublic, .allowReadOnly, .allowPrivate]
-        sharingController.modalPresentationStyle = .formSheet
-
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let root = scene.windows.first?.rootViewController else { return }
-        root.present(sharingController, animated: true)
+        ckContainer.privateCloudDatabase.add(op)
     }
 
     private func errorMessage(for error: Error) -> String {
