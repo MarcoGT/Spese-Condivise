@@ -77,10 +77,24 @@ struct SharedSheetListView: View {
                 }
             }
             
-                // 🔹 OVERLAY SYNC
+                // 🔹 OVERLAY SYNC (non-blocking)
             if syncState.showOverlay {
-                Color.black.opacity(0.35).ignoresSafeArea()
-                ProgressView()
+                VStack {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                        Text(NSLocalizedString("Sincronizzazione…", comment: ""))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(20)
+                    .padding(.top, 8)
+                    Spacer()
+                }
+                .allowsHitTesting(false)
             }
         }
         .onAppear {

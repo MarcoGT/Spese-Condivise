@@ -12,8 +12,6 @@ struct SheetDetailView: View {
     @FetchRequest private var expenses: FetchedResults<Expense>
     
     @State private var activeModal: ActiveModal?
-    @State private var showShareSheet = false
-    @State private var cloudShare: CKShare?
     @State private var showAddPersonAlert = false
     @State private var newPersonName = ""
     @State private var showingShareError = false
@@ -22,13 +20,13 @@ struct SheetDetailView: View {
     enum ActiveModal: Identifiable {
         case add
         case edit(Expense)
-        case share(CKShare)
-        
+        case share(URL)
+
         var id: String {
             switch self {
                 case .add: return "add"
                 case .edit(let expense): return "edit-\(expense.objectID.uriRepresentation().absoluteString)"
-                case .share(let share): return "share-\(share.recordID.recordName)"
+                case .share(let url): return "share-\(url.absoluteString)"
             }
         }
     }
@@ -112,11 +110,8 @@ struct SheetDetailView: View {
                     AddExpenseView(sheetID: sheet.objectID)
                 case .edit(let expense):
                     AddExpenseView(expenseToEdit: expense)
-                case .share(let share):
-                    CloudSharingView(
-                        share: share,
-                        container: CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
-                    )
+                case .share(let url):
+                    ActivityView(activityItems: [url])
             }
         }
             // GESTIONE ERRORI CONDIVISIONE
@@ -133,18 +128,6 @@ struct SheetDetailView: View {
         } message: {
             Text("Inserisci il nome della persona")
         }
-            // GESTIONE SHARING SHEET (Separato per evitare conflitti SwiftUI)
-        .background(
-            EmptyView()
-                .sheet(isPresented: $showShareSheet) {
-                    if let share = cloudShare {
-                        CloudSharingView(
-                            share: share,
-                            container: CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
-                        )
-                    }
-                }
-        )
     }
     
         // MARK: - CONDIVISIONE (CORE)
@@ -189,8 +172,6 @@ struct SheetDetailView: View {
     }
 
     private func uploadAndPresent(_ share: CKShare, using ckContainer: CKContainer) {
-            // Carica la share su CloudKit (con publicPermission già impostato) prima
-            // di aprire il controller, così lui non deve modificarla.
         let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
         op.savePolicy = .changedKeys
         op.configuration.timeoutIntervalForRequest = 15
@@ -199,7 +180,12 @@ struct SheetDetailView: View {
             DispatchQueue.main.async {
                 switch result {
                     case .success:
-                        self.activeModal = .share(share)
+                        if let url = share.url {
+                            self.activeModal = .share(url)
+                        } else {
+                            self.shareErrorMessage = NSLocalizedString("Link non disponibile. Riprova tra qualche secondo.", comment: "")
+                            self.showingShareError = true
+                        }
                     case .failure(let error):
                         self.shareErrorMessage = self.errorMessage(for: error)
                         self.showingShareError = true
