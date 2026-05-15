@@ -11,7 +11,7 @@ struct SyncOverlay: View {
                 ProgressView()
                     .scaleEffect(1.2)
                 
-                Text("Sincronizzazione in corso…")
+                Text(NSLocalizedString("Sincronizzazione in corso…", comment: "sync overlay"))
                     .font(.footnote)
                     .foregroundColor(.secondary)
             }
