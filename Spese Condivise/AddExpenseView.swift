@@ -2,14 +2,14 @@ import SwiftUI
 import CoreData
 
 struct AddExpenseView: View {
-    
+
     @Environment(\.managedObjectContext) private var viewContext
     @Environment(\.dismiss) private var dismiss
-    
+
         // MODE
     private let sheetID: NSManagedObjectID?
     private let expenseToEdit: Expense?
-    
+
         // FIELDS
     @State private var amount: String = ""
     @State private var note: String = ""
@@ -17,35 +17,46 @@ struct AddExpenseView: View {
     @State private var selectedPayer: Person?
     @State private var selectedParticipants: Set<Person> = []
 
-    
         // INIT — ADD
     init(sheetID: NSManagedObjectID) {
         self.sheetID = sheetID
         self.expenseToEdit = nil
     }
-    
+
         // INIT — EDIT
     init(expenseToEdit: Expense) {
         self.sheetID = nil
         self.expenseToEdit = expenseToEdit
     }
-    
+
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
-                
-                Section(header: Text(NSLocalizedString("Importo", comment: "amount"))) {
-                    TextField("0,00", text: $amount)
-                        .keyboardType(.decimalPad)
+
+                // Big amount field — no header
+                Section {
+                    HStack {
+                        Spacer()
+                        TextField("0,00", text: $amount)
+                            .keyboardType(.decimalPad)
+                            .font(.system(size: 32, weight: .bold, design: .rounded))
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: 200)
+                        Text("€")
+                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
                 }
-                
+
                 Section(header: Text(NSLocalizedString("Descrizione", comment: "description"))) {
                     TextField(
                         NSLocalizedString("Es. Cena, benzina…", comment: "example"),
                         text: $note
                     )
                 }
-                
+
                 Section(header: Text(NSLocalizedString("Data", comment: "date"))) {
                     DatePicker(
                         NSLocalizedString("Data", comment: "date"),
@@ -53,7 +64,7 @@ struct AddExpenseView: View {
                         displayedComponents: .date
                     )
                 }
-                
+
                 Section(header: Text(NSLocalizedString("paid by", comment: "paid by"))) {
                     Picker(
                         NSLocalizedString("Pagato da", comment: "paid by picker"),
@@ -65,32 +76,45 @@ struct AddExpenseView: View {
                         }
                     }
                 }
-                
+
                 Section(header: Text(NSLocalizedString("Per chi è la spesa", comment: "split between"))) {
-                    ForEach(persons) { person in
-                        Button {
-                            toggleParticipant(person)
-                        } label: {
-                            HStack {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 10) {
+                        ForEach(persons) { person in
+                            let isSelected = selectedParticipants.contains(where: { $0.objectID == person.objectID })
+                            Button {
+                                toggleParticipant(person)
+                            } label: {
                                 Text(person.name ?? "—")
-                                Spacer()
-                                if selectedParticipants.contains(where: { $0.objectID == person.objectID }) {
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.accentColor)
-                                }
-
-                                
+                                    .font(.subheadline)
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .frame(maxWidth: .infinity)
+                                    .background(
+                                        isSelected
+                                            ? Color.accentColor
+                                            : Color.clear
+                                    )
+                                    .foregroundColor(
+                                        isSelected
+                                            ? .white
+                                            : .accentColor
+                                    )
+                                    .clipShape(Capsule())
+                                    .overlay(
+                                        Capsule()
+                                            .strokeBorder(Color.accentColor, lineWidth: isSelected ? 0 : 1.5)
+                                    )
                             }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.vertical, 4)
                 }
-
             }
             .navigationTitle(
                 expenseToEdit == nil
-                ? NSLocalizedString("new expense", comment: "new expense")
-                : NSLocalizedString("edit expense", comment: "edit expense")
+                    ? NSLocalizedString("new expense", comment: "new expense")
+                    : NSLocalizedString("edit expense", comment: "edit expense")
             )
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -98,7 +122,7 @@ struct AddExpenseView: View {
                         dismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(NSLocalizedString("save", comment: "save")) {
                         save()
@@ -111,40 +135,39 @@ struct AddExpenseView: View {
             }
         }
     }
-    
-        // MARK: - DATI
-    
+
+    // MARK: - DATI
+
     private var sheet: SharedSheet? {
         if let expense = expenseToEdit {
             return expense.sheet
         }
-        
+
         if let sheetID = sheetID {
             return try? viewContext.existingObject(with: sheetID) as? SharedSheet
         }
-        
+
         return nil
     }
-    
+
     private var persons: [Person] {
         sheet?.personsArray ?? []
     }
-    
-        // MARK: - LOGICA
-    
+
+    // MARK: - LOGICA
+
     private var canSave: Bool {
         let value = Double(amount.replacingOccurrences(of: ",", with: "."))
         return value != nil && selectedPayer != nil && !selectedParticipants.isEmpty
     }
 
-    
     private func loadIfNeeded() {
         if let expense = expenseToEdit {
             amount = String(format: "%.2f", expense.amount)
             note = expense.note ?? ""
             date = expense.date ?? Date()
             selectedPayer = expense.paidBy
-            
+
                 // EDIT → ripristina split
             if let set = expense.splitBetween as? Set<Person> {
                 selectedParticipants = Set(
@@ -154,7 +177,6 @@ struct AddExpenseView: View {
                 )
             }
 
-
         } else {
                 // ADD → default: tutti
             selectedPayer = persons.first
@@ -162,7 +184,6 @@ struct AddExpenseView: View {
         }
     }
 
-    
     private func toggleParticipant(_ person: Person) {
         if let existing = selectedParticipants.first(where: { $0.objectID == person.objectID }) {
             selectedParticipants.remove(existing)
@@ -171,14 +192,12 @@ struct AddExpenseView: View {
         }
     }
 
-
-    
     private func save() {
         guard
             let value = Double(amount.replacingOccurrences(of: ",", with: ".")),
             let payer = selectedPayer
         else { return }
-        
+
         if let expense = expenseToEdit {
             expense.amount = value
             expense.note = note
@@ -186,7 +205,7 @@ struct AddExpenseView: View {
             expense.paidBy = payer
             expense.sheet?.lastUpdated = Date()
             expense.splitBetween = NSSet(set: selectedParticipants)
-            
+
         } else if let sheet = sheet {
                 // ➕ ADD
             let expense = Expense(context: viewContext)
@@ -197,10 +216,10 @@ struct AddExpenseView: View {
             expense.sheet = sheet
             expense.paidBy = payer
             expense.splitBetween = NSSet(set: selectedParticipants)
-            
+
             sheet.lastUpdated = Date()
         }
-        
+
         do {
             try viewContext.save()
             dismiss()
@@ -209,4 +228,3 @@ struct AddExpenseView: View {
         }
     }
 }
-

@@ -8,8 +8,9 @@ final class PersistenceController: ObservableObject {
     let container: NSPersistentCloudKitContainer
 
     var sharedPersistentStore: NSPersistentStore? {
+        // Cerca per URL (più affidabile di configurationName che può variare)
         return container.persistentStoreCoordinator.persistentStores.first {
-            $0.configurationName == "CloudSharing"
+            $0.url?.lastPathComponent == "shared.sqlite"
         }
     }
 

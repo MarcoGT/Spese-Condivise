@@ -11,6 +11,9 @@
         }
       }
     },
+    "€" : {
+
+    },
     "0,00" : {
       "localizations" : {
         "en" : {
@@ -29,6 +32,7 @@
     },
     "added shared sheet" : {
       "comment" : "added shared sheet",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -142,6 +146,12 @@
         }
       }
     },
+    "Crea foglio" : {
+
+    },
+    "Crea il tuo primo foglio condiviso per iniziare a tracciare le spese." : {
+
+    },
     "currency" : {
       "localizations" : {
         "en" : {
@@ -208,6 +218,9 @@
           }
         }
       }
+    },
+    "devi pagare" : {
+
     },
     "edit expense" : {
       "comment" : "edit expense",
@@ -295,6 +308,7 @@
     },
     "for_people_names" : {
       "comment" : "for people {names}",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -310,8 +324,12 @@
         }
       }
     },
+    "I tuoi fogli" : {
+
+    },
     "Importo" : {
       "comment" : "amount",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -377,6 +395,9 @@
         }
       }
     },
+    "Link non disponibile. Riprova tra qualche secondo." : {
+
+    },
     "Me" : {
       "comment" : "current user",
       "localizations" : {
@@ -393,6 +414,12 @@
           }
         }
       }
+    },
+    "Nessun foglio" : {
+
+    },
+    "Nessuna spesa ancora" : {
+
     },
     "new expense" : {
       "comment" : "new expense",
@@ -546,6 +573,9 @@
         }
       }
     },
+    "Saldo totale" : {
+
+    },
     "save" : {
       "comment" : "save",
       "localizations" : {
@@ -559,6 +589,74 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salva"
+          }
+        }
+      }
+    },
+    "share_accepted_message" : {
+      "comment" : "Share accepted successfully",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared sheet added! It may take a few seconds to appear."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foglio condiviso aggiunto! Potrebbe richiedere qualche secondo per apparire."
+          }
+        }
+      }
+    },
+    "share_accepted_title" : {
+      "comment" : "Share accepted title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share Accepted"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Condivisione accettata"
+          }
+        }
+      }
+    },
+    "share_store_not_found" : {
+      "comment" : "Shared store not found\nShared store not found error",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared store not found. Try restarting the app."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Store condiviso non trovato. Prova a riavviare l'app."
+          }
+        }
+      }
+    },
+    "share_unknown_error" : {
+      "comment" : "Unknown share error",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unknown error while accepting the share."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Errore sconosciuto durante l'accettazione."
           }
         }
       }
@@ -582,6 +680,7 @@
     },
     "shared sheet" : {
       "comment" : "shared sheet",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -649,6 +748,7 @@
       }
     },
     "Sincronizzazione in corso…" : {
+      "comment" : "sync overlay",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -664,8 +764,12 @@
         }
       }
     },
+    "Spese" : {
+      "comment" : "expenses"
+    },
     "The shared sheet has been added to your list, you can see it in a few seconds" : {
       "comment" : "shared sheet added",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -717,6 +821,9 @@
         }
       }
     },
+    "ti devono" : {
+
+    },
     "Ti devono %.2f €" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -736,6 +843,7 @@
     },
     "total" : {
       "comment" : "total",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
