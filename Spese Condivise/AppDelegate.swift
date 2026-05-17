@@ -78,7 +78,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata
     ) {
-        print("AppDelegate: userDidAcceptCloudKitShareWith")
         let persistenceController = PersistenceController.shared
 
         persistenceController.executeWhenReady {

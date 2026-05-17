@@ -84,7 +84,6 @@ final class PersistenceController: ObservableObject {
                 print("❌ Errore caricamento store (\(storeDescription.configuration ?? "N/A")): \(error)")
                 fatalError("Unresolved error \(error)")
             } else {
-                print("✅ Store caricato: \(storeDescription.configuration ?? "N/A")")
                 DispatchQueue.main.async { self.storeDidLoad() }
             }
         }
