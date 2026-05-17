@@ -1125,6 +1125,54 @@
         }
       }
     },
+    "close" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Close" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Chiudi" } }
+      }
+    },
+    "stats_avg_per_person" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Avg per person" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Media per persona" } }
+      }
+    },
+    "stats_by_category" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "By category" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Per categoria" } }
+      }
+    },
+    "stats_by_person" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Paid by" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Pagato da" } }
+      }
+    },
+    "stats_expense_count" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Expenses" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Spese" } }
+      }
+    },
+    "stats_most_expensive" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Most expensive" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Spesa più alta" } }
+      }
+    },
+    "stats_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Statistics" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Statistiche" } }
+      }
+    },
+    "stats_total" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Total" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Totale" } }
+      }
+    },
     "search_expenses" : {
       "localizations" : {
         "en" : {

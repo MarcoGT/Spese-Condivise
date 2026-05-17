@@ -18,6 +18,7 @@ struct SheetDetailView: View {
     @State private var shareErrorMessage = ""
     @State private var isPreparingShare = false
     @State private var showSettleConfirm = false
+    @State private var showStatistics = false
     @State private var searchText = ""
     @State private var selectedCategoryFilter: ExpenseCategory? = nil
 
@@ -225,6 +226,16 @@ struct SheetDetailView: View {
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
+                    showStatistics = true
+                } label: {
+                    Image(systemName: "chart.pie")
+                }
+                .labelStyle(.iconOnly)
+                .disabled(expenses.isEmpty)
+            }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
                     activeModal = .add
                 } label: {
                     Image(systemName: "plus")
@@ -277,6 +288,10 @@ struct SheetDetailView: View {
                         activeModal = nil
                     }
             }
+        }
+        // STATISTICHE
+        .sheet(isPresented: $showStatistics) {
+            StatisticsView(sheet: sheet)
         }
         // CONFERMA AZZERAMENTO SALDO
         .confirmationDialog(
