@@ -228,7 +228,7 @@ struct SheetDetailView: View {
                 Button {
                     showStatistics = true
                 } label: {
-                    Image(systemName: "chart.pie")
+                    Image(systemName: "chart.bar.xaxis")
                 }
                 .labelStyle(.iconOnly)
                 .disabled(expenses.isEmpty)

@@ -137,28 +137,17 @@ struct StatisticsView: View {
         .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
     }
 
-    // MARK: - Torta categorie
+    // MARK: - Barre per categoria (iOS 16 compatible)
 
     private var categoryChart: some View {
-        VStack(spacing: 16) {
-            Chart(byCategory, id: \.category) { item in
-                SectorMark(
-                    angle: .value("amount", item.total),
-                    innerRadius: .ratio(0.55),
-                    angularInset: 2
-                )
-                .foregroundStyle(item.category.color)
-                .cornerRadius(4)
-            }
-            .frame(height: 200)
-
-            // Legenda
-            VStack(spacing: 8) {
-                ForEach(byCategory, id: \.category) { item in
+        VStack(spacing: 10) {
+            ForEach(byCategory, id: \.category) { item in
+                let pct = totalAmount > 0 ? item.total / totalAmount : 0
+                VStack(alignment: .leading, spacing: 4) {
                     HStack {
-                        Circle()
-                            .fill(item.category.color)
-                            .frame(width: 10, height: 10)
+                        Image(systemName: item.category.icon)
+                            .font(.caption)
+                            .foregroundColor(item.category.color)
                         Text(item.category.localizedName)
                             .font(.subheadline)
                             .foregroundColor(.primary)
@@ -167,11 +156,21 @@ struct StatisticsView: View {
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(.secondary)
-                        Text(String(format: "%.0f%%", item.total / totalAmount * 100))
+                        Text(String(format: "%.0f%%", pct * 100))
                             .font(.caption)
                             .foregroundColor(.secondary)
-                            .frame(width: 36, alignment: .trailing)
+                            .frame(width: 34, alignment: .trailing)
                     }
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(item.category.color.opacity(0.15))
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(item.category.color)
+                                .frame(width: geo.size.width * pct)
+                        }
+                    }
+                    .frame(height: 8)
                 }
             }
         }
@@ -180,23 +179,21 @@ struct StatisticsView: View {
     // MARK: - Barre per persona
 
     private var personChart: some View {
-        VStack(spacing: 12) {
-            Chart(byPerson, id: \.name) { item in
-                BarMark(
-                    x: .value("amount", item.total),
-                    y: .value("person", item.name)
-                )
-                .foregroundStyle(Color.accentColor.gradient)
-                .cornerRadius(6)
-                .annotation(position: .trailing) {
-                    Text(AmountFormatter.format(item.total))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+        Chart(byPerson, id: \.name) { item in
+            BarMark(
+                x: .value("amount", item.total),
+                y: .value("person", item.name)
+            )
+            .foregroundStyle(Color.accentColor.gradient)
+            .cornerRadius(6)
+            .annotation(position: .trailing) {
+                Text(AmountFormatter.format(item.total))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
-            .chartXAxis(.hidden)
-            .frame(height: max(CGFloat(byPerson.count) * 52, 80))
         }
+        .chartXAxis(.hidden)
+        .frame(height: max(CGFloat(byPerson.count) * 52, 80))
     }
 
     // MARK: - Wrapper card
