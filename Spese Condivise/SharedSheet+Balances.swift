@@ -6,7 +6,7 @@ extension SharedSheet {
         var balances: [Person: Double] = [:]
         
         let persons = personsArray
-        let expenses = expensesArray
+        let expenses = activeExpensesArray
         
         persons.forEach { balances[$0] = 0 }
         

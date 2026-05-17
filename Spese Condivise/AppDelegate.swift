@@ -37,12 +37,40 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         return config
     }
 
-func application(
+    func application(
         _ application: UIApplication,
         didReceiveRemoteNotification userInfo: [AnyHashable: Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
-        completionHandler(.newData)
+        // Push silenzioso CloudKit → aspetta l'import e poi mostra notifica locale
+        let persistence = PersistenceController.shared
+        remoteNotifObserver = NotificationCenter.default.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard
+                let event = notification.userInfo?[
+                    NSPersistentCloudKitContainer.eventNotificationUserInfoKey
+                ] as? NSPersistentCloudKitContainer.Event,
+                event.type == .import,
+                event.endDate != nil,
+                event.error == nil
+            else { return }
+
+            if let obs = self?.remoteNotifObserver { NotificationCenter.default.removeObserver(obs) }
+            self?.remoteNotifObserver = nil
+            LastSeenStore.globalLastSeen = Date()
+            NotificationService.shared.notifyIfNeeded(context: persistence.container.viewContext)
+            completionHandler(.newData)
+        }
+
+        // Fallback dopo 20 secondi
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20) { [weak self] in
+            if let obs = self?.remoteNotifObserver { NotificationCenter.default.removeObserver(obs) }
+            self?.remoteNotifObserver = nil
+            completionHandler(.noData)
+        }
     }
 
     // Chiamato da iOS quando l'utente accetta un link di condivisione CloudKit.
@@ -82,6 +110,7 @@ func application(
 
     // MARK: - Attende import CloudKit dopo accettazione share
 
+    private var remoteNotifObserver: NSObjectProtocol?
     private var importObserver: NSObjectProtocol?
     private var importFallbackWork: DispatchWorkItem?
 

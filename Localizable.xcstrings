@@ -11,6 +11,9 @@
         }
       }
     },
+    "🏖️" : {
+
+    },
     "€" : {
 
     },
@@ -26,142 +29,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "0,00"
-          }
-        }
-      }
-    },
-    "onboarding_p1_title" : {
-      "comment" : "Onboarding page 1 title",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Shared Expenses"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spese Condivise"
-          }
-        }
-      }
-    },
-    "onboarding_p1_body" : {
-      "comment" : "Onboarding page 1 body",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Keep track of shared expenses with friends, family or flatmates — always in sync."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tieni traccia delle spese condivise con amici, familiari o coinquilini — sempre sincronizzato."
-          }
-        }
-      }
-    },
-    "onboarding_p2_title" : {
-      "comment" : "Onboarding page 2 title",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Add people, track expenses"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aggiungi persone, registra spese"
-          }
-        }
-      }
-    },
-    "onboarding_p2_body" : {
-      "comment" : "Onboarding page 2 body",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Create a sheet for each occasion. Add everyone involved and log expenses as you go. The app always shows who owes what."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Crea un foglio per ogni occasione. Aggiungi tutti i partecipanti e registra le spese man mano. L'app mostra sempre chi deve cosa."
-          }
-        }
-      }
-    },
-    "onboarding_p3_title" : {
-      "comment" : "Onboarding page 3 title",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Real-time sync via iCloud"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sincronizzazione in tempo reale"
-          }
-        }
-      }
-    },
-    "onboarding_p3_body" : {
-      "comment" : "Onboarding page 3 body",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Share a sheet with a link. Anyone who accepts it sees all expenses updated in real time, powered by iCloud."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Condividi un foglio con un link. Chi lo accetta vede tutte le spese aggiornate in tempo reale, grazie a iCloud."
-          }
-        }
-      }
-    },
-    "onboarding_next" : {
-      "comment" : "Onboarding next button",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Next"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avanti"
-          }
-        }
-      }
-    },
-    "onboarding_start" : {
-      "comment" : "Onboarding final button",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Get started"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Inizia"
           }
         }
       }
@@ -198,6 +65,22 @@
         }
       }
     },
+    "all_categories" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutte"
+          }
+        }
+      }
+    },
     "Annulla" : {
       "localizations" : {
         "en" : {
@@ -217,6 +100,160 @@
     "App con Core Data + CloudKit Sharing in costruzione..." : {
 
     },
+    "appearance_color" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colore"
+          }
+        }
+      }
+    },
+    "appearance_emoji_placeholder" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap to type an emoji…" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tocca per inserire un'emoji…" } }
+      }
+    },
+    "appearance_emoji" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emoji"
+          }
+        }
+      }
+    },
+    "appearance_title" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aspetto"
+          }
+        }
+      }
+    },
+    "archive_empty" : {
+      "comment" : "Empty state in archive",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No archived periods yet.\nReset the balance to create the first one."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun periodo archiviato.\nAzzera il saldo per crearne uno."
+          }
+        }
+      }
+    },
+    "archive_expense_count" : {
+      "comment" : "Number of expenses in a settlement",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d expense(s)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d spesa/e"
+          }
+        }
+      }
+    },
+    "archive_settlement_count" : {
+      "comment" : "Number of settlements in archive",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d period(s)"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d periodo/i"
+          }
+        }
+      }
+    },
+    "archive_title" : {
+      "comment" : "Archive section/page title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archive"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivio"
+          }
+        }
+      }
+    },
+    "balance_credit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "credit"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in credito"
+          }
+        }
+      }
+    },
+    "balance_debit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "debit"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in debito"
+          }
+        }
+      }
+    },
     "balance_even" : {
       "comment" : "Balance is even",
       "localizations" : {
@@ -234,6 +271,22 @@
         }
       }
     },
+    "balance_even_short" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "even"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "in pari"
+          }
+        }
+      }
+    },
     "cancel" : {
       "comment" : "cancel",
       "localizations" : {
@@ -247,6 +300,145 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annulla"
+          }
+        }
+      }
+    },
+    "category" : {
+
+    },
+    "category_accommodation" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accommodation"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alloggio"
+          }
+        }
+      }
+    },
+    "category_entertainment" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entertainment"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Intrattenimento"
+          }
+        }
+      }
+    },
+    "category_food" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Food & Drink"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cibo & Bevande"
+          }
+        }
+      }
+    },
+    "category_health" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salute"
+          }
+        }
+      }
+    },
+    "category_other" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Other"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Altro"
+          }
+        }
+      }
+    },
+    "category_shopping" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shopping"
+          }
+        }
+      }
+    },
+    "category_transport" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transport"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trasporti"
+          }
+        }
+      }
+    },
+    "category_utilities" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilities"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bollette"
           }
         }
       }
@@ -349,6 +541,22 @@
         }
       }
     },
+    "edit" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifica"
+          }
+        }
+      }
+    },
     "edit expense" : {
       "comment" : "edit expense",
       "localizations" : {
@@ -401,6 +609,7 @@
     },
     "expense_amount" : {
       "comment" : "expense amount",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -598,6 +807,22 @@
         }
       }
     },
+    "no_results" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No results"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun risultato"
+          }
+        }
+      }
+    },
     "Nome" : {
       "localizations" : {
         "en" : {
@@ -610,6 +835,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nome"
+          }
+        }
+      }
+    },
+    "notification_new_expense" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New expense: %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuova spesa: %@"
+          }
+        }
+      }
+    },
+    "notification_new_expense_named" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ — %@"
           }
         }
       }
@@ -627,6 +884,142 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "onboarding_next" : {
+      "comment" : "Onboarding next button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanti"
+          }
+        }
+      }
+    },
+    "onboarding_p1_body" : {
+      "comment" : "Onboarding page 1 body",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep track of shared expenses with friends, family or flatmates — always in sync."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tieni traccia delle spese condivise con amici, familiari o coinquilini — sempre sincronizzato."
+          }
+        }
+      }
+    },
+    "onboarding_p1_title" : {
+      "comment" : "Onboarding page 1 title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shared Expenses"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spese Condivise"
+          }
+        }
+      }
+    },
+    "onboarding_p2_body" : {
+      "comment" : "Onboarding page 2 body",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a sheet for each occasion. Add everyone involved and log expenses as you go. The app always shows who owes what."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea un foglio per ogni occasione. Aggiungi tutti i partecipanti e registra le spese man mano. L'app mostra sempre chi deve cosa."
+          }
+        }
+      }
+    },
+    "onboarding_p2_title" : {
+      "comment" : "Onboarding page 2 title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add people, track expenses"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi persone, registra spese"
+          }
+        }
+      }
+    },
+    "onboarding_p3_body" : {
+      "comment" : "Onboarding page 3 body",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share a sheet with a link. Anyone who accepts it sees all expenses updated in real time, powered by iCloud."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Condividi un foglio con un link. Chi lo accetta vede tutte le spese aggiornate in tempo reale, grazie a iCloud."
+          }
+        }
+      }
+    },
+    "onboarding_p3_title" : {
+      "comment" : "Onboarding page 3 title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Real-time sync via iCloud"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizzazione in tempo reale"
+          }
+        }
+      }
+    },
+    "onboarding_start" : {
+      "comment" : "Onboarding final button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get started"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inizia"
           }
         }
       }
@@ -728,6 +1121,155 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Salva"
+          }
+        }
+      }
+    },
+    "search_expenses" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search expenses…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerca spese…"
+          }
+        }
+      }
+    },
+    "settle_confirm_action" : {
+      "comment" : "Destructive button in settle confirmation",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archive and reset"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivia e azzera"
+          }
+        }
+      }
+    },
+    "settle_confirm_message" : {
+      "comment" : "Confirmation dialog message for settle",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All current expenses will be archived. The balance resets to zero. You can view the history in the archive."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutte le spese attuali verranno archiviate. Il saldo torna a zero. Puoi vedere la storia nell'archivio."
+          }
+        }
+      }
+    },
+    "settle_confirm_title" : {
+      "comment" : "Confirmation dialog title for settle",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset balance?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Azzera saldo?"
+          }
+        }
+      }
+    },
+    "settlement_balances_at_close" : {
+      "comment" : "Section header — balances snapshot",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Balances at close"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saldi alla chiusura"
+          }
+        }
+      }
+    },
+    "settlement_expenses_of_period" : {
+      "comment" : "Section header — expenses list",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses of the period"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spese del periodo"
+          }
+        }
+      }
+    },
+    "settlement_no_balances" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No balances recorded."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun saldo registrato."
+          }
+        }
+      }
+    },
+    "settlement_no_expenses" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No expenses for this period."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuna spesa per questo periodo."
+          }
+        }
+      }
+    },
+    "settlement_title_fallback" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archived period"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Periodo archiviato"
           }
         }
       }

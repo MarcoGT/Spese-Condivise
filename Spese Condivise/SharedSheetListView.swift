@@ -20,6 +20,11 @@ struct SharedSheetListView: View {
     @State private var shareAlertMessage = ""
     @State private var showingShareAlert = false
     @State private var shareAlertIsSuccess = false
+    @State private var lastSeenRefresh = Date()
+    @State private var sheetToCustomize: SharedSheet? = nil
+    // Emoji e colori per foglio — aggiornati subito al salvataggio
+    @State private var sheetEmojis:  [NSManagedObjectID: String] = [:]
+    @State private var sheetColors:  [NSManagedObjectID: Color]  = [:]
 
     private let remoteChangePublisher = NotificationCenter.default
         .publisher(for: .NSPersistentStoreRemoteChange)
@@ -48,8 +53,26 @@ struct SharedSheetListView: View {
                                 ForEach(sheets) { sheet in
                                     NavigationLink {
                                         SheetDetailView(sheet: sheet)
+                                            .onDisappear { lastSeenRefresh = Date() }
                                     } label: {
-                                        sheetRow(sheet)
+                                        SheetRowView(
+                                            sheet: sheet,
+                                            emoji: sheetEmojis[sheet.objectID],
+                                            sheetColor: sheetColors[sheet.objectID] ?? SheetAppearanceStore.shared.color(for: sheet),
+                                            balanceText: sheetBalanceText(sheet),
+                                            balanceColor: {
+                                                let b = sheetBalance(sheet)
+                                                return b == 0 ? .gray : (b > 0 ? .green : .red)
+                                            }(),
+                                            lastSeenRefresh: lastSeenRefresh
+                                        )
+                                    }
+                                    .contextMenu {
+                                        Button {
+                                            sheetToCustomize = sheet
+                                        } label: {
+                                            Label(NSLocalizedString("appearance_title", comment: ""), systemImage: "paintpalette")
+                                        }
                                     }
                                     .listRowBackground(Color.clear)
                                     .listRowSeparator(.hidden)
@@ -99,6 +122,7 @@ struct SharedSheetListView: View {
         .onAppear {
             bootstrapCurrentUserIfNeeded()
             AppSyncState.current = syncState
+            loadSavedAppearances()
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 if !syncState.initialSyncCompleted {
@@ -131,6 +155,14 @@ struct SharedSheetListView: View {
             shareAlertMessage = msg
             showingShareAlert = true
             syncState.pendingShareError = nil
+        }
+        .sheet(item: $sheetToCustomize) { sheet in
+            SheetAppearanceView(sheet: sheet) { emoji, color in
+                // Aggiorna @State subito — SwiftUI ridisegna la riga immediatamente
+                if let e = emoji { sheetEmojis[sheet.objectID] = e }
+                else { sheetEmojis.removeValue(forKey: sheet.objectID) }
+                sheetColors[sheet.objectID] = color
+            }
         }
         .alert(shareAlertIsSuccess
                ? NSLocalizedString("share_accepted_title", comment: "Share accepted title")
@@ -185,50 +217,7 @@ struct SharedSheetListView: View {
         )
     }
 
-    // MARK: - SHEET ROW
-
-    @ViewBuilder
-    private func sheetRow(_ sheet: SharedSheet) -> some View {
-        let balance = sheetBalance(sheet)
-        let isPositive = balance > 0
-        let isEven = balance == 0
-        let accentColor: Color = isEven ? .gray : (isPositive ? .green : .red)
-        let iconName = isEven ? "equal" : (isPositive ? "arrow.up" : "arrow.down")
-
-        HStack(spacing: 14) {
-            // Colored circle icon
-            ZStack {
-                Circle()
-                    .fill(accentColor.opacity(0.15))
-                    .frame(width: 44, height: 44)
-                Image(systemName: iconName)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(accentColor)
-            }
-
-            // Center: sheet name
-            Text(sheet.name ?? NSLocalizedString("sheet", comment: ""))
-                .font(.headline)
-                .foregroundColor(.primary)
-                .lineLimit(1)
-
-            Spacer()
-
-            // Right: balance
-            Text(sheetBalanceText(sheet))
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(accentColor)
-                .lineLimit(1)
-        }
-        .padding(.vertical, 14)
-        .padding(.horizontal, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
-        )
-    }
+    // sheetRow ora è una struct separata — vedi SheetRowView in fondo al file
 
     // MARK: - EMPTY STATE
 
@@ -272,14 +261,31 @@ struct SharedSheetListView: View {
         }
     }
 
+    // MARK: - APPEARANCE
+
+    private func loadSavedAppearances() {
+        let store = SheetAppearanceStore.shared
+        for sheet in sheets {
+            if let e = store.emoji(for: sheet) {
+                sheetEmojis[sheet.objectID] = e
+            }
+            sheetColors[sheet.objectID] = store.color(for: sheet)
+        }
+    }
+
     // MARK: - BOOTSTRAP USER
     private func bootstrapCurrentUserIfNeeded() {
-        guard currentUser.personID == nil else { return }
-
-        if let firstSheet = sheets.first,
-           let firstPerson = firstSheet.personsArray.first,
-           let id = firstPerson.id {
-            currentUser.bootstrapIfNeeded(with: id)
+        // Cerca sempre la persona "Io/Me" e la imposta come utente corrente —
+        // sovrascrive eventuali ID errati salvati in precedenza.
+        let meName = NSLocalizedString("Me", comment: "current user") // "Io" in IT, "Me" in EN
+        for sheet in sheets {
+            let persons = sheet.personsArray
+            let match = persons.first(where: { $0.name == meName })
+                     ?? persons.first(where: { $0.name?.lowercased() == "io" || $0.name?.lowercased() == "me" })
+            if let me = match, let id = me.id {
+                currentUser.setPersonID(id)  // corregge anche ID errati già salvati
+                return
+            }
         }
     }
 
@@ -297,28 +303,19 @@ struct SharedSheetListView: View {
 
     private func sheetBalanceText(_ sheet: SharedSheet) -> String {
         let value = sheetBalance(sheet)
-        let formatted = String(format: "%.2f", abs(value))
-
-        if value == 0 {
-            return NSLocalizedString("in pari", comment: "")
-        } else if value > 0 {
-            return "+\(formatted) €"
-        } else {
-            return "−\(formatted) €"
-        }
+        if value == 0 { return NSLocalizedString("in pari", comment: "") }
+        let formatted = AmountFormatter.format(abs(value))
+        return value > 0 ? "+\(formatted)" : "−\(formatted)"
     }
 
     private func totalBalance() -> Double {
         normalized(sheets.reduce(0) { $0 + sheetBalance($1) })
     }
 
-    /// Returns just the formatted amount (e.g. "12.50 €") for the hero card number display.
+    /// Returns just the formatted amount (e.g. "12,50 €") for the hero card number display.
     private func totalBalanceAmountText() -> String {
         let value = totalBalance()
-        if value == 0 {
-            return "0.00 €"
-        }
-        return String(format: "%.2f €", abs(value))
+        return AmountFormatter.format(abs(value))
     }
 
     private func totalBalanceText() -> String {

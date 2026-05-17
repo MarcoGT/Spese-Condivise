@@ -17,6 +17,9 @@ struct SheetDetailView: View {
     @State private var showingShareError = false
     @State private var shareErrorMessage = ""
     @State private var isPreparingShare = false
+    @State private var showSettleConfirm = false
+    @State private var searchText = ""
+    @State private var selectedCategoryFilter: ExpenseCategory? = nil
 
     enum ActiveModal: Identifiable {
         case add
@@ -39,7 +42,8 @@ struct SheetDetailView: View {
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \Expense.date, ascending: false)
         ]
-        request.predicate = NSPredicate(format: "sheet == %@", sheet)
+        // Solo spese attive (non archiviate)
+        request.predicate = NSPredicate(format: "sheet == %@ AND archived == NO", sheet)
 
         _expenses = FetchRequest(fetchRequest: request)
     }
@@ -78,14 +82,78 @@ struct SheetDetailView: View {
                     }
                 }
 
+                // MARK: Category filter chips
+                if !expenses.isEmpty {
+                    Section {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                // "Tutte" chip
+                                Button {
+                                    selectedCategoryFilter = nil
+                                } label: {
+                                    Text(NSLocalizedString("all_categories", comment: ""))
+                                        .font(.subheadline)
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 7)
+                                        .background(selectedCategoryFilter == nil ? Color.accentColor : Color(.systemGray5))
+                                        .foregroundColor(selectedCategoryFilter == nil ? .white : .primary)
+                                        .clipShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+
+                                // Una chip per ogni categoria presente nelle spese
+                                ForEach(usedCategories, id: \.self) { cat in
+                                    let isSelected = selectedCategoryFilter == cat
+                                    Button {
+                                        selectedCategoryFilter = isSelected ? nil : cat
+                                    } label: {
+                                        HStack(spacing: 5) {
+                                            Image(systemName: cat.icon)
+                                                .font(.caption)
+                                            Text(cat.localizedName)
+                                                .font(.subheadline)
+                                        }
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 7)
+                                        .background(isSelected ? cat.color : Color(.systemGray5))
+                                        .foregroundColor(isSelected ? .white : .primary)
+                                        .clipShape(Capsule())
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 4)
+                        }
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                    }
+                }
+
                 // MARK: Expenses section
                 Section {
                     if expenses.isEmpty {
                         EmptyExpensesView()
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
+                    } else if filteredExpenses.isEmpty {
+                        // Nessun risultato per ricerca/filtro
+                        VStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 32))
+                                .foregroundColor(.secondary)
+                            Text(NSLocalizedString("no_results", comment: ""))
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 32)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
                     } else {
-                        ForEach(expenses) { expense in
+                        ForEach(filteredExpenses) { expense in
+                            let isNew = (expense.createdAt ?? .distantPast) > LastSeenStore.lastSeen(for: sheet)
                             Button {
                                 activeModal = .edit(expense)
                             } label: {
@@ -93,21 +161,67 @@ struct SheetDetailView: View {
                                     .background(Color(.systemBackground))
                                     .cornerRadius(14)
                                     .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 14)
+                                            .stroke(Color.blue.opacity(isNew ? 0.5 : 0), lineWidth: 1.5)
+                                    )
                             }
                             .buttonStyle(.plain)
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                             .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                                Button {
+                                    activeModal = .edit(expense)
+                                } label: {
+                                    Label(NSLocalizedString("edit", comment: ""), systemImage: "pencil")
+                                }
+                                .tint(.blue)
+                            }
                         }
                         .onDelete(perform: deleteExpenses)
                     }
                 } header: {
                     SectionHeader(title: NSLocalizedString("Spese", comment: "expenses"))
                 }
+
+                // MARK: Archive link
+                if !sheet.settlementsArray.isEmpty {
+                    Section {
+                        NavigationLink {
+                            ArchiveView(sheet: sheet)
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "archivebox.fill")
+                                    .foregroundColor(.secondary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(NSLocalizedString("archive_title", comment: ""))
+                                        .font(.body)
+                                        .fontWeight(.medium)
+                                    Text(String(
+                                        format: NSLocalizedString("archive_settlement_count", comment: ""),
+                                        sheet.settlementsArray.count
+                                    ))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                }
+                            }
+                            .padding(.vertical, 4)
+                        }
+                        .listRowBackground(Color(.systemBackground))
+                    }
+                }
             }
             .listStyle(.plain)
         }
         .navigationTitle(sheet.name ?? NSLocalizedString("sheet", comment: ""))
+        .searchable(
+            text: $searchText,
+            prompt: NSLocalizedString("search_expenses", comment: "")
+        )
+        .onAppear {
+            LastSeenStore.markSeen(for: sheet)
+        }
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
@@ -140,6 +254,16 @@ struct SheetDetailView: View {
                 }
                 .labelStyle(.iconOnly)
             }
+
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    showSettleConfirm = true
+                } label: {
+                    Image(systemName: "checkmark.circle")
+                }
+                .labelStyle(.iconOnly)
+                .disabled(expenses.isEmpty)
+            }
         }
         // GESTIONE MODAL AGGIUNGI/MODIFICA/SHARE
         .sheet(item: $activeModal) { modal in
@@ -153,6 +277,19 @@ struct SheetDetailView: View {
                         activeModal = nil
                     }
             }
+        }
+        // CONFERMA AZZERAMENTO SALDO
+        .confirmationDialog(
+            NSLocalizedString("settle_confirm_title", comment: ""),
+            isPresented: $showSettleConfirm,
+            titleVisibility: .visible
+        ) {
+            Button(NSLocalizedString("settle_confirm_action", comment: ""), role: .destructive) {
+                performSettle()
+            }
+            Button(NSLocalizedString("Annulla", comment: ""), role: .cancel) {}
+        } message: {
+            Text(NSLocalizedString("settle_confirm_message", comment: ""))
         }
         // GESTIONE ERRORI CONDIVISIONE
         .alert("Errore condivisione", isPresented: $showingShareError) {
@@ -168,6 +305,30 @@ struct SheetDetailView: View {
         } message: {
             Text("Inserisci il nome della persona")
         }
+    }
+
+    // MARK: - FILTRO
+
+    private var usedCategories: [ExpenseCategory] {
+        let raw = Set(expenses.compactMap { $0.category })
+        return ExpenseCategory.allCases.filter { raw.contains($0.rawValue) }
+    }
+
+    private var filteredExpenses: [Expense] {
+        expenses.filter { expense in
+            let matchesSearch = searchText.isEmpty
+                || (expense.note?.localizedCaseInsensitiveContains(searchText) == true)
+                || (expense.paidBy?.name?.localizedCaseInsensitiveContains(searchText) == true)
+            let matchesCategory = selectedCategoryFilter == nil
+                || expense.category == selectedCategoryFilter?.rawValue
+            return matchesSearch && matchesCategory
+        }
+    }
+
+    // MARK: - AZZERAMENTO SALDO
+
+    private func performSettle() {
+        try? SettlementService.performSettlement(sheet: sheet, context: viewContext)
     }
 
     // MARK: - CONDIVISIONE (CORE)
@@ -215,18 +376,11 @@ struct SheetDetailView: View {
             }
             ckShare[CKShare.SystemFieldKey.title] = self.sheet.name ?? "Foglio Condiviso"
             ckShare.publicPermission = .readWrite
-            // Aspetta che NSPersistentCloudKitContainer finisca l'upload dei record
-            // prima di presentare l'URL — altrimenti il destinatario accetta una
-            // share vuota (race condition).
             self.waitForExportThenPresent(ckShare, using: ckContainer)
         }
     }
 
-    /// Aspetta che NSPersistentCloudKitContainer esporti i record su CloudKit
-    /// (eventi di export completati DOPO la creazione della share),
-    /// poi chiama uploadAndPresent. Fallback dopo 12 secondi.
     private func waitForExportThenPresent(_ share: CKShare, using ckContainer: CKContainer) {
-        // Salva il context per innescare subito un ciclo di sync
         let coreDataContainer = PersistenceController.shared.container
         if coreDataContainer.viewContext.hasChanges {
             try? coreDataContainer.viewContext.save()
@@ -255,13 +409,11 @@ struct SheetDetailView: View {
                 event.type == .export,
                 event.endDate != nil,
                 event.error == nil,
-                // Solo eventi di export iniziati DOPO che la share è stata creata
                 event.startDate >= shareCreatedAt
             else { return }
             fire()
         }
 
-        // Fallback: se non arriva conferma entro 12 secondi, proviamo comunque
         DispatchQueue.main.asyncAfter(deadline: .now() + 12) { fire() }
     }
 
@@ -271,8 +423,6 @@ struct SheetDetailView: View {
         op.configuration.timeoutIntervalForRequest = 15
         op.configuration.timeoutIntervalForResource = 15
 
-        // CloudKit restituisce il record aggiornato (con URL) nel perRecordSaveBlock,
-        // non nell'oggetto locale passato all'operazione.
         var savedShare: CKShare?
         op.perRecordSaveBlock = { _, result in
             if case .success(let record) = result, let ckShare = record as? CKShare {
@@ -343,7 +493,7 @@ struct SheetDetailView: View {
     func balancesPerPerson(sheet: SharedSheet) -> [Person: Double] {
         var balances: [Person: Double] = [:]
         let persons = sheet.personsArray
-        let expenses = sheet.expensesArray
+        let expenses = sheet.activeExpensesArray  // solo spese attive
 
         persons.forEach { balances[$0] = 0 }
 
@@ -367,14 +517,10 @@ struct SheetDetailView: View {
     }
 
     func personBalanceText(_ value: Double, isMe: Bool) -> String {
+        // Usato solo come label accessibile — testo neutro per qualsiasi persona
         if abs(value) < 0.01 { return NSLocalizedString("In pari", comment: "") }
-        let amount = String(format: "%.2f €", abs(value))
-
-        if value > 0 {
-            return isMe ? "Ti devono \(amount)" : "Gli devono \(amount)"
-        } else {
-            return isMe ? "Devi \(amount)" : "Deve \(amount)"
-        }
+        let amount = AmountFormatter.format(abs(value))
+        return value > 0 ? "\(amount) in credito" : "\(amount) in debito"
     }
 }
 
@@ -401,14 +547,15 @@ private struct PersonBalanceCard: View {
     let balanceText: String
 
     private var balanceLabel: String {
-        if abs(value) < 0.01 { return "pari" }
-        if value > 0 { return isMe ? "ti devono" : "gli devono" }
-        return isMe ? "devi" : "deve"
+        if abs(value) < 0.01 { return NSLocalizedString("balance_even_short", comment: "") }
+        return value > 0
+            ? NSLocalizedString("balance_credit", comment: "")
+            : NSLocalizedString("balance_debit", comment: "")
     }
 
     private var formattedAmount: String {
-        if abs(value) < 0.01 { return "0.00 €" }
-        return String(format: "%.2f €", abs(value))
+        if abs(value) < 0.01 { return AmountFormatter.format(0) }
+        return AmountFormatter.format(abs(value))
     }
 
     var body: some View {

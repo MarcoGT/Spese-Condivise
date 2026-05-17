@@ -16,6 +16,7 @@ struct AddExpenseView: View {
     @State private var date: Date = Date()
     @State private var selectedPayer: Person?
     @State private var selectedParticipants: Set<Person> = []
+    @State private var selectedCategory: ExpenseCategory = .other
 
         // INIT — ADD
     init(sheetID: NSManagedObjectID) {
@@ -48,6 +49,35 @@ struct AddExpenseView: View {
                         Spacer()
                     }
                     .padding(.vertical, 8)
+                }
+
+                // Categoria
+                Section(header: Text(NSLocalizedString("category", comment: ""))) {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(ExpenseCategory.allCases) { cat in
+                                let isSelected = selectedCategory == cat
+                                Button {
+                                    selectedCategory = cat
+                                } label: {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: cat.icon)
+                                            .font(.system(size: 13, weight: .semibold))
+                                        Text(cat.localizedName)
+                                            .font(.subheadline)
+                                    }
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 8)
+                                    .background(isSelected ? cat.color : cat.color.opacity(0.1))
+                                    .foregroundColor(isSelected ? .white : cat.color)
+                                    .clipShape(Capsule())
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
                 }
 
                 Section(header: Text(NSLocalizedString("Descrizione", comment: "description"))) {
@@ -167,8 +197,9 @@ struct AddExpenseView: View {
             note = expense.note ?? ""
             date = expense.date ?? Date()
             selectedPayer = expense.paidBy
+            selectedCategory = ExpenseCategory.from(expense.category)
 
-                // EDIT → ripristina split
+            // EDIT → ripristina split
             if let set = expense.splitBetween as? Set<Person> {
                 selectedParticipants = Set(
                     set.compactMap { participant in
@@ -178,8 +209,11 @@ struct AddExpenseView: View {
             }
 
         } else {
-                // ADD → default: tutti
-            selectedPayer = persons.first
+            // ADD → default pagante: "Io/Me", altrimenti il primo
+            let meName = NSLocalizedString("Me", comment: "current user")
+            selectedPayer = persons.first(where: { $0.name == meName })
+                ?? persons.first(where: { $0.name?.lowercased() == "io" || $0.name?.lowercased() == "me" })
+                ?? persons.first
             selectedParticipants = Set(persons)
         }
     }
@@ -203,18 +237,21 @@ struct AddExpenseView: View {
             expense.note = note
             expense.date = date
             expense.paidBy = payer
+            expense.category = selectedCategory.rawValue
             expense.sheet?.lastUpdated = Date()
             expense.splitBetween = NSSet(set: selectedParticipants)
 
         } else if let sheet = sheet {
-                // ➕ ADD
+            // ➕ ADD
             let expense = Expense(context: viewContext)
             expense.id = UUID()
             expense.amount = value
             expense.note = note
             expense.date = date
+            expense.createdAt = Date()
             expense.sheet = sheet
             expense.paidBy = payer
+            expense.category = selectedCategory.rawValue
             expense.splitBetween = NSSet(set: selectedParticipants)
 
             sheet.lastUpdated = Date()

@@ -12,11 +12,14 @@ extension Expense {
     @NSManaged public var note: String?
     @NSManaged public var date: Date?
     @NSManaged public var archived: Bool
+    @NSManaged public var category: String?
+    @NSManaged public var createdAt: Date?
     
         // RELAZIONI
     @NSManaged public var sheet: SharedSheet?
     @NSManaged public var paidBy: Person?
     @NSManaged public var splitBetween: NSSet?
+    @NSManaged public var settlement: Settlement?
 }
 
 extension Expense: Identifiable {}

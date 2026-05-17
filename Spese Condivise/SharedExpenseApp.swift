@@ -42,6 +42,8 @@ struct SharedExpensesApp: App {
                     AppSyncState.current = syncState
                     prewarmCloudKit()
                     observeCloudKitSync()
+                    NotificationService.shared.requestPermission()
+                    NotificationService.shared.setupSubscriptions()
                 }
         }
     }
