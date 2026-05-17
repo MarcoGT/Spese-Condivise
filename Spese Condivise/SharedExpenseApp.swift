@@ -10,6 +10,7 @@ struct SharedExpensesApp: App {
     private let cloudContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
     @StateObject private var syncState = AppSyncState()
     @StateObject private var currentUser = CurrentUser()
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
     var body: some Scene {
         WindowGroup {
@@ -19,6 +20,15 @@ struct SharedExpensesApp: App {
                 .environmentObject(persistenceController)
                 .environmentObject(syncState)
                 .environmentObject(currentUser)
+                .fullScreenCover(isPresented: .init(
+                    get: { !hasSeenOnboarding },
+                    set: { if !$0 { hasSeenOnboarding = true } }
+                )) {
+                    OnboardingView(isPresented: .init(
+                        get: { !hasSeenOnboarding },
+                        set: { if !$0 { hasSeenOnboarding = true } }
+                    ))
+                }
                 .onOpenURL { url in
                     handleIncomingURL(url)
                 }

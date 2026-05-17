@@ -30,20 +30,138 @@
         }
       }
     },
-    "added shared sheet" : {
-      "comment" : "added shared sheet",
-      "extractionState" : "stale",
+    "onboarding_p1_title" : {
+      "comment" : "Onboarding page 1 title",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shared sheet added"
+            "value" : "Shared Expenses"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Foglio condiviso aggiunto"
+            "value" : "Spese Condivise"
+          }
+        }
+      }
+    },
+    "onboarding_p1_body" : {
+      "comment" : "Onboarding page 1 body",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep track of shared expenses with friends, family or flatmates — always in sync."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tieni traccia delle spese condivise con amici, familiari o coinquilini — sempre sincronizzato."
+          }
+        }
+      }
+    },
+    "onboarding_p2_title" : {
+      "comment" : "Onboarding page 2 title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add people, track expenses"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aggiungi persone, registra spese"
+          }
+        }
+      }
+    },
+    "onboarding_p2_body" : {
+      "comment" : "Onboarding page 2 body",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create a sheet for each occasion. Add everyone involved and log expenses as you go. The app always shows who owes what."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea un foglio per ogni occasione. Aggiungi tutti i partecipanti e registra le spese man mano. L'app mostra sempre chi deve cosa."
+          }
+        }
+      }
+    },
+    "onboarding_p3_title" : {
+      "comment" : "Onboarding page 3 title",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Real-time sync via iCloud"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sincronizzazione in tempo reale"
+          }
+        }
+      }
+    },
+    "onboarding_p3_body" : {
+      "comment" : "Onboarding page 3 body",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share a sheet with a link. Anyone who accepts it sees all expenses updated in real time, powered by iCloud."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Condividi un foglio con un link. Chi lo accetta vede tutte le spese aggiornate in tempo reale, grazie a iCloud."
+          }
+        }
+      }
+    },
+    "onboarding_next" : {
+      "comment" : "Onboarding next button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanti"
+          }
+        }
+      }
+    },
+    "onboarding_start" : {
+      "comment" : "Onboarding final button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get started"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inizia"
           }
         }
       }
@@ -97,20 +215,7 @@
       }
     },
     "App con Core Data + CloudKit Sharing in costruzione..." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App with Core Data + CloudKit Sharing under construction..."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App con Core Data + CloudKit Sharing in costruzione..."
-          }
-        }
-      }
+
     },
     "balance_even" : {
       "comment" : "Balance is even",
@@ -147,10 +252,36 @@
       }
     },
     "Crea foglio" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create sheet"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea foglio"
+          }
+        }
+      }
     },
     "Crea il tuo primo foglio condiviso per iniziare a tracciare le spese." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create your first shared sheet to start tracking expenses."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea il tuo primo foglio condiviso per iniziare a tracciare le spese."
+          }
+        }
+      }
     },
     "currency" : {
       "localizations" : {
@@ -202,25 +333,21 @@
         }
       }
     },
-    "Devi %.2f €" : {
-      "extractionState" : "stale",
+    "devi pagare" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You owe %.2f €"
+            "value" : "you owe"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Devi %.2f €"
+            "value" : "devi pagare"
           }
         }
       }
-    },
-    "devi pagare" : {
-
     },
     "edit expense" : {
       "comment" : "edit expense",
@@ -306,41 +433,18 @@
         }
       }
     },
-    "for_people_names" : {
-      "comment" : "for people {names}",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "For: %@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Per: %@"
-          }
-        }
-      }
-    },
     "I tuoi fogli" : {
-
-    },
-    "Importo" : {
-      "comment" : "amount",
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Amount"
+            "value" : "Your sheets"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Importo"
+            "value" : "I tuoi fogli"
           }
         }
       }
@@ -384,19 +488,32 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Insert the person name"
+            "value" : "Enter the person's name"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nome della Persona"
+            "value" : "Inserisci il nome della persona"
           }
         }
       }
     },
     "Link non disponibile. Riprova tra qualche secondo." : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link not available. Try again in a few seconds."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Link non disponibile. Riprova tra qualche secondo."
+          }
+        }
+      }
     },
     "Me" : {
       "comment" : "current user",
@@ -416,10 +533,36 @@
       }
     },
     "Nessun foglio" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No sheets"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessun foglio"
+          }
+        }
+      }
     },
     "Nessuna spesa ancora" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No expenses yet"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuna spesa ancora"
+          }
+        }
+      }
     },
     "new expense" : {
       "comment" : "new expense",
@@ -545,7 +688,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Persons"
+            "value" : "People"
           }
         },
         "it" : {
@@ -556,25 +699,21 @@
         }
       }
     },
-    "Saldo in pari" : {
-      "extractionState" : "stale",
+    "Saldo totale" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Balance even"
+            "value" : "Total balance"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Saldo in pari"
+            "value" : "Saldo totale"
           }
         }
       }
-    },
-    "Saldo totale" : {
-
     },
     "save" : {
       "comment" : "save",
@@ -627,6 +766,23 @@
         }
       }
     },
+    "share_creation_failed" : {
+      "comment" : "Error shown when creating a share fails",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to create the share. Please try again."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile creare la condivisione. Riprova."
+          }
+        }
+      }
+    },
     "share_store_not_found" : {
       "comment" : "Shared store not found\nShared store not found error",
       "localizations" : {
@@ -674,24 +830,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spese Condivise"
-          }
-        }
-      }
-    },
-    "shared sheet" : {
-      "comment" : "shared sheet",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Shared sheet"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foglio condiviso"
           }
         }
       }
@@ -765,96 +903,34 @@
       }
     },
     "Spese" : {
-      "comment" : "expenses"
-    },
-    "The shared sheet has been added to your list, you can see it in a few seconds" : {
-      "comment" : "shared sheet added",
-      "extractionState" : "stale",
+      "comment" : "expenses",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The shared sheet has been added to your list; you’ll see it in a few seconds"
+            "value" : "Expenses"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il foglio condiviso è stato aggiunto alla tua lista; sarà visibile tra pochi secondi"
-          }
-        }
-      }
-    },
-    "they_are_owed_amount" : {
-      "comment" : "they are owed",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "They are owed %@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Riceve %@"
-          }
-        }
-      }
-    },
-    "they_owe_amount" : {
-      "comment" : "they owe",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Devi %@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Deve %@"
+            "value" : "Spese"
           }
         }
       }
     },
     "ti devono" : {
-
-    },
-    "Ti devono %.2f €" : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You are owed %.2f €"
+            "value" : "you are owed"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ti devono %.2f €"
-          }
-        }
-      }
-    },
-    "total" : {
-      "comment" : "total",
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Total"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Totale"
+            "value" : "ti devono"
           }
         }
       }

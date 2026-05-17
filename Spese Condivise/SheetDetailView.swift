@@ -107,7 +107,7 @@ struct SheetDetailView: View {
             }
             .listStyle(.plain)
         }
-        .navigationTitle(sheet.name ?? "Foglio")
+        .navigationTitle(sheet.name ?? NSLocalizedString("sheet", comment: ""))
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
@@ -208,7 +208,7 @@ struct SheetDetailView: View {
             guard let ckShare = share else {
                 DispatchQueue.main.async {
                     self.isPreparingShare = false
-                    self.shareErrorMessage = "Impossibile creare la condivisione."
+                    self.shareErrorMessage = NSLocalizedString("share_creation_failed", comment: "")
                     self.showingShareError = true
                 }
                 return
