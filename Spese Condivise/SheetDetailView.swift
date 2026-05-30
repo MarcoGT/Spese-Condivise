@@ -21,6 +21,7 @@ struct SheetDetailView: View {
     @State private var showStatistics = false
     @State private var searchText = ""
     @State private var selectedCategoryFilter: ExpenseCategory? = nil
+    @State private var personToClaimAsMe: Person? = nil
 
     enum ActiveModal: Identifiable {
         case add
@@ -43,8 +44,8 @@ struct SheetDetailView: View {
         request.sortDescriptors = [
             NSSortDescriptor(keyPath: \Expense.date, ascending: false)
         ]
-        // Solo spese attive (non archiviate)
-        request.predicate = NSPredicate(format: "sheet == %@ AND archived == NO", sheet)
+        // archived != YES gestisce correttamente anche valori NULL (es. dopo sync CloudKit)
+        request.predicate = NSPredicate(format: "sheet == %@ AND archived != YES", sheet)
 
         _expenses = FetchRequest(fetchRequest: request)
     }
@@ -63,12 +64,14 @@ struct SheetDetailView: View {
                                 ForEach(sheet.personsArray) { person in
                                     let value = balances[person] ?? 0
                                     let isMe = person.id == currentUser.personID
+                                    let claimMode = isSharedSheet && !isIdentifiedInSheet
                                     PersonBalanceCard(
                                         person: person,
                                         value: value,
                                         isMe: isMe,
                                         balanceColor: balanceColor(value),
-                                        balanceText: personBalanceText(value, isMe: isMe)
+                                        balanceText: personBalanceText(value, isMe: isMe),
+                                        onTap: claimMode ? { personToClaimAsMe = person } : nil
                                     )
                                 }
                             }
@@ -78,6 +81,27 @@ struct SheetDetailView: View {
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
+
+                        // Banner "chi sei tu?" visibile solo nei fogli condivisi
+                        // dove l'utente non si è ancora identificato
+                        if isSharedSheet && !isIdentifiedInSheet {
+                            HStack(spacing: 10) {
+                                Image(systemName: "person.fill.questionmark")
+                                    .foregroundColor(.accentColor)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(NSLocalizedString("identify_prompt_title", comment: ""))
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                    Text(NSLocalizedString("identify_prompt_body", comment: ""))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                Spacer()
+                            }
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 4)
+                            .listRowBackground(Color.accentColor.opacity(0.06))
+                        }
                     } header: {
                         SectionHeader(title: NSLocalizedString("Persone", comment: "people"))
                     }
@@ -135,9 +159,15 @@ struct SheetDetailView: View {
                 // MARK: Expenses section
                 Section {
                     if expenses.isEmpty {
-                        EmptyExpensesView()
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
+                        if isSharedSheet {
+                            SharedSyncEmptyView()
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                        } else {
+                            EmptyExpensesView()
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                        }
                     } else if filteredExpenses.isEmpty {
                         // Nessun risultato per ricerca/filtro
                         VStack(spacing: 8) {
@@ -320,6 +350,29 @@ struct SheetDetailView: View {
         } message: {
             Text("Inserisci il nome della persona")
         }
+        // CONFERMA IDENTIFICAZIONE PERSONA
+        .confirmationDialog(
+            NSLocalizedString("identify_confirm_title", comment: ""),
+            isPresented: Binding(
+                get: { personToClaimAsMe != nil },
+                set: { if !$0 { personToClaimAsMe = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            if let person = personToClaimAsMe {
+                Button(String(format: NSLocalizedString("identify_confirm_action", comment: ""), person.name ?? "")) {
+                    currentUser.setPersonID(person.id!)
+                    personToClaimAsMe = nil
+                }
+            }
+            Button(NSLocalizedString("Annulla", comment: ""), role: .cancel) {
+                personToClaimAsMe = nil
+            }
+        } message: {
+            if let person = personToClaimAsMe {
+                Text(String(format: NSLocalizedString("identify_confirm_message", comment: ""), person.name ?? ""))
+            }
+        }
     }
 
     // MARK: - FILTRO
@@ -497,6 +550,17 @@ struct SheetDetailView: View {
         try? viewContext.save()
     }
 
+    // MARK: - IDENTITÀ FOGLIO CONDIVISO
+
+    private var isSharedSheet: Bool {
+        sheet.objectID.persistentStore === persistence.sharedPersistentStore
+    }
+
+    private var isIdentifiedInSheet: Bool {
+        guard let myID = currentUser.personID else { return false }
+        return sheet.personsArray.contains { $0.id == myID }
+    }
+
     // MARK: - LOGICA BILANCI
 
     private func deleteExpenses(at offsets: IndexSet) {
@@ -560,6 +624,7 @@ private struct PersonBalanceCard: View {
     let isMe: Bool
     let balanceColor: Color
     let balanceText: String
+    var onTap: (() -> Void)? = nil
 
     private var balanceLabel: String {
         if abs(value) < 0.01 { return NSLocalizedString("balance_even_short", comment: "") }
@@ -608,6 +673,17 @@ private struct PersonBalanceCard: View {
                 .stroke(isMe ? Color.blue.opacity(0.25) : Color.clear, lineWidth: 1.5)
         )
         .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
+        .overlay(alignment: .topTrailing) {
+            if onTap != nil {
+                Image(systemName: "hand.tap.fill")
+                    .font(.caption2)
+                    .foregroundColor(.accentColor)
+                    .padding(6)
+            }
+        }
+        .onTapGesture {
+            onTap?()
+        }
     }
 }
 
@@ -617,9 +693,30 @@ private struct EmptyExpensesView: View {
             Image(systemName: "plus.circle")
                 .font(.system(size: 40))
                 .foregroundColor(.secondary)
-            Text("Nessuna spesa ancora")
+            Text(NSLocalizedString("no_expenses_yet", comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+    }
+}
+
+private struct SharedSyncEmptyView: View {
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "arrow.triangle.2.circlepath")
+                .font(.system(size: 40))
+                .foregroundColor(.secondary)
+            Text(NSLocalizedString("shared_sync_empty_title", comment: ""))
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            Text(NSLocalizedString("shared_sync_empty_body", comment: ""))
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
