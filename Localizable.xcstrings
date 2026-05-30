@@ -1652,6 +1652,74 @@
         }
       }
     },
+    "name_setup_title" : {
+      "comment" : "NameSetupView headline",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's your name?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Come ti chiami?"
+          }
+        }
+      }
+    },
+    "name_setup_body" : {
+      "comment" : "NameSetupView subtitle",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name will appear in shared sheets so others can see who you are."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo nome apparirà nei fogli condivisi così gli altri sapranno chi sei."
+          }
+        }
+      }
+    },
+    "name_setup_placeholder" : {
+      "comment" : "NameSetupView text field placeholder",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo nome"
+          }
+        }
+      }
+    },
+    "name_setup_cta" : {
+      "comment" : "NameSetupView confirm button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continua"
+          }
+        }
+      }
+    },
     "no_expenses_yet" : {
       "comment" : "Empty state: no expenses added yet",
       "localizations" : {

@@ -57,7 +57,7 @@ struct AddSharedSheetView: View {
             // 👤 CREA SOLO IL PROPRIETARIO (UTENTE CORRENTE)
         let me = Person(context: viewContext)
         me.id = UUID()
-        me.name = NSLocalizedString("Me", comment: "current user")
+        me.name = currentUser.name ?? NSLocalizedString("Me", comment: "current user")
         me.sheet = sheet
         
             // 🔐 collega il currentUser

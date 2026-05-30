@@ -138,6 +138,9 @@ struct SharedSheetListView: View {
         .onReceive(remoteChangePublisher) { _ in
             viewContext.refreshAllObjects()
         }
+        .onChange(of: currentUser.name) { _ in
+            bootstrapCurrentUserIfNeeded()
+        }
         // Osserva AppSyncState per il risultato dell'accettazione share.
         // .onChange è immune alle race condition tipiche dei publisher Combine:
         // lo stato @Published persiste anche se la view non era ancora attiva.
@@ -275,15 +278,26 @@ struct SharedSheetListView: View {
 
     // MARK: - BOOTSTRAP USER
     private func bootstrapCurrentUserIfNeeded() {
-        // Cerca sempre la persona "Io/Me" e la imposta come utente corrente —
-        // sovrascrive eventuali ID errati salvati in precedenza.
-        let meName = NSLocalizedString("Me", comment: "current user") // "Io" in IT, "Me" in EN
+        let myName = currentUser.name?.lowercased()
+
         for sheet in sheets {
             let persons = sheet.personsArray
-            let match = persons.first(where: { $0.name == meName })
-                     ?? persons.first(where: { $0.name?.lowercased() == "io" || $0.name?.lowercased() == "me" })
+            let match: Person?
+            if let myName {
+                // Cerca per nome reale dell'utente (caso principale)
+                match = persons.first(where: { $0.name?.lowercased() == myName })
+            } else {
+                // Fallback legacy: cerca "Io/Me" per utenti senza nome impostato
+                let fallback = NSLocalizedString("Me", comment: "current user").lowercased()
+                match = persons.first(where: {
+                    let n = $0.name?.lowercased()
+                    return n == fallback || n == "io" || n == "me"
+                })
+            }
             if let me = match, let id = me.id {
-                currentUser.setPersonID(id)  // corregge anche ID errati già salvati
+                if currentUser.personID != id {
+                    currentUser.setPersonID(id)
+                }
                 return
             }
         }

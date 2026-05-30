@@ -29,6 +29,12 @@ struct SharedExpensesApp: App {
                         set: { if !$0 { hasSeenOnboarding = true } }
                     ))
                 }
+                .fullScreenCover(isPresented: .init(
+                    get: { hasSeenOnboarding && currentUser.name == nil },
+                    set: { _ in }
+                )) {
+                    NameSetupView()
+                }
                 .onOpenURL { url in
                     handleIncomingURL(url)
                 }
