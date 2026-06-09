@@ -58,11 +58,20 @@ struct SheetRowView: View {
                 .lineLimit(1)
         }
         .padding(.vertical, 14)
-        .padding(.horizontal, 16)
+        .padding(.leading, 20)
+        .padding(.trailing, 16)
         .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
+                // Bordo sinistro colorato
+                RoundedRectangle(cornerRadius: 4, style: .continuous)
+                    .fill(balanceColor.opacity(0.7))
+                    .frame(width: 4)
+                    .padding(.vertical, 10)
+                    .padding(.leading, 0)
+            }
         )
     }
 }

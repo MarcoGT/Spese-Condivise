@@ -186,6 +186,12 @@ struct SharedSheetListView: View {
         let isEven = balance == 0
         let accentColor: Color = isEven ? .secondary : (isPositive ? .green : .red)
 
+        let gradientColors: [Color] = isEven
+            ? [Color(.secondarySystemBackground), Color(.systemBackground)]
+            : isPositive
+                ? [Color.green.opacity(0.25), Color.green.opacity(0.05)]
+                : [Color.red.opacity(0.25), Color.red.opacity(0.05)]
+
         VStack(spacing: 6) {
             Text(NSLocalizedString("Saldo totale", comment: ""))
                 .font(.subheadline)
@@ -215,8 +221,12 @@ struct SharedSheetListView: View {
         .padding(.horizontal, 20)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 4)
+                .fill(LinearGradient(
+                    colors: gradientColors,
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                ))
+                .shadow(color: accentColor.opacity(isEven ? 0.05 : 0.15), radius: 12, x: 0, y: 4)
         )
     }
 
