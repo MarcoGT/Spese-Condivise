@@ -34,6 +34,7 @@ struct SharedExpensesApp: App {
                     set: { _ in }
                 )) {
                     NameSetupView()
+                        .environmentObject(currentUser)
                 }
                 .onOpenURL { url in
                     handleIncomingURL(url)
