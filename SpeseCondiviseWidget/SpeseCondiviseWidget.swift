@@ -81,9 +81,7 @@ private struct SmallWidgetView: View {
                      : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
     }
     private var label: String {
-        isEven ? NSLocalizedString("balance_even_short", comment: "")
-        : isPositive ? NSLocalizedString("balance_credit", comment: "")
-                     : NSLocalizedString("balance_debit",  comment: "")
+        isEven ? "In pari" : (isPositive ? "In credito" : "In debito")
     }
 
     var body: some View {
@@ -130,9 +128,7 @@ private struct MediumWidgetView: View {
                      : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
     }
     private var label: String {
-        isEven ? NSLocalizedString("balance_even_short", comment: "")
-        : isPositive ? NSLocalizedString("balance_credit", comment: "")
-                     : NSLocalizedString("balance_debit",  comment: "")
+        isEven ? "In pari" : (isPositive ? "In credito" : "In debito")
     }
 
     var body: some View {
