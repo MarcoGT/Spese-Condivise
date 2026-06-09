@@ -164,7 +164,7 @@ struct SheetDetailView: View {
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
                         } else {
-                            EmptyExpensesView()
+                            EmptyExpensesView { activeModal = .add }
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
                         }
@@ -688,17 +688,21 @@ private struct PersonBalanceCard: View {
 }
 
 private struct EmptyExpensesView: View {
+    var onAdd: () -> Void
+
     var body: some View {
         VStack(spacing: 12) {
             Image(systemName: "plus.circle")
                 .font(.system(size: 40))
-                .foregroundColor(.secondary)
+                .foregroundColor(.accentColor)
             Text(NSLocalizedString("no_expenses_yet", comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
+        .contentShape(Rectangle())
+        .onTapGesture { onAdd() }
     }
 }
 
