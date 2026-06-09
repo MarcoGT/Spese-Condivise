@@ -144,6 +144,9 @@ struct SharedSheetListView: View {
             bootstrapCurrentUserIfNeeded()
             updateWidget()
         }
+        .onChange(of: widgetTrigger) { _ in
+            updateWidget()
+        }
         // Osserva AppSyncState per il risultato dell'accettazione share.
         // .onChange è immune alle race condition tipiche dei publisher Combine:
         // lo stato @Published persiste anche se la view non era ancora attiva.
@@ -395,6 +398,15 @@ struct SharedSheetListView: View {
     }
 
     // MARK: - WIDGET
+
+    /// Stringa che cambia ogni volta che i saldi o le spese cambiano — usata come trigger per aggiornare il widget.
+    private var widgetTrigger: String {
+        sheets.map { sheet in
+            let balance = sheetBalance(sheet)
+            let expCount = sheet.activeExpensesArray.count
+            return "\(sheet.objectID)\(balance)\(expCount)"
+        }.joined(separator: ",")
+    }
 
     private func updateWidget() {
         let widgetSheets = sheets.map { sheet in
