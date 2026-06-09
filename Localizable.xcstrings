@@ -684,6 +684,91 @@
         }
       }
     },
+    "identify_confirm_action" : {
+      "comment" : "Button to confirm claiming a person — %@ is the person name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I am %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sono %@"
+          }
+        }
+      }
+    },
+    "identify_confirm_message" : {
+      "comment" : "Confirmation dialog message — %@ is the person name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set \"%@\" as your identity in this sheet? Your balance will be highlighted across the app."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Imposta \"%@\" come tua identità in questo foglio? Il tuo saldo verrà evidenziato in tutta l'app."
+          }
+        }
+      }
+    },
+    "identify_confirm_title" : {
+      "comment" : "Confirmation dialog title for claiming a person as self",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identify yourself"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identificati"
+          }
+        }
+      }
+    },
+    "identify_prompt_body" : {
+      "comment" : "Banner subtitle asking user to tap their person card",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap your name above to identify yourself"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tocca il tuo nome qui sopra per identificarti"
+          }
+        }
+      }
+    },
+    "identify_prompt_title" : {
+      "comment" : "Banner title asking user to identify themselves in a shared sheet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who are you in this sheet?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chi sei in questo foglio?"
+          }
+        }
+      }
+    },
     "in pari" : {
       "comment" : "in pari",
       "localizations" : {
@@ -767,6 +852,74 @@
         }
       }
     },
+    "name_setup_body" : {
+      "comment" : "NameSetupView subtitle",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name will appear in shared sheets so others can see who you are."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo nome apparirà nei fogli condivisi così gli altri sapranno chi sei."
+          }
+        }
+      }
+    },
+    "name_setup_cta" : {
+      "comment" : "NameSetupView confirm button",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continua"
+          }
+        }
+      }
+    },
+    "name_setup_placeholder" : {
+      "comment" : "NameSetupView text field placeholder",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your name"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo nome"
+          }
+        }
+      }
+    },
+    "name_setup_title" : {
+      "comment" : "NameSetupView headline",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's your name?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Come ti chiami?"
+          }
+        }
+      }
+    },
     "Nessun foglio" : {
       "localizations" : {
         "en" : {
@@ -784,6 +937,7 @@
       }
     },
     "Nessuna spesa ancora" : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -829,6 +983,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nuovo foglio"
+          }
+        }
+      }
+    },
+    "no_expenses_yet" : {
+      "comment" : "Empty state: no expenses added yet",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No expenses yet"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuna spesa ancora"
           }
         }
       }
@@ -1405,6 +1576,40 @@
         }
       }
     },
+    "shared_sync_empty_body" : {
+      "comment" : "Empty state body for shared sheet waiting for sync",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The expenses from the shared sheet may take a few minutes to appear. Check back shortly."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le spese del foglio condiviso possono impiegare qualche minuto ad apparire. Riprova tra poco."
+          }
+        }
+      }
+    },
+    "shared_sync_empty_title" : {
+      "comment" : "Empty state title for shared sheet waiting for sync",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expenses are syncing…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le spese si stanno sincronizzando…"
+          }
+        }
+      }
+    },
     "sharing error" : {
       "comment" : "sharing error",
       "localizations" : {
@@ -1648,210 +1853,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Devi %@"
-          }
-        }
-      }
-    },
-    "name_setup_title" : {
-      "comment" : "NameSetupView headline",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "What's your name?"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Come ti chiami?"
-          }
-        }
-      }
-    },
-    "name_setup_body" : {
-      "comment" : "NameSetupView subtitle",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your name will appear in shared sheets so others can see who you are."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il tuo nome apparirà nei fogli condivisi così gli altri sapranno chi sei."
-          }
-        }
-      }
-    },
-    "name_setup_placeholder" : {
-      "comment" : "NameSetupView text field placeholder",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Your name"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il tuo nome"
-          }
-        }
-      }
-    },
-    "name_setup_cta" : {
-      "comment" : "NameSetupView confirm button",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continue"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Continua"
-          }
-        }
-      }
-    },
-    "no_expenses_yet" : {
-      "comment" : "Empty state: no expenses added yet",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No expenses yet"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nessuna spesa ancora"
-          }
-        }
-      }
-    },
-    "shared_sync_empty_title" : {
-      "comment" : "Empty state title for shared sheet waiting for sync",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Expenses are syncing…"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le spese si stanno sincronizzando…"
-          }
-        }
-      }
-    },
-    "shared_sync_empty_body" : {
-      "comment" : "Empty state body for shared sheet waiting for sync",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The expenses from the shared sheet may take a few minutes to appear. Check back shortly."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le spese del foglio condiviso possono impiegare qualche minuto ad apparire. Riprova tra poco."
-          }
-        }
-      }
-    },
-    "identify_prompt_title" : {
-      "comment" : "Banner title asking user to identify themselves in a shared sheet",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Who are you in this sheet?"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chi sei in questo foglio?"
-          }
-        }
-      }
-    },
-    "identify_prompt_body" : {
-      "comment" : "Banner subtitle asking user to tap their person card",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tap your name above to identify yourself"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tocca il tuo nome qui sopra per identificarti"
-          }
-        }
-      }
-    },
-    "identify_confirm_title" : {
-      "comment" : "Confirmation dialog title for claiming a person as self",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Identify yourself"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Identificati"
-          }
-        }
-      }
-    },
-    "identify_confirm_action" : {
-      "comment" : "Button to confirm claiming a person — %@ is the person name",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "I am %@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sono %@"
-          }
-        }
-      }
-    },
-    "identify_confirm_message" : {
-      "comment" : "Confirmation dialog message — %@ is the person name",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set \"%@\" as your identity in this sheet? Your balance will be highlighted across the app."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Imposta \"%@\" come tua identità in questo foglio? Il tuo saldo verrà evidenziato in tutta l'app."
           }
         }
       }

@@ -7,10 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A99AD5452FD8ACA1002197CE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A99AD5442FD8ACA1002197CE /* WidgetKit.framework */; };
+		A99AD5472FD8ACA1002197CE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A99AD5462FD8ACA1002197CE /* SwiftUI.framework */; };
+		A99AD5522FD8ACA4002197CE /* SpeseCondiviseWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A99AD5422FD8ACA1002197CE /* SpeseCondiviseWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A9B2E1EC2DDB5FE800873A02 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = A9B2E1EB2DDB5FE800873A02 /* Localizable.xcstrings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		A99AD5502FD8ACA4002197CE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A9CE6D712DD752DF00993A11 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A99AD5412FD8ACA1002197CE;
+			remoteInfo = SpeseCondiviseWidgetExtension;
+		};
 		A9CE6D8B2DD752E200993A11 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A9CE6D712DD752DF00993A11 /* Project object */;
@@ -27,7 +37,23 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		A99AD5532FD8ACA4002197CE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			dstPath = "";
+			dstSubfolder = PlugIns;
+			files = (
+				A99AD5522FD8ACA4002197CE /* SpeseCondiviseWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		A99AD5422FD8ACA1002197CE /* SpeseCondiviseWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = SpeseCondiviseWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A99AD5442FD8ACA1002197CE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		A99AD5462FD8ACA1002197CE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		A99AD5582FD8AD34002197CE /* SpeseCondiviseWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SpeseCondiviseWidgetExtension.entitlements; sourceTree = "<group>"; };
 		A9B2E1EB2DDB5FE800873A02 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		A9CE6D792DD752DF00993A11 /* Spese Condivise.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Spese Condivise.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A9CE6D8A2DD752E200993A11 /* Spese CondiviseTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Spese CondiviseTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -35,6 +61,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A99AD5572FD8ACA4002197CE /* Exceptions for "SpeseCondiviseWidget" folder in "SpeseCondiviseWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A99AD5412FD8ACA1002197CE /* SpeseCondiviseWidgetExtension */;
+		};
 		A9CE6D9C2DD752E200993A11 /* Exceptions for "Spese Condivise" folder in "Spese Condivise" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -45,6 +78,14 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		A99AD5482FD8ACA1002197CE /* SpeseCondiviseWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A99AD5572FD8ACA4002197CE /* Exceptions for "SpeseCondiviseWidget" folder in "SpeseCondiviseWidgetExtension" target */,
+			);
+			path = SpeseCondiviseWidget;
+			sourceTree = "<group>";
+		};
 		A9CE6D7B2DD752DF00993A11 /* Spese Condivise */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -66,6 +107,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		A99AD53F2FD8ACA1002197CE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			files = (
+				A99AD5472FD8ACA1002197CE /* SwiftUI.framework in Frameworks */,
+				A99AD5452FD8ACA1002197CE /* WidgetKit.framework in Frameworks */,
+			);
+		};
 		A9CE6D762DD752DF00993A11 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
@@ -84,13 +132,25 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		A99AD5432FD8ACA1002197CE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A99AD5442FD8ACA1002197CE /* WidgetKit.framework */,
+				A99AD5462FD8ACA1002197CE /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		A9CE6D702DD752DF00993A11 = {
 			isa = PBXGroup;
 			children = (
+				A99AD5582FD8AD34002197CE /* SpeseCondiviseWidgetExtension.entitlements */,
 				A9B2E1EB2DDB5FE800873A02 /* Localizable.xcstrings */,
 				A9CE6D7B2DD752DF00993A11 /* Spese Condivise */,
 				A9CE6D8D2DD752E200993A11 /* Spese CondiviseTests */,
 				A9CE6D972DD752E200993A11 /* Spese CondiviseUITests */,
+				A99AD5482FD8ACA1002197CE /* SpeseCondiviseWidget */,
+				A99AD5432FD8ACA1002197CE /* Frameworks */,
 				A9CE6D7A2DD752DF00993A11 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -101,6 +161,7 @@
 				A9CE6D792DD752DF00993A11 /* Spese Condivise.app */,
 				A9CE6D8A2DD752E200993A11 /* Spese CondiviseTests.xctest */,
 				A9CE6D942DD752E200993A11 /* Spese CondiviseUITests.xctest */,
+				A99AD5422FD8ACA1002197CE /* SpeseCondiviseWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -108,6 +169,24 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		A99AD5412FD8ACA1002197CE /* SpeseCondiviseWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A99AD5562FD8ACA4002197CE /* Build configuration list for PBXNativeTarget "SpeseCondiviseWidgetExtension" */;
+			buildPhases = (
+				A99AD53E2FD8ACA1002197CE /* Sources */,
+				A99AD53F2FD8ACA1002197CE /* Frameworks */,
+				A99AD5402FD8ACA1002197CE /* Resources */,
+			);
+			buildRules = (
+			);
+			fileSystemSynchronizedGroups = (
+				A99AD5482FD8ACA1002197CE /* SpeseCondiviseWidget */,
+			);
+			name = SpeseCondiviseWidgetExtension;
+			productName = SpeseCondiviseWidgetExtension;
+			productReference = A99AD5422FD8ACA1002197CE /* SpeseCondiviseWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		A9CE6D782DD752DF00993A11 /* Spese Condivise */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = A9CE6D9D2DD752E200993A11 /* Build configuration list for PBXNativeTarget "Spese Condivise" */;
@@ -115,8 +194,12 @@
 				A9CE6D752DD752DF00993A11 /* Sources */,
 				A9CE6D762DD752DF00993A11 /* Frameworks */,
 				A9CE6D772DD752DF00993A11 /* Resources */,
+				A99AD5532FD8ACA4002197CE /* Embed Foundation Extensions */,
 			);
 			buildRules = (
+			);
+			dependencies = (
+				A99AD5512FD8ACA4002197CE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				A9CE6D7B2DD752DF00993A11 /* Spese Condivise */,
@@ -175,9 +258,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1630;
+				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2630;
 				TargetAttributes = {
+					A99AD5412FD8ACA1002197CE = {
+						CreatedOnToolsVersion = 26.3;
+					};
 					A9CE6D782DD752DF00993A11 = {
 						CreatedOnToolsVersion = 16.3;
 					};
@@ -209,11 +295,17 @@
 				A9CE6D782DD752DF00993A11 /* Spese Condivise */,
 				A9CE6D892DD752E200993A11 /* Spese CondiviseTests */,
 				A9CE6D932DD752E200993A11 /* Spese CondiviseUITests */,
+				A99AD5412FD8ACA1002197CE /* SpeseCondiviseWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		A99AD5402FD8ACA1002197CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			files = (
+			);
+		};
 		A9CE6D772DD752DF00993A11 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			files = (
@@ -233,6 +325,11 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		A99AD53E2FD8ACA1002197CE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			files = (
+			);
+		};
 		A9CE6D752DD752DF00993A11 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
@@ -251,6 +348,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A99AD5512FD8ACA4002197CE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A99AD5412FD8ACA1002197CE /* SpeseCondiviseWidgetExtension */;
+			targetProxy = A99AD5502FD8ACA4002197CE /* PBXContainerItemProxy */;
+		};
 		A9CE6D8C2DD752E200993A11 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = A9CE6D782DD752DF00993A11 /* Spese Condivise */;
@@ -264,6 +366,70 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		A99AD5542FD8ACA4002197CE /* Debug configuration for PBXNativeTarget "SpeseCondiviseWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SpeseCondiviseWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3UASW22J93;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SpeseCondiviseWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SpeseCondiviseWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.marcolagana.Spese-Condivise.SpeseCondiviseWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A99AD5552FD8ACA4002197CE /* Release configuration for PBXNativeTarget "SpeseCondiviseWidgetExtension" */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = SpeseCondiviseWidgetExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3UASW22J93;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SpeseCondiviseWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = SpeseCondiviseWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.marcolagana.Spese-Condivise.SpeseCondiviseWidget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		A9CE6D9E2DD752E200993A11 /* Debug configuration for PBXNativeTarget "Spese Condivise" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -544,6 +710,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		A99AD5562FD8ACA4002197CE /* Build configuration list for PBXNativeTarget "SpeseCondiviseWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A99AD5542FD8ACA4002197CE /* Debug configuration for PBXNativeTarget "SpeseCondiviseWidgetExtension" */,
+				A99AD5552FD8ACA4002197CE /* Release configuration for PBXNativeTarget "SpeseCondiviseWidgetExtension" */,
+			);
+			defaultConfigurationName = Release;
+		};
 		A9CE6D742DD752DF00993A11 /* Build configuration list for PBXProject "Spese Condivise" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

@@ -123,6 +123,7 @@ struct SharedSheetListView: View {
             bootstrapCurrentUserIfNeeded()
             AppSyncState.current = syncState
             loadSavedAppearances()
+            updateWidget()
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
                 if !syncState.initialSyncCompleted {
@@ -137,9 +138,11 @@ struct SharedSheetListView: View {
         }
         .onReceive(remoteChangePublisher) { _ in
             viewContext.refreshAllObjects()
+            updateWidget()
         }
         .onChange(of: currentUser.name) { _ in
             bootstrapCurrentUserIfNeeded()
+            updateWidget()
         }
         // Osserva AppSyncState per il risultato dell'accettazione share.
         // .onChange è immune alle race condition tipiche dei publisher Combine:
@@ -389,6 +392,15 @@ struct SharedSheetListView: View {
         }
 
         return balances
+    }
+
+    // MARK: - WIDGET
+
+    private func updateWidget() {
+        let widgetSheets = sheets.map { sheet in
+            WidgetSheetData(name: sheet.name ?? "", balance: sheetBalance(sheet))
+        }
+        WidgetDataStore.write(totalBalance: totalBalance(), sheets: widgetSheets)
     }
 
     private func myPerson(in sheet: SharedSheet) -> Person? {
