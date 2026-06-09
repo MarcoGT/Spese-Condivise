@@ -382,9 +382,20 @@ struct SharedSheetListView: View {
     }
 
     private func myPerson(in sheet: SharedSheet) -> Person? {
-        sheet.personsArray.first { person in
-            person.name?.lowercased() == "io"
-                || person.name?.lowercased() == NSLocalizedString("Me", comment: "").lowercased()
+        // Prima cerca per UUID (caso principale — identificato correttamente)
+        if let myID = currentUser.personID,
+           let match = sheet.personsArray.first(where: { $0.id == myID }) {
+            return match
+        }
+        // Fallback: cerca per nome utente impostato
+        if let myName = currentUser.name?.lowercased(),
+           let match = sheet.personsArray.first(where: { $0.name?.lowercased() == myName }) {
+            return match
+        }
+        // Fallback legacy: "Io"/"Me"
+        return sheet.personsArray.first {
+            $0.name?.lowercased() == "io"
+                || $0.name?.lowercased() == NSLocalizedString("Me", comment: "").lowercased()
         }
     }
 }
