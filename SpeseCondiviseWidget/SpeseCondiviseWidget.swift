@@ -75,11 +75,6 @@ private struct SmallWidgetView: View {
     private var isEven:     Bool  { abs(entry.totalBalance) < 0.01 }
     private var isPositive: Bool  { entry.totalBalance > 0 }
     private var accent:     Color { isEven ? .secondary : (isPositive ? .green : .red) }
-    private var gradient: [Color] {
-        isEven    ? [Color(.systemGray5), Color(.systemGray6)]
-        : isPositive ? [Color.green.opacity(0.30), Color.green.opacity(0.05)]
-                     : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
-    }
     private var label: String {
         isEven ? "In pari" : (isPositive ? "In credito" : "In debito")
     }
@@ -106,11 +101,6 @@ private struct SmallWidgetView: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-        .background(
-            LinearGradient(colors: gradient,
-                           startPoint: .topLeading,
-                           endPoint: .bottomTrailing)
-        )
     }
 }
 
@@ -122,11 +112,6 @@ private struct MediumWidgetView: View {
     private var isEven:     Bool  { abs(entry.totalBalance) < 0.01 }
     private var isPositive: Bool  { entry.totalBalance > 0 }
     private var accent:     Color { isEven ? .secondary : (isPositive ? .green : .red) }
-    private var gradient: [Color] {
-        isEven    ? [Color(.systemGray5), Color(.systemGray6)]
-        : isPositive ? [Color.green.opacity(0.30), Color.green.opacity(0.05)]
-                     : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
-    }
     private var label: String {
         isEven ? "In pari" : (isPositive ? "In credito" : "In debito")
     }
@@ -155,11 +140,12 @@ private struct MediumWidgetView: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-            .background(
-                LinearGradient(colors: gradient,
-                               startPoint: .topLeading,
-                               endPoint: .bottomTrailing)
-            )
+
+            // Divisore
+            Rectangle()
+                .fill(accent.opacity(0.15))
+                .frame(width: 1)
+                .padding(.vertical, 14)
 
             // Colonna destra — lista fogli
             VStack(alignment: .leading, spacing: 8) {
@@ -200,11 +186,25 @@ struct SpeseCondiviseWidgetEntryView: View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
 
+    private var isEven:     Bool    { abs(entry.totalBalance) < 0.01 }
+    private var isPositive: Bool    { entry.totalBalance > 0 }
+    private var gradient: [Color] {
+        isEven    ? [Color(.systemGray5), Color(.systemGray6)]
+        : isPositive ? [Color.green.opacity(0.30), Color.green.opacity(0.05)]
+                     : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
+    }
+
     var body: some View {
-        switch family {
-        case .systemMedium: MediumWidgetView(entry: entry)
-        default:            SmallWidgetView(entry: entry)
+        Group {
+            switch family {
+            case .systemMedium: MediumWidgetView(entry: entry)
+            default:            SmallWidgetView(entry: entry)
+            }
         }
+        .containerBackground(
+            LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing),
+            for: .widget
+        )
     }
 }
 
@@ -216,7 +216,6 @@ struct SpeseCondiviseWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             SpeseCondiviseWidgetEntryView(entry: entry)
-                .containerBackground(Color(.systemBackground), for: .widget)
         }
         .configurationDisplayName("Spese Condivise")
         .description("Il tuo saldo totale, sempre in vista.")
