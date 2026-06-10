@@ -34,7 +34,7 @@ struct SharedSheetListView: View {
         ZStack {
             NavigationStack {
                 ZStack {
-                    Color(.systemGroupedBackground).ignoresSafeArea()
+                    Color(.systemBackground).ignoresSafeArea()
 
                     if sheets.isEmpty {
                         emptyStateView
@@ -193,7 +193,7 @@ struct SharedSheetListView: View {
         let accentColor: Color = isEven ? .secondary : (isPositive ? .green : .red)
 
         let gradientColors: [Color] = isEven
-            ? [Color(.secondarySystemBackground), Color(.systemBackground)]
+            ? [Color(.systemGray5), Color(.systemGray6)]
             : isPositive
                 ? [Color.green.opacity(0.25), Color.green.opacity(0.05)]
                 : [Color.red.opacity(0.25), Color.red.opacity(0.05)]
