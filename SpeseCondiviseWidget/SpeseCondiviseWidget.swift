@@ -56,6 +56,12 @@ struct Provider: TimelineProvider {
     }
 }
 
+// MARK: - Localization helper (widget runs in a separate bundle)
+
+private func wloc(_ it: String, _ en: String) -> String {
+    Locale.current.language.languageCode?.identifier.hasPrefix("en") == true ? en : it
+}
+
 // MARK: - Formatting helper
 
 private func formatAmount(_ value: Double) -> String {
@@ -76,7 +82,7 @@ private struct SmallWidgetView: View {
     private var isPositive: Bool  { entry.totalBalance > 0 }
     private var accent:     Color { isEven ? .secondary : (isPositive ? .green : .red) }
     private var label: String {
-        isEven ? "In pari" : (isPositive ? "In credito" : "In debito")
+        isEven ? wloc("In pari", "Even") : (isPositive ? wloc("In credito", "In credit") : wloc("In debito", "In debt"))
     }
 
     var body: some View {
@@ -85,7 +91,7 @@ private struct SmallWidgetView: View {
                 Image(systemName: "eurosign.circle.fill")
                     .foregroundColor(accent)
                     .font(.system(size: 13, weight: .semibold))
-                Text("Spese Condivise")
+                Text(wloc("Spese Condivise", "Shared Expenses"))
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.secondary)
             }
@@ -113,7 +119,7 @@ private struct MediumWidgetView: View {
     private var isPositive: Bool  { entry.totalBalance > 0 }
     private var accent:     Color { isEven ? .secondary : (isPositive ? .green : .red) }
     private var label: String {
-        isEven ? "In pari" : (isPositive ? "In credito" : "In debito")
+        isEven ? wloc("In pari", "Even") : (isPositive ? wloc("In credito", "In credit") : wloc("In debito", "In debt"))
     }
 
     var body: some View {
@@ -124,7 +130,7 @@ private struct MediumWidgetView: View {
                     Image(systemName: "eurosign.circle.fill")
                         .foregroundColor(accent)
                         .font(.system(size: 12, weight: .semibold))
-                    Text("Saldo totale")
+                    Text(wloc("Saldo totale", "Total balance"))
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundColor(.secondary)
                 }
@@ -151,7 +157,7 @@ private struct MediumWidgetView: View {
             VStack(alignment: .leading, spacing: 8) {
                 if entry.sheets.isEmpty {
                     Spacer()
-                    Text("Nessun foglio")
+                    Text(wloc("Nessun foglio", "No sheets"))
                         .font(.system(size: 11))
                         .foregroundColor(.secondary)
                     Spacer()
