@@ -59,7 +59,7 @@ struct Provider: TimelineProvider {
 // MARK: - Localization helper
 
 private func wloc(_ it: String, _ en: String) -> String {
-    Locale.current.language.languageCode?.identifier.hasPrefix("en") == true ? en : it
+    (Locale.preferredLanguages.first?.hasPrefix("en") ?? false) ? en : it
 }
 
 // MARK: - Formatting helper
