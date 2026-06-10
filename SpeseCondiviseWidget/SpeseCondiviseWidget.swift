@@ -46,7 +46,7 @@ struct Provider: TimelineProvider {
     }
 
     func getSnapshot(in context: Context, completion: @escaping (WidgetEntry) -> ()) {
-        completion(WidgetStore.read())
+        completion(placeholder(in: context))
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<WidgetEntry>) -> ()) {
@@ -56,7 +56,7 @@ struct Provider: TimelineProvider {
     }
 }
 
-// MARK: - Localization helper (widget runs in a separate bundle)
+// MARK: - Localization helper
 
 private func wloc(_ it: String, _ en: String) -> String {
     Locale.current.language.languageCode?.identifier.hasPrefix("en") == true ? en : it
@@ -66,11 +66,24 @@ private func wloc(_ it: String, _ en: String) -> String {
 
 private func formatAmount(_ value: Double) -> String {
     let f = NumberFormatter()
-    f.numberStyle          = .decimal
+    f.numberStyle           = .decimal
     f.minimumFractionDigits = 2
     f.maximumFractionDigits = 2
-    f.locale               = Locale.current
+    f.locale                = Locale.current
     return (f.string(from: NSNumber(value: value)) ?? "0,00") + " €"
+}
+
+// MARK: - Gradient helper
+
+private func widgetGradient(for balance: Double) -> LinearGradient {
+    let isEven     = abs(balance) < 0.01
+    let isPositive = balance > 0
+    let colors: [Color] = isEven
+        ? [Color(.systemGray5), Color(.systemGray6)]
+        : isPositive
+            ? [Color.green.opacity(0.30), Color.green.opacity(0.05)]
+            : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
+    return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
 }
 
 // MARK: - Small widget view
@@ -184,19 +197,6 @@ private struct MediumWidgetView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
-}
-
-// MARK: - Gradient helper
-
-private func widgetGradient(for balance: Double) -> LinearGradient {
-    let isEven     = abs(balance) < 0.01
-    let isPositive = balance > 0
-    let colors: [Color] = isEven
-        ? [Color(.systemGray5), Color(.systemGray6)]
-        : isPositive
-            ? [Color.green.opacity(0.30), Color.green.opacity(0.05)]
-            : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
-    return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
 }
 
 // MARK: - Entry view
