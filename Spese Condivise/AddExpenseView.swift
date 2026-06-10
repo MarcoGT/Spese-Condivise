@@ -43,6 +43,10 @@ struct AddExpenseView: View {
                             .font(.system(size: 32, weight: .bold, design: .rounded))
                             .multilineTextAlignment(.center)
                             .frame(maxWidth: 200)
+                            .onChange(of: amount) { newValue in
+                                let filtered = newValue.filter { $0.isNumber || $0 == "," || $0 == "." }
+                                if filtered != newValue { amount = filtered }
+                            }
                         Text("€")
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .foregroundColor(.secondary)
