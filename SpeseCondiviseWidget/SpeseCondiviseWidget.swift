@@ -186,31 +186,30 @@ private struct MediumWidgetView: View {
     }
 }
 
+// MARK: - Gradient helper
+
+private func widgetGradient(for balance: Double) -> LinearGradient {
+    let isEven     = abs(balance) < 0.01
+    let isPositive = balance > 0
+    let colors: [Color] = isEven
+        ? [Color(.systemGray5), Color(.systemGray6)]
+        : isPositive
+            ? [Color.green.opacity(0.30), Color.green.opacity(0.05)]
+            : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
+    return LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing)
+}
+
 // MARK: - Entry view
 
 struct SpeseCondiviseWidgetEntryView: View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var family
 
-    private var isEven:     Bool    { abs(entry.totalBalance) < 0.01 }
-    private var isPositive: Bool    { entry.totalBalance > 0 }
-    private var gradient: [Color] {
-        isEven    ? [Color(.systemGray5), Color(.systemGray6)]
-        : isPositive ? [Color.green.opacity(0.30), Color.green.opacity(0.05)]
-                     : [Color.red.opacity(0.30),   Color.red.opacity(0.05)]
-    }
-
     var body: some View {
-        Group {
-            switch family {
-            case .systemMedium: MediumWidgetView(entry: entry)
-            default:            SmallWidgetView(entry: entry)
-            }
+        switch family {
+        case .systemMedium: MediumWidgetView(entry: entry)
+        default:            SmallWidgetView(entry: entry)
         }
-        .containerBackground(
-            LinearGradient(colors: gradient, startPoint: .topLeading, endPoint: .bottomTrailing),
-            for: .widget
-        )
     }
 }
 
@@ -222,9 +221,10 @@ struct SpeseCondiviseWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             SpeseCondiviseWidgetEntryView(entry: entry)
+                .containerBackground(widgetGradient(for: entry.totalBalance), for: .widget)
         }
         .configurationDisplayName("Spese Condivise")
-        .description("Il tuo saldo totale, sempre in vista.")
+        .description(wloc("Il tuo saldo totale, sempre in vista.", "Your total balance, always visible."))
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
