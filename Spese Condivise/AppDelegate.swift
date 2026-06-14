@@ -22,7 +22,42 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     ) -> Bool {
         AppDelegate.shared = self
         application.registerForRemoteNotifications()
+
+        // Al primo avvio fissa il watermark a "ora": evita di notificare le
+        // spese già esistenti durante la prima sincronizzazione.
+        if UserDefaults.standard.object(forKey: "globalLastSeen") == nil {
+            LastSeenStore.globalLastSeen = Date()
+        }
+
+        // Observer sempre attivo: a ogni import CloudKit completato valuta se
+        // mostrare una notifica locale. È più affidabile del solo handler della
+        // push (che dipende dal timing); il watermark in notifyIfNeeded evita
+        // notifiche duplicate quando entrambi i percorsi scattano.
+        startImportNotificationObserver()
         return true
+    }
+
+    private var importNotifyObserver: NSObjectProtocol?
+
+    private func startImportNotificationObserver() {
+        importNotifyObserver = NotificationCenter.default.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard
+                let event = notification.userInfo?[
+                    NSPersistentCloudKitContainer.eventNotificationUserInfoKey
+                ] as? NSPersistentCloudKitContainer.Event,
+                event.type == .import,
+                event.endDate != nil,
+                event.error == nil
+            else { return }
+
+            NotificationService.shared.notifyIfNeeded(
+                context: PersistenceController.shared.container.viewContext
+            )
+        }
     }
 
     // Collega SceneDelegate alla finestra SwiftUI (necessario per ricevere
