@@ -42,13 +42,35 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didReceiveRemoteNotification userInfo: [AnyHashable: Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
-        // Push silenzioso CloudKit → aspetta l'import e poi mostra notifica locale
+        // Push silenzioso CloudKit → aspetta l'import e poi mostra notifica locale.
+        //
+        // IMPORTANTE: il completionHandler deve essere chiamato ESATTAMENTE una volta.
+        // Una doppia chiamata fa crashare l'app con dispatch_group_leave underflow
+        // (EXC_BREAKPOINT in libdispatch). Per questo ogni invocazione usa il proprio
+        // stato locale (observer + flag `fired`) invece di una proprietà condivisa,
+        // che con più push ravvicinate veniva sovrascritta causando doppie chiamate.
         let persistence = PersistenceController.shared
-        remoteNotifObserver = NotificationCenter.default.addObserver(
+
+        var observer: NSObjectProtocol?
+        var fired = false
+
+        // Chiamato sia dall'evento di import sia dal fallback: garantisce
+        // una sola chiamata al completionHandler e una sola rimozione dell'observer.
+        let finish: (UIBackgroundFetchResult) -> Void = { result in
+            guard !fired else { return }
+            fired = true
+            if let obs = observer {
+                NotificationCenter.default.removeObserver(obs)
+                observer = nil
+            }
+            completionHandler(result)
+        }
+
+        observer = NotificationCenter.default.addObserver(
             forName: NSPersistentCloudKitContainer.eventChangedNotification,
             object: nil,
             queue: .main
-        ) { [weak self] notification in
+        ) { notification in
             guard
                 let event = notification.userInfo?[
                     NSPersistentCloudKitContainer.eventNotificationUserInfoKey
@@ -58,18 +80,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 event.error == nil
             else { return }
 
-            if let obs = self?.remoteNotifObserver { NotificationCenter.default.removeObserver(obs) }
-            self?.remoteNotifObserver = nil
             LastSeenStore.globalLastSeen = Date()
             NotificationService.shared.notifyIfNeeded(context: persistence.container.viewContext)
-            completionHandler(.newData)
+            finish(.newData)
         }
 
-        // Fallback dopo 20 secondi
-        DispatchQueue.main.asyncAfter(deadline: .now() + 20) { [weak self] in
-            if let obs = self?.remoteNotifObserver { NotificationCenter.default.removeObserver(obs) }
-            self?.remoteNotifObserver = nil
-            completionHandler(.noData)
+        // Fallback dopo 20 secondi (no-op se l'import è già arrivato)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 20) {
+            finish(.noData)
         }
     }
 
@@ -109,7 +127,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
     // MARK: - Attende import CloudKit dopo accettazione share
 
-    private var remoteNotifObserver: NSObjectProtocol?
     private var importObserver: NSObjectProtocol?
     private var importFallbackWork: DispatchWorkItem?
 
