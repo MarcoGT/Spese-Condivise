@@ -258,6 +258,12 @@ struct AddExpenseView: View {
             expense.category = selectedCategory.rawValue
             expense.splitBetween = NSSet(set: selectedParticipants)
 
+            // Se il foglio è nello shared store, assegna la spesa allo stesso store
+            // altrimenti non si sincronizza con gli altri utenti
+            if let sheetStore = sheet.objectID.persistentStore {
+                viewContext.assign(expense, to: sheetStore)
+            }
+
             sheet.lastUpdated = Date()
         }
 

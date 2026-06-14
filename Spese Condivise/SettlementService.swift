@@ -18,6 +18,11 @@ enum SettlementService {
         settlement.date = Date()
         settlement.sheet = sheet
 
+        // Assegna al medesimo store del foglio (private o shared)
+        if let sheetStore = sheet.objectID.persistentStore {
+            context.assign(settlement, to: sheetStore)
+        }
+
         // 3. Snapshot dei saldi per ogni persona
         for (person, amount) in balances {
             let entry = SettlementBalance(context: context)
@@ -25,6 +30,10 @@ enum SettlementService {
             entry.personName = person.name
             entry.amount = amount
             entry.settlement = settlement
+
+            if let sheetStore = sheet.objectID.persistentStore {
+                context.assign(entry, to: sheetStore)
+            }
         }
 
         // 4. Archivia le spese attive e collegale al settlement

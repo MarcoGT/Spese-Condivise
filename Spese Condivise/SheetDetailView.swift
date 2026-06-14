@@ -545,8 +545,12 @@ struct SheetDetailView: View {
         person.id = UUID()
         person.name = trimmed
         person.sheet = sheet
-        sheet.lastUpdated = Date()
 
+        if let sheetStore = sheet.objectID.persistentStore {
+            viewContext.assign(person, to: sheetStore)
+        }
+
+        sheet.lastUpdated = Date()
         try? viewContext.save()
     }
 
