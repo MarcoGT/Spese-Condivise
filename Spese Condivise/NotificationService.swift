@@ -59,17 +59,25 @@ final class NotificationService {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             guard settings.authorizationStatus == .authorized else { return }
 
+            // Leggi il watermark PRIMA della query: tutte le spese con
+            // createdAt successivo a questo istante sono "nuove".
+            let since = LastSeenStore.globalLastSeen
+
             context.perform {
                 let fetch = NSFetchRequest<Expense>(entityName: "Expense")
                 fetch.predicate = NSPredicate(
                     format: "createdAt > %@ AND archived == NO",
-                    LastSeenStore.globalLastSeen as CVarArg
+                    since as CVarArg
                 )
                 fetch.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
-                fetch.fetchLimit = 1
+
+                let newExpenses = (try? context.fetch(fetch)) ?? []
+
+                // Aggiorna il watermark solo ora, dopo aver letto le spese nuove.
+                LastSeenStore.globalLastSeen = Date()
 
                 guard
-                    let newest = try? context.fetch(fetch).first,
+                    let newest = newExpenses.first,
                     let sheet = newest.sheet,
                     let sheetName = sheet.name
                 else { return }

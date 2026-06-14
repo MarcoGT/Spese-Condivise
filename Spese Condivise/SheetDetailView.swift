@@ -159,7 +159,13 @@ struct SheetDetailView: View {
                 // MARK: Expenses section
                 Section {
                     if expenses.isEmpty {
-                        if isSharedSheet {
+                        if !sheet.settlementsArray.isEmpty {
+                            // Tutte le spese sono state archiviate con un azzeramento
+                            AllSettledEmptyView { activeModal = .add }
+                                .listRowBackground(Color.clear)
+                                .listRowSeparator(.hidden)
+                        } else if isSharedSheet && !isIdentifiedInSheet {
+                            // Foglio condiviso appena accettato: dati ancora in arrivo
                             SharedSyncEmptyView()
                                 .listRowBackground(Color.clear)
                                 .listRowSeparator(.hidden)
@@ -702,6 +708,31 @@ private struct EmptyExpensesView: View {
             Text(NSLocalizedString("no_expenses_yet", comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 40)
+        .contentShape(Rectangle())
+        .onTapGesture { onAdd() }
+    }
+}
+
+private struct AllSettledEmptyView: View {
+    var onAdd: () -> Void
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Image(systemName: "checkmark.seal.fill")
+                .font(.system(size: 40))
+                .foregroundColor(.green)
+            Text(NSLocalizedString("all_settled_title", comment: ""))
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.primary)
+            Text(NSLocalizedString("all_settled_body", comment: ""))
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)

@@ -80,7 +80,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                 event.error == nil
             else { return }
 
-            LastSeenStore.globalLastSeen = Date()
+            // notifyIfNeeded legge il watermark precedente, mostra la notifica
+            // per le spese nuove e poi aggiorna il watermark internamente.
+            // NON impostare globalLastSeen qui: lo farebbe avanzare prima della
+            // query, facendo sparire le spese appena importate.
             NotificationService.shared.notifyIfNeeded(context: persistence.container.viewContext)
             finish(.newData)
         }

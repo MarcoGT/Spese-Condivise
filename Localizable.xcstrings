@@ -1576,6 +1576,40 @@
         }
       }
     },
+    "all_settled_title" : {
+      "comment" : "Empty state title when all expenses have been settled",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All settled up"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saldo azzerato"
+          }
+        }
+      }
+    },
+    "all_settled_body" : {
+      "comment" : "Empty state body when all expenses have been settled",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All expenses have been archived. Add a new one to start again."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutte le spese sono state archiviate. Aggiungine una nuova per ricominciare."
+          }
+        }
+      }
+    },
     "shared_sync_empty_body" : {
       "comment" : "Empty state body for shared sheet waiting for sync",
       "localizations" : {
