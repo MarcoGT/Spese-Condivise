@@ -1,6 +1,7 @@
 import SwiftUI
 import CoreData
 import CloudKit
+import UIKit
 
 struct SheetDetailView: View {
 
@@ -410,139 +411,58 @@ struct SheetDetailView: View {
     // MARK: - CONDIVISIONE (CORE)
 
     private func openShare() {
-        guard !isPreparingShare else { return }
-        isPreparingShare = true
-
         let coreDataContainer = PersistenceController.shared.container
         let ckContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
 
+        // Salva eventuali modifiche pendenti prima di condividere
         if coreDataContainer.viewContext.hasChanges {
             try? coreDataContainer.viewContext.save()
         }
 
-        // Se esiste già una share, usala direttamente
+        let controller: UICloudSharingController
+
         if let existing = (try? coreDataContainer.fetchShares(matching: [sheet.objectID]))?[sheet.objectID] {
-            let isOwner = existing.currentUserParticipant?.role == .owner
-
-            if isOwner {
-                // Il proprietario può aggiornare titolo e permessi
-                existing[CKShare.SystemFieldKey.title] = sheet.name ?? "Foglio Condiviso"
-                existing.publicPermission = .readWrite
-
-                if let url = existing.url {
-                    // URL già disponibile: aggiorna titolo/permessi in background e presenta subito
-                    uploadShareMetadata(existing, using: ckContainer)
-                    isPreparingShare = false
-                    activeModal = .share(url)
-                } else {
-                    // URL non ancora disponibile: upload e poi presenta
-                    uploadAndPresent(existing, using: ckContainer)
-                }
-            } else {
-                // Partecipante (non proprietario): usa la URL della share esistente
-                isPreparingShare = false
-                if let url = existing.url {
-                    activeModal = .share(url)
-                } else {
-                    shareErrorMessage = NSLocalizedString("Link non disponibile. Riprova tra qualche secondo.", comment: "")
-                    showingShareError = true
-                }
-            }
-            return
-        }
-
-        // Crea una nuova share (prima volta, solo per il proprietario)
-        // NSPersistentCloudKitContainer carica il record su CloudKit e torna
-        // con share.url già valorizzata nel callback.
-        coreDataContainer.share([sheet], to: nil) { _, share, _, error in
-            DispatchQueue.main.async {
-                if let error = error {
-                    self.isPreparingShare = false
-                    self.shareErrorMessage = self.errorMessage(for: error)
-                    self.showingShareError = true
-                    return
-                }
-                guard let ckShare = share else {
-                    self.isPreparingShare = false
-                    self.shareErrorMessage = NSLocalizedString("share_creation_failed", comment: "")
-                    self.showingShareError = true
-                    return
-                }
-                ckShare[CKShare.SystemFieldKey.title] = self.sheet.name ?? "Foglio Condiviso"
-                ckShare.publicPermission = .readWrite
-
-                if let url = ckShare.url {
-                    // Share già caricata da NSPersistentCloudKitContainer: aggiorna metadati in background
-                    self.uploadShareMetadata(ckShare, using: ckContainer)
-                    self.isPreparingShare = false
-                    self.activeModal = .share(url)
-                } else {
-                    // Caso raro: URL non ancora disponibile, carica e presenta
-                    self.uploadAndPresent(ckShare, using: ckContainer)
+            // Share già esistente: presentala per gestire partecipanti / link
+            controller = UICloudSharingController(share: existing, container: ckContainer)
+        } else {
+            // Nuova share: il preparationHandler lascia che sia
+            // NSPersistentCloudKitContainer a creare ed esportare la share,
+            // gestendo internamente i tempi di sync. Niente attesa manuale né
+            // assegnazioni a publicPermission che potevano lanciare eccezioni
+            // CloudKit (NSException) e far abortire l'app.
+            let sheetName = sheet.name ?? "Foglio Condiviso"
+            controller = UICloudSharingController { _, completion in
+                coreDataContainer.share([sheet], to: nil) { _, share, _, error in
+                    share?[CKShare.SystemFieldKey.title] = sheetName as CKRecordValue
+                    completion(share, ckContainer, error)
                 }
             }
         }
+
+        controller.delegate = SharingDelegate.shared
+        controller.availablePermissions = [.allowReadWrite, .allowPublic, .allowPrivate]
+        presentCloudSharingController(controller)
     }
 
-    // Aggiorna titolo e permessi della share senza attendere il risultato (fire-and-forget).
-    private func uploadShareMetadata(_ share: CKShare, using ckContainer: CKContainer) {
-        let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
-        op.savePolicy = .changedKeys
-        op.configuration.timeoutIntervalForRequest = 20
-        op.configuration.timeoutIntervalForResource = 20
-        ckContainer.privateCloudDatabase.add(op)
-    }
+    private func presentCloudSharingController(_ controller: UICloudSharingController) {
+        guard
+            let scene = UIApplication.shared.connectedScenes.first(where: {
+                $0.activationState == .foregroundActive
+            }) as? UIWindowScene,
+            let root = scene.keyWindow?.rootViewController
+        else { return }
 
-    // Upload completo della share: attende il risultato per ricavare la URL.
-    private func uploadAndPresent(_ share: CKShare, using ckContainer: CKContainer) {
-        let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
-        op.savePolicy = .changedKeys
-        op.configuration.timeoutIntervalForRequest = 20
-        op.configuration.timeoutIntervalForResource = 20
+        var top = root
+        while let presented = top.presentedViewController { top = presented }
 
-        var savedShare: CKShare?
-        op.perRecordSaveBlock = { _, result in
-            if case .success(let record) = result, let ckShare = record as? CKShare {
-                savedShare = ckShare
-            }
+        // Su iPad il controller è presentato come popover: àncoralo al centro
+        if let pop = controller.popoverPresentationController {
+            pop.sourceView = top.view
+            pop.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
+            pop.permittedArrowDirections = []
         }
 
-        op.modifyRecordsResultBlock = { result in
-            DispatchQueue.main.async {
-                self.isPreparingShare = false
-                switch result {
-                    case .success:
-                        if let url = savedShare?.url ?? share.url {
-                            self.activeModal = .share(url)
-                        } else {
-                            self.shareErrorMessage = NSLocalizedString("Link non disponibile. Riprova tra qualche secondo.", comment: "")
-                            self.showingShareError = true
-                        }
-                    case .failure(let error):
-                        self.shareErrorMessage = self.errorMessage(for: error)
-                        self.showingShareError = true
-                }
-            }
-        }
-        ckContainer.privateCloudDatabase.add(op)
-    }
-
-    private func errorMessage(for error: Error) -> String {
-        if let ckError = error as? CKError {
-            switch ckError.code {
-                case .notAuthenticated:
-                    return "Devi essere connesso con il tuo Apple ID. Vai in Impostazioni > iCloud."
-                case .accountTemporarilyUnavailable:
-                    return "L'account iCloud non è ancora pronto. Attendi qualche secondo e riprova."
-                case .networkFailure, .networkUnavailable:
-                    return "Connessione internet non disponibile. Riprova più tardi."
-                case .quotaExceeded:
-                    return "Spazio iCloud insufficiente. Libera spazio e riprova."
-                default:
-                    return "Errore durante la condivisione:\n\(ckError.localizedDescription)"
-            }
-        }
-        return "Errore durante la condivisione:\n\(error.localizedDescription)"
+        top.present(controller, animated: true)
     }
 
     private func addPerson() {
