@@ -78,6 +78,57 @@
         }
       }
     },
+    "all_settled_body" : {
+      "comment" : "Empty state body when all expenses have been settled",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All expenses have been archived. Add a new one to start again."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutte le spese sono state archiviate. Aggiungine una nuova per ricominciare."
+          }
+        }
+      }
+    },
+    "manage_sharing" : {
+      "comment" : "Long-press action to manage an existing share",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage sharing"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestisci condivisione"
+          }
+        }
+      }
+    },
+    "all_settled_title" : {
+      "comment" : "Empty state title when all expenses have been settled",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All settled up"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saldo azzerato"
+          }
+        }
+      }
+    },
     "amount" : {
 
     },
@@ -820,6 +871,7 @@
       }
     },
     "Link non disponibile. Riprova tra qualche secondo." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1510,6 +1562,7 @@
     },
     "share_creation_failed" : {
       "comment" : "Error shown when creating a share fails",
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1572,40 +1625,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spese Condivise"
-          }
-        }
-      }
-    },
-    "all_settled_title" : {
-      "comment" : "Empty state title when all expenses have been settled",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All settled up"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saldo azzerato"
-          }
-        }
-      }
-    },
-    "all_settled_body" : {
-      "comment" : "Empty state body when all expenses have been settled",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "All expenses have been archived. Add a new one to start again."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tutte le spese sono state archiviate. Aggiungine una nuova per ricominciare."
           }
         }
       }

@@ -281,15 +281,19 @@ struct SheetDetailView: View {
             }
 
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button(action: openShare) {
-                    if isPreparingShare {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                    } else {
-                        Image(systemName: "person.crop.circle.badge.plus")
+                // Tap = invia subito il link (pannello iOS pulito).
+                // Long-press = gestione/interruzione condivisione (opzione separata).
+                Menu {
+                    Button {
+                        manageShare()
+                    } label: {
+                        Label(NSLocalizedString("manage_sharing", comment: ""), systemImage: "person.2")
                     }
+                } label: {
+                    Image(systemName: "person.crop.circle.badge.plus")
+                } primaryAction: {
+                    openShare()
                 }
-                .disabled(isPreparingShare)
                 .labelStyle(.iconOnly)
             }
 
@@ -410,41 +414,58 @@ struct SheetDetailView: View {
 
     // MARK: - CONDIVISIONE (CORE)
 
+    // Tap sul tasto condividi: se il foglio è già condiviso manda subito il
+    // link col pannello iOS pulito; altrimenti avvia la creazione/invito.
     private func openShare() {
-        let coreDataContainer = PersistenceController.shared.container
+        let container = PersistenceController.shared.container
         let ckContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
 
-        // Salva eventuali modifiche pendenti prima di condividere
-        if coreDataContainer.viewContext.hasChanges {
-            try? coreDataContainer.viewContext.save()
+        if container.viewContext.hasChanges {
+            try? container.viewContext.save()
         }
 
-        let controller: UICloudSharingController
-
-        if let existing = (try? coreDataContainer.fetchShares(matching: [sheet.objectID]))?[sheet.objectID] {
-            // Share già esistente: presentala per gestire partecipanti / link
-            controller = UICloudSharingController(share: existing, container: ckContainer)
-        } else {
-            // Nuova share: il preparationHandler lascia che sia
-            // NSPersistentCloudKitContainer a creare ed esportare la share,
-            // gestendo internamente i tempi di sync. Niente attesa manuale né
-            // assegnazioni a publicPermission che potevano lanciare eccezioni
-            // CloudKit (NSException) e far abortire l'app.
-            let sheetName = sheet.name ?? "Foglio Condiviso"
-            controller = UICloudSharingController { _, completion in
-                coreDataContainer.share([sheet], to: nil) { _, share, _, error in
-                    share?[CKShare.SystemFieldKey.title] = sheetName as CKRecordValue
-                    completion(share, ckContainer, error)
-                }
-            }
+        if let existing = (try? container.fetchShares(matching: [sheet.objectID]))?[sheet.objectID],
+           let url = existing.url {
+            // Già condiviso e link pronto → pannello di condivisione iOS standard
+            presentViewController(UIActivityViewController(activityItems: [url], applicationActivities: nil))
+            return
         }
 
-        controller.delegate = SharingDelegate.shared
-        controller.availablePermissions = [.allowReadWrite, .allowPublic, .allowPrivate]
-        presentCloudSharingController(controller)
+        // Non ancora condiviso (o link non ancora pronto) → crea/invita
+        presentShareCreation(container: container, ckContainer: ckContainer)
     }
 
-    private func presentCloudSharingController(_ controller: UICloudSharingController) {
+    // Long-press: gestione condivisione (partecipanti, permessi, interrompi).
+    private func manageShare() {
+        let container = PersistenceController.shared.container
+        let ckContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
+
+        guard let existing = (try? container.fetchShares(matching: [sheet.objectID]))?[sheet.objectID] else {
+            // Niente da gestire: avvia la creazione
+            presentShareCreation(container: container, ckContainer: ckContainer)
+            return
+        }
+        let controller = UICloudSharingController(share: existing, container: ckContainer)
+        controller.delegate = SharingDelegate.shared
+        presentViewController(controller)
+    }
+
+    private func presentShareCreation(container: NSPersistentCloudKitContainer, ckContainer: CKContainer) {
+        let sheetName = sheet.name ?? "Foglio Condiviso"
+        let controller = UICloudSharingController { _, completion in
+            // NSPersistentCloudKitContainer crea ed esporta la share gestendo i
+            // tempi di sync internamente (niente attesa/crash manuali).
+            container.share([sheet], to: nil) { _, share, _, error in
+                share?[CKShare.SystemFieldKey.title] = sheetName as CKRecordValue
+                completion(share, ckContainer, error)
+            }
+        }
+        controller.delegate = SharingDelegate.shared
+        controller.availablePermissions = [.allowReadWrite, .allowPublic, .allowPrivate]
+        presentViewController(controller)
+    }
+
+    private func presentViewController(_ controller: UIViewController) {
         guard
             let scene = UIApplication.shared.connectedScenes.first(where: {
                 $0.activationState == .foregroundActive
@@ -455,7 +476,7 @@ struct SheetDetailView: View {
         var top = root
         while let presented = top.presentedViewController { top = presented }
 
-        // Su iPad il controller è presentato come popover: àncoralo al centro
+        // Su iPad i controller sono presentati come popover: àncorali al centro
         if let pop = controller.popoverPresentationController {
             pop.sourceView = top.view
             pop.sourceRect = CGRect(x: top.view.bounds.midX, y: top.view.bounds.midY, width: 0, height: 0)
