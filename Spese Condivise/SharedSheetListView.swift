@@ -296,14 +296,17 @@ struct SharedSheetListView: View {
     private func bootstrapCurrentUserIfNeeded() {
         let myName = currentUser.name?.lowercased()
 
+        // Identifica l'utente in OGNI foglio dove il nome corrisponde, salvando
+        // l'identità per-foglio. Salta i fogli già identificati.
         for sheet in sheets {
+            guard let sid = sheet.id else { continue }
+            if currentUser.personID(forSheet: sid) != nil { continue }
+
             let persons = sheet.personsArray
             let match: Person?
             if let myName {
-                // Cerca per nome reale dell'utente (caso principale)
                 match = persons.first(where: { $0.name?.lowercased() == myName })
             } else {
-                // Fallback legacy: cerca "Io/Me" per utenti senza nome impostato
                 let fallback = NSLocalizedString("Me", comment: "current user").lowercased()
                 match = persons.first(where: {
                     let n = $0.name?.lowercased()
@@ -311,10 +314,7 @@ struct SharedSheetListView: View {
                 })
             }
             if let me = match, let id = me.id {
-                if currentUser.personID != id {
-                    currentUser.setPersonID(id)
-                }
-                return
+                currentUser.setPersonID(id, forSheet: sid)
             }
         }
     }
@@ -416,20 +416,6 @@ struct SharedSheetListView: View {
     }
 
     private func myPerson(in sheet: SharedSheet) -> Person? {
-        // Prima cerca per UUID (caso principale — identificato correttamente)
-        if let myID = currentUser.personID,
-           let match = sheet.personsArray.first(where: { $0.id == myID }) {
-            return match
-        }
-        // Fallback: cerca per nome utente impostato
-        if let myName = currentUser.name?.lowercased(),
-           let match = sheet.personsArray.first(where: { $0.name?.lowercased() == myName }) {
-            return match
-        }
-        // Fallback legacy: "Io"/"Me"
-        return sheet.personsArray.first {
-            $0.name?.lowercased() == "io"
-                || $0.name?.lowercased() == NSLocalizedString("Me", comment: "").lowercased()
-        }
+        sheet.resolvedMyPerson(using: currentUser)
     }
 }

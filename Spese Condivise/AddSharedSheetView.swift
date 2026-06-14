@@ -60,8 +60,10 @@ struct AddSharedSheetView: View {
         me.name = currentUser.name ?? NSLocalizedString("Me", comment: "current user")
         me.sheet = sheet
         
-            // 🔐 collega il currentUser
-        currentUser.bootstrapIfNeeded(with: me.id!)
+            // 🔐 sei tu il creatore: registra l'identità per QUESTO foglio
+        if let sid = sheet.id, let mid = me.id {
+            currentUser.setPersonID(mid, forSheet: sid)
+        }
         
         do {
             try viewContext.save()

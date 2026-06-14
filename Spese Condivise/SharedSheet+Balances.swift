@@ -33,7 +33,34 @@ extension SharedSheet {
 }
 
 extension SharedSheet {
-    
+
+    /// Risolve quale Person sei tu in QUESTO foglio, in ordine di affidabilità:
+    /// 1. identità per-foglio salvata esplicitamente
+    /// 2. corrispondenza per nome utente
+    /// 3. legacy: personID globale, se presente in questo foglio
+    /// 4. legacy: persona chiamata "Io"/"Me"
+    func resolvedMyPerson(using user: CurrentUser) -> Person? {
+        if let sid = id, let pid = user.personID(forSheet: sid),
+           let match = personsArray.first(where: { $0.id == pid }) {
+            return match
+        }
+        if let myName = user.name?.lowercased(),
+           let match = personsArray.first(where: { $0.name?.lowercased() == myName }) {
+            return match
+        }
+        if let gid = user.personID,
+           let match = personsArray.first(where: { $0.id == gid }) {
+            return match
+        }
+        let me = NSLocalizedString("Me", comment: "").lowercased()
+        return personsArray.first {
+            $0.name?.lowercased() == "io" || $0.name?.lowercased() == me
+        }
+    }
+}
+
+extension SharedSheet {
+
     func balance(for personID: UUID) -> Double {
         guard let me = personsArray.first(where: { $0.id == personID }) else {
             return 0

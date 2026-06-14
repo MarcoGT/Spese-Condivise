@@ -63,7 +63,7 @@ struct SheetDetailView: View {
                             HStack(spacing: 12) {
                                 ForEach(sheet.personsArray) { person in
                                     let value = balances[person] ?? 0
-                                    let isMe = person.id == currentUser.personID
+                                    let isMe = person.objectID == myPerson?.objectID
                                     let claimMode = isSharedSheet && !isIdentifiedInSheet
                                     PersonBalanceCard(
                                         person: person,
@@ -367,7 +367,9 @@ struct SheetDetailView: View {
         ) {
             if let person = personToClaimAsMe {
                 Button(String(format: NSLocalizedString("identify_confirm_action", comment: ""), person.name ?? "")) {
-                    currentUser.setPersonID(person.id!)
+                    if let pid = person.id, let sid = sheet.id {
+                        currentUser.setPersonID(pid, forSheet: sid)
+                    }
                     personToClaimAsMe = nil
                 }
             }
@@ -566,9 +568,13 @@ struct SheetDetailView: View {
         sheet.objectID.persistentStore === persistence.sharedPersistentStore
     }
 
+    /// La persona che sei tu in questo foglio (identità per-foglio + fallback).
+    private var myPerson: Person? {
+        sheet.resolvedMyPerson(using: currentUser)
+    }
+
     private var isIdentifiedInSheet: Bool {
-        guard let myID = currentUser.personID else { return false }
-        return sheet.personsArray.contains { $0.id == myID }
+        myPerson != nil
     }
 
     // MARK: - LOGICA BILANCI
