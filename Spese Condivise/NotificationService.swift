@@ -82,10 +82,17 @@ final class NotificationService {
                     let sheetName = sheet.name
                 else { return }
 
-                // Non notificare se l'app è in foreground
-                var isActive = false
-                DispatchQueue.main.sync {
+                // Non notificare se l'app è in foreground.
+                // viewContext è main-queue, quindi questo blocco gira già sul
+                // main thread: leggere applicationState con DispatchQueue.main.sync
+                // qui causerebbe un deadlock (crash EXC_BREAKPOINT in libdispatch).
+                let isActive: Bool
+                if Thread.isMainThread {
                     isActive = UIApplication.shared.applicationState == .active
+                } else {
+                    isActive = DispatchQueue.main.sync {
+                        UIApplication.shared.applicationState == .active
+                    }
                 }
                 guard !isActive else { return }
 
