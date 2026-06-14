@@ -412,84 +412,85 @@ struct SheetDetailView: View {
             try? coreDataContainer.viewContext.save()
         }
 
-        // Se esiste già una share, usala direttamente senza ricrearla
+        // Se esiste già una share, usala direttamente
         if let existing = (try? coreDataContainer.fetchShares(matching: [sheet.objectID]))?[sheet.objectID] {
-            // Solo il proprietario può modificare i permessi della share.
-            // I partecipanti non possono — CloudKit lancia un'eccezione.
-            if existing.currentUserParticipant?.role == .owner {
+            let isOwner = existing.currentUserParticipant?.role == .owner
+
+            if isOwner {
+                // Il proprietario può aggiornare titolo e permessi
                 existing[CKShare.SystemFieldKey.title] = sheet.name ?? "Foglio Condiviso"
                 existing.publicPermission = .readWrite
+
+                if let url = existing.url {
+                    // URL già disponibile: aggiorna titolo/permessi in background e presenta subito
+                    uploadShareMetadata(existing, using: ckContainer)
+                    isPreparingShare = false
+                    activeModal = .share(url)
+                } else {
+                    // URL non ancora disponibile: upload e poi presenta
+                    uploadAndPresent(existing, using: ckContainer)
+                }
+            } else {
+                // Partecipante (non proprietario): usa la URL della share esistente
+                isPreparingShare = false
+                if let url = existing.url {
+                    activeModal = .share(url)
+                } else {
+                    shareErrorMessage = NSLocalizedString("Link non disponibile. Riprova tra qualche secondo.", comment: "")
+                    showingShareError = true
+                }
             }
-            uploadAndPresent(existing, using: ckContainer)
             return
         }
 
-        // Altrimenti crea una nuova share
+        // Crea una nuova share (prima volta, solo per il proprietario)
+        // NSPersistentCloudKitContainer carica il record su CloudKit e torna
+        // con share.url già valorizzata nel callback.
         coreDataContainer.share([sheet], to: nil) { _, share, _, error in
-            if let error = error {
-                DispatchQueue.main.async {
+            DispatchQueue.main.async {
+                if let error = error {
                     self.isPreparingShare = false
                     self.shareErrorMessage = self.errorMessage(for: error)
                     self.showingShareError = true
+                    return
                 }
-                return
-            }
-            guard let ckShare = share else {
-                DispatchQueue.main.async {
+                guard let ckShare = share else {
                     self.isPreparingShare = false
                     self.shareErrorMessage = NSLocalizedString("share_creation_failed", comment: "")
                     self.showingShareError = true
+                    return
                 }
-                return
+                ckShare[CKShare.SystemFieldKey.title] = self.sheet.name ?? "Foglio Condiviso"
+                ckShare.publicPermission = .readWrite
+
+                if let url = ckShare.url {
+                    // Share già caricata da NSPersistentCloudKitContainer: aggiorna metadati in background
+                    self.uploadShareMetadata(ckShare, using: ckContainer)
+                    self.isPreparingShare = false
+                    self.activeModal = .share(url)
+                } else {
+                    // Caso raro: URL non ancora disponibile, carica e presenta
+                    self.uploadAndPresent(ckShare, using: ckContainer)
+                }
             }
-            ckShare[CKShare.SystemFieldKey.title] = self.sheet.name ?? "Foglio Condiviso"
-            ckShare.publicPermission = .readWrite
-            self.waitForExportThenPresent(ckShare, using: ckContainer)
         }
     }
 
-    private func waitForExportThenPresent(_ share: CKShare, using ckContainer: CKContainer) {
-        let coreDataContainer = PersistenceController.shared.container
-        if coreDataContainer.viewContext.hasChanges {
-            try? coreDataContainer.viewContext.save()
-        }
-
-        let shareCreatedAt = Date()
-        var observer: NSObjectProtocol?
-        var fired = false
-
-        let fire: () -> Void = {
-            guard !fired else { return }
-            fired = true
-            if let obs = observer { NotificationCenter.default.removeObserver(obs) }
-            self.uploadAndPresent(share, using: ckContainer)
-        }
-
-        observer = NotificationCenter.default.addObserver(
-            forName: NSPersistentCloudKitContainer.eventChangedNotification,
-            object: nil,
-            queue: .main
-        ) { notification in
-            guard
-                let event = notification.userInfo?[
-                    NSPersistentCloudKitContainer.eventNotificationUserInfoKey
-                ] as? NSPersistentCloudKitContainer.Event,
-                event.type == .export,
-                event.endDate != nil,
-                event.error == nil,
-                event.startDate >= shareCreatedAt
-            else { return }
-            fire()
-        }
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 12) { fire() }
+    // Aggiorna titolo e permessi della share senza attendere il risultato (fire-and-forget).
+    private func uploadShareMetadata(_ share: CKShare, using ckContainer: CKContainer) {
+        let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
+        op.savePolicy = .changedKeys
+        op.configuration.timeoutIntervalForRequest = 20
+        op.configuration.timeoutIntervalForResource = 20
+        ckContainer.privateCloudDatabase.add(op)
     }
 
+    // Upload completo della share: attende il risultato per ricavare la URL.
     private func uploadAndPresent(_ share: CKShare, using ckContainer: CKContainer) {
         let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
         op.savePolicy = .changedKeys
-        op.configuration.timeoutIntervalForRequest = 15
-        op.configuration.timeoutIntervalForResource = 15
+        op.configuration.timeoutIntervalForRequest = 20
+        op.configuration.timeoutIntervalForResource = 20
 
         var savedShare: CKShare?
         op.perRecordSaveBlock = { _, result in
@@ -503,8 +504,7 @@ struct SheetDetailView: View {
                 self.isPreparingShare = false
                 switch result {
                     case .success:
-                        let url = savedShare?.url ?? share.url
-                        if let url {
+                        if let url = savedShare?.url ?? share.url {
                             self.activeModal = .share(url)
                         } else {
                             self.shareErrorMessage = NSLocalizedString("Link non disponibile. Riprova tra qualche secondo.", comment: "")
