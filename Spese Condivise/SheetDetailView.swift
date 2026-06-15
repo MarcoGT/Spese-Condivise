@@ -290,7 +290,12 @@ struct SheetDetailView: View {
                         Label(NSLocalizedString("manage_sharing", comment: ""), systemImage: "person.2")
                     }
                 } label: {
-                    Image(systemName: "person.crop.circle.badge.plus")
+                    if isPreparingShare {
+                        ProgressView()
+                            .scaleEffect(0.8)
+                    } else {
+                        Image(systemName: "person.crop.circle.badge.plus")
+                    }
                 } primaryAction: {
                     openShare()
                 }
@@ -431,8 +436,54 @@ struct SheetDetailView: View {
             return
         }
 
-        // Non ancora condiviso (o link non ancora pronto) → crea/invita
-        presentShareCreation(container: container, ckContainer: ckContainer)
+        // La condivisione richiede che il foglio sia già stato ESPORTATO su
+        // CloudKit: su un foglio appena creato share() resterebbe appeso in
+        // attesa dell'export. record(for:) è non-nil solo quando l'export è
+        // completato: se non lo è, attendiamo prima di presentare.
+        if container.record(for: sheet.objectID) != nil {
+            presentShareCreation(container: container, ckContainer: ckContainer)
+        } else {
+            waitForExportThenPresentShareCreation(container: container, ckContainer: ckContainer)
+        }
+    }
+
+    // Attende che il foglio sia esportato su CloudKit (spinner sul tasto) e poi
+    // presenta il pannello di creazione share. Fallback dopo 25s.
+    private func waitForExportThenPresentShareCreation(container: NSPersistentCloudKitContainer, ckContainer: CKContainer) {
+        isPreparingShare = true
+
+        var observer: NSObjectProtocol?
+        var fired = false
+
+        let finish: () -> Void = {
+            guard !fired else { return }
+            fired = true
+            if let obs = observer { NotificationCenter.default.removeObserver(obs) }
+            isPreparingShare = false
+            presentShareCreation(container: container, ckContainer: ckContainer)
+        }
+
+        observer = NotificationCenter.default.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard
+                let event = notification.userInfo?[
+                    NSPersistentCloudKitContainer.eventNotificationUserInfoKey
+                ] as? NSPersistentCloudKitContainer.Event,
+                event.type == .export,
+                event.endDate != nil,
+                event.error == nil
+            else { return }
+
+            // Presenta solo quando il foglio risulta effettivamente esportato.
+            if container.record(for: sheet.objectID) != nil {
+                finish()
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 25) { finish() }
     }
 
     // Long-press: gestione condivisione (partecipanti, permessi, interrompi).
