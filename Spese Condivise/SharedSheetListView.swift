@@ -17,6 +17,7 @@ struct SharedSheetListView: View {
 
     // MARK: - STATE
     @State private var showingAddSheet = false
+    @State private var showingAbout = false
     @State private var shareAlertMessage = ""
     @State private var showingShareAlert = false
     @State private var shareAlertIsSuccess = false
@@ -102,6 +103,13 @@ struct SharedSheetListView: View {
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {
+                            showingAbout = true
+                        } label: {
+                            Image(systemName: "info.circle")
+                        }
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
                             showingAddSheet = true
                         } label: {
                             Image(systemName: "plus")
@@ -111,6 +119,9 @@ struct SharedSheetListView: View {
                 }
                 .sheet(isPresented: $showingAddSheet) {
                     AddSharedSheetView()
+                }
+                .sheet(isPresented: $showingAbout) {
+                    AboutView()
                 }
             }
 

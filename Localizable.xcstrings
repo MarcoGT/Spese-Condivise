@@ -95,6 +95,41 @@
         }
       }
     },
+    "about_title" : {
+      "comment" : "About screen title",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Info" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Info" } }
+      }
+    },
+    "about_version_label" : {
+      "comment" : "Version row label",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Version" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Versione" } }
+      }
+    },
+    "about_build_label" : {
+      "comment" : "Build row label",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Build" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Build" } }
+      }
+    },
+    "about_version_format" : {
+      "comment" : "Version + build subtitle, e.g. Version 2.2 (56)",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Version %@ (%@)" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Versione %@ (%@)" } }
+      }
+    },
+    "about_footer" : {
+      "comment" : "About screen footer",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Shared Expenses — split expenses with family and friends." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Spese Condivise — dividi le spese con famiglia e amici." } }
+      }
+    },
     "manage_sharing" : {
       "comment" : "Long-press action to manage an existing share",
       "localizations" : {
