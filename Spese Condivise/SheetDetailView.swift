@@ -424,32 +424,40 @@ struct SheetDetailView: View {
     private func openShare() {
         let container = PersistenceController.shared.container
         let ckContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
+        let objectID = sheet.objectID
 
         if container.viewContext.hasChanges {
             try? container.viewContext.save()
         }
 
-        if let existing = (try? container.fetchShares(matching: [sheet.objectID]))?[sheet.objectID],
-           let url = existing.url {
-            // Già condiviso e link pronto → pannello di condivisione iOS standard
-            presentViewController(UIActivityViewController(activityItems: [url], applicationActivities: nil))
-            return
-        }
+        // fetchShares e record(for:) sono SINCRONE e durante un sync intenso
+        // possono bloccare il main thread (freeze totale). Eseguile su una coda
+        // di background, mostra lo spinner, e presenta poi sul main.
+        isPreparingShare = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let existingShareURL = (try? container.fetchShares(matching: [objectID]))?[objectID]?.url
+            let isExported = container.record(for: objectID) != nil
 
-        // La condivisione richiede che il foglio sia già stato ESPORTATO su
-        // CloudKit: su un foglio appena creato share() resterebbe appeso in
-        // attesa dell'export. record(for:) è non-nil solo quando l'export è
-        // completato: se non lo è, attendiamo prima di presentare.
-        if container.record(for: sheet.objectID) != nil {
-            presentShareCreation(container: container, ckContainer: ckContainer)
-        } else {
-            waitForExportThenPresentShareCreation(container: container, ckContainer: ckContainer)
+            DispatchQueue.main.async {
+                if let url = existingShareURL {
+                    // Già condiviso e link pronto → pannello iOS standard
+                    self.isPreparingShare = false
+                    self.presentViewController(UIActivityViewController(activityItems: [url], applicationActivities: nil))
+                } else if isExported {
+                    // Foglio già su CloudKit → crea/invita subito
+                    self.isPreparingShare = false
+                    self.presentShareCreation(container: container, ckContainer: ckContainer)
+                } else {
+                    // Foglio non ancora esportato → attendi l'export (spinner attivo)
+                    self.waitForExportThenPresentShareCreation(container: container, ckContainer: ckContainer, objectID: objectID)
+                }
+            }
         }
     }
 
     // Attende che il foglio sia esportato su CloudKit (spinner sul tasto) e poi
     // presenta il pannello di creazione share. Fallback dopo 25s.
-    private func waitForExportThenPresentShareCreation(container: NSPersistentCloudKitContainer, ckContainer: CKContainer) {
+    private func waitForExportThenPresentShareCreation(container: NSPersistentCloudKitContainer, ckContainer: CKContainer, objectID: NSManagedObjectID) {
         isPreparingShare = true
 
         var observer: NSObjectProtocol?
@@ -459,8 +467,8 @@ struct SheetDetailView: View {
             guard !fired else { return }
             fired = true
             if let obs = observer { NotificationCenter.default.removeObserver(obs) }
-            isPreparingShare = false
-            presentShareCreation(container: container, ckContainer: ckContainer)
+            self.isPreparingShare = false
+            self.presentShareCreation(container: container, ckContainer: ckContainer)
         }
 
         observer = NotificationCenter.default.addObserver(
@@ -477,9 +485,12 @@ struct SheetDetailView: View {
                 event.error == nil
             else { return }
 
-            // Presenta solo quando il foglio risulta effettivamente esportato.
-            if container.record(for: sheet.objectID) != nil {
-                finish()
+            // record(for:) è sincrona: controllala in background per non bloccare il main.
+            DispatchQueue.global(qos: .userInitiated).async {
+                let exported = container.record(for: objectID) != nil
+                if exported {
+                    DispatchQueue.main.async { finish() }
+                }
             }
         }
 
