@@ -942,7 +942,6 @@
       }
     },
     "Link non disponibile. Riprova tra qualche secondo." : {
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -956,6 +955,13 @@
             "value" : "Link non disponibile. Riprova tra qualche secondo."
           }
         }
+      }
+    },
+    "share_not_synced" : {
+      "comment" : "Shown when a sheet hasn't finished syncing to iCloud yet, blocking share",
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "This sheet hasn't synced to iCloud yet. Wait a moment and try again." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Il foglio non si è ancora sincronizzato con iCloud. Attendi qualche secondo e riprova." } }
       }
     },
     "manage_sharing" : {
@@ -1650,7 +1656,6 @@
     },
     "share_creation_failed" : {
       "comment" : "Error shown when creating a share fails",
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
