@@ -419,82 +419,91 @@ struct SheetDetailView: View {
 
     // MARK: - CONDIVISIONE (CORE)
 
-    // Tap sul tasto condividi: se il foglio è già condiviso manda subito il
-    // link col pannello iOS pulito; altrimenti avvia la creazione/invito.
+    // Tap sul tasto condividi: genera/recupera il link della share e lo mostra
+    // nel pannello di condivisione iOS standard.
+    //
+    // NB: NON usiamo UICloudSharingController per CREARE la share, perché al
+    // tap su un'app esso esegue un upload tramite il mirroring di
+    // NSPersistentCloudKitContainer e, quando la sync è lenta/affollata, resta
+    // bloccato all'infinito ("attendo"). Generando noi il link e condividendolo
+    // come testo, la condivisione non dipende dallo stato del mirroring.
     private func openShare() {
         let container = PersistenceController.shared.container
         let ckContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
         let objectID = sheet.objectID
+        let sheetName = sheet.name ?? "Foglio Condiviso"
 
         if container.viewContext.hasChanges {
             try? container.viewContext.save()
         }
 
-        // fetchShares e record(for:) sono SINCRONE e durante un sync intenso
-        // possono bloccare il main thread (freeze totale). Eseguile su una coda
-        // di background, mostra lo spinner, e presenta poi sul main.
+        // fetchShares è sincrona: eseguila in background per non bloccare il main.
         isPreparingShare = true
         DispatchQueue.global(qos: .userInitiated).async {
-            let existingShareURL = (try? container.fetchShares(matching: [objectID]))?[objectID]?.url
-            let isExported = container.record(for: objectID) != nil
+            let existing = (try? container.fetchShares(matching: [objectID]))?[objectID]
 
             DispatchQueue.main.async {
-                if let url = existingShareURL {
-                    // Già condiviso e link pronto → pannello iOS standard
+                // Share già esistente con link → mostralo subito
+                if let url = existing?.url {
                     self.isPreparingShare = false
-                    self.presentViewController(UIActivityViewController(activityItems: [url], applicationActivities: nil))
-                } else if isExported {
-                    // Foglio già su CloudKit → crea/invita subito
-                    self.isPreparingShare = false
-                    self.presentShareCreation(container: container, ckContainer: ckContainer)
-                } else {
-                    // Foglio non ancora esportato → attendi l'export (spinner attivo)
-                    self.waitForExportThenPresentShareCreation(container: container, ckContainer: ckContainer, objectID: objectID)
+                    self.presentShareLink(url)
+                    return
+                }
+
+                // Crea una nuova share, poi mostra il link
+                container.share([self.sheet], to: nil) { _, share, _, error in
+                    DispatchQueue.main.async {
+                        guard let share = share, error == nil else {
+                            self.isPreparingShare = false
+                            self.shareErrorMessage = error?.localizedDescription
+                                ?? NSLocalizedString("share_creation_failed", comment: "")
+                            self.showingShareError = true
+                            return
+                        }
+                        share[CKShare.SystemFieldKey.title] = sheetName as CKRecordValue
+                        share.publicPermission = .readWrite
+                        self.uploadAndPresentShareLink(share, using: ckContainer)
+                    }
                 }
             }
         }
     }
 
-    // Attende che il foglio sia esportato su CloudKit (spinner sul tasto) e poi
-    // presenta il pannello di creazione share. Fallback dopo 25s.
-    private func waitForExportThenPresentShareCreation(container: NSPersistentCloudKitContainer, ckContainer: CKContainer, objectID: NSManagedObjectID) {
-        isPreparingShare = true
-
-        var observer: NSObjectProtocol?
-        var fired = false
-
-        let finish: () -> Void = {
-            guard !fired else { return }
-            fired = true
-            if let obs = observer { NotificationCenter.default.removeObserver(obs) }
-            self.isPreparingShare = false
-            self.presentShareCreation(container: container, ckContainer: ckContainer)
+    // Salva la share su CloudKit (direttamente, senza passare dal mirroring) per
+    // ottenerne la URL, e poi presenta il link.
+    private func uploadAndPresentShareLink(_ share: CKShare, using ckContainer: CKContainer) {
+        if let url = share.url {
+            isPreparingShare = false
+            presentShareLink(url)
+            return
         }
 
-        observer = NotificationCenter.default.addObserver(
-            forName: NSPersistentCloudKitContainer.eventChangedNotification,
-            object: nil,
-            queue: .main
-        ) { notification in
-            guard
-                let event = notification.userInfo?[
-                    NSPersistentCloudKitContainer.eventNotificationUserInfoKey
-                ] as? NSPersistentCloudKitContainer.Event,
-                event.type == .export,
-                event.endDate != nil,
-                event.error == nil
-            else { return }
-
-            // record(for:) è sincrona: controllala in background per non bloccare il main.
-            DispatchQueue.global(qos: .userInitiated).async {
-                let exported = container.record(for: objectID) != nil
-                if exported {
-                    DispatchQueue.main.async { finish() }
+        let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
+        op.savePolicy = .changedKeys
+        op.configuration.timeoutIntervalForRequest = 20
+        op.configuration.timeoutIntervalForResource = 20
+        op.modifyRecordsResultBlock = { result in
+            DispatchQueue.main.async {
+                self.isPreparingShare = false
+                switch result {
+                    case .success:
+                        if let url = share.url {
+                            self.presentShareLink(url)
+                        } else {
+                            self.shareErrorMessage = NSLocalizedString("Link non disponibile. Riprova tra qualche secondo.", comment: "")
+                            self.showingShareError = true
+                        }
+                    case .failure(let error):
+                        self.shareErrorMessage = error.localizedDescription
+                        self.showingShareError = true
                 }
             }
         }
+        ckContainer.privateCloudDatabase.add(op)
+    }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 25) { finish() }
+    private func presentShareLink(_ url: URL) {
+        presentViewController(UIActivityViewController(activityItems: [url], applicationActivities: nil))
     }
 
     // Long-press: gestione condivisione (partecipanti, permessi, interrompi).
@@ -502,29 +511,19 @@ struct SheetDetailView: View {
         let container = PersistenceController.shared.container
         let ckContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
 
-        guard let existing = (try? container.fetchShares(matching: [sheet.objectID]))?[sheet.objectID] else {
-            // Niente da gestire: avvia la creazione
-            presentShareCreation(container: container, ckContainer: ckContainer)
-            return
-        }
-        let controller = UICloudSharingController(share: existing, container: ckContainer)
-        controller.delegate = SharingDelegate.shared
-        presentViewController(controller)
-    }
-
-    private func presentShareCreation(container: NSPersistentCloudKitContainer, ckContainer: CKContainer) {
-        let sheetName = sheet.name ?? "Foglio Condiviso"
-        let controller = UICloudSharingController { _, completion in
-            // NSPersistentCloudKitContainer crea ed esporta la share gestendo i
-            // tempi di sync internamente (niente attesa/crash manuali).
-            container.share([sheet], to: nil) { _, share, _, error in
-                share?[CKShare.SystemFieldKey.title] = sheetName as CKRecordValue
-                completion(share, ckContainer, error)
+        DispatchQueue.global(qos: .userInitiated).async {
+            let existing = (try? container.fetchShares(matching: [self.sheet.objectID]))?[self.sheet.objectID]
+            DispatchQueue.main.async {
+                guard let existing = existing else {
+                    // Niente da gestire: avvia la creazione (flusso link)
+                    self.openShare()
+                    return
+                }
+                let controller = UICloudSharingController(share: existing, container: ckContainer)
+                controller.delegate = SharingDelegate.shared
+                self.presentViewController(controller)
             }
         }
-        controller.delegate = SharingDelegate.shared
-        controller.availablePermissions = [.allowReadWrite, .allowPublic, .allowPrivate]
-        presentViewController(controller)
     }
 
     private func presentViewController(_ controller: UIViewController) {
