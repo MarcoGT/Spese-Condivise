@@ -63,9 +63,10 @@ struct SettingsView: View {
                 NSLocalizedString("settings_reset_done_title", comment: ""),
                 isPresented: $showResetDone
             ) {
-                Button(NSLocalizedString("settings_reset_done_action", comment: "")) {
-                    // Lo store verrà ricreato pulito al riavvio.
-                    exit(0)
+                Button(NSLocalizedString("Fine", comment: "")) {
+                    // Niente exit(0) (sembrerebbe un crash): lo store verrà
+                    // ricreato pulito al prossimo avvio manuale dell'app.
+                    dismiss()
                 }
             } message: {
                 Text(NSLocalizedString("settings_reset_done_message", comment: ""))
