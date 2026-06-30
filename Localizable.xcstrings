@@ -1850,13 +1850,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This sheet is still syncing to iCloud. A newly created sheet can take up to a minute before it can be shared — please try again shortly."
+            "value" : "Couldn't prepare sharing for this sheet yet. Close and reopen the app, then try sharing again."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il foglio si sta ancora sincronizzando con iCloud. Un foglio appena creato può richiedere fino a un minuto prima di poter essere condiviso: riprova tra poco."
+            "value" : "Non è stato possibile preparare la condivisione di questo foglio. Chiudi e riapri l'app, poi riprova a condividere."
           }
         }
       }
