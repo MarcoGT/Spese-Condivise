@@ -438,22 +438,20 @@ struct SheetDetailView: View {
         }
 
         isPreparingShare = true
-        print("🔵 openShare: avviato per \(objectID)")
 
         // Timeout di sicurezza: lo spinner non resta mai appeso all'infinito.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
-            print("🔴 openShare: timeout 30s scattato (isPreparingShare=\(self.isPreparingShare))")
+        // Un foglio appena creato può metterci un po' a essere esportato su
+        // iCloud prima che container.share() possa completare.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 45) {
             self.finishShare(error: NSLocalizedString("share_not_synced", comment: ""))
         }
 
         DispatchQueue.global(qos: .userInitiated).async {
             // Share già esistente con link → mostralo subito
             if let url = (try? container.fetchShares(matching: [objectID]))?[objectID]?.url {
-                print("🟢 openShare: share esistente trovata, link pronto")
                 DispatchQueue.main.async { self.presentShareLink(url) }
                 return
             }
-            print("🟡 openShare: nessuna share esistente, verifico export")
             self.checkExportThenCreateShare(container: container, ckContainer: ckContainer, objectID: objectID)
         }
     }
@@ -464,7 +462,6 @@ struct SheetDetailView: View {
     // coordinator da background, che può bloccare il main thread).
     private func checkExportThenCreateShare(container: NSPersistentCloudKitContainer, ckContainer: CKContainer, objectID: NSManagedObjectID) {
         let exported = container.record(for: objectID) != nil
-        print("🟡 checkExportThenCreateShare: exported=\(exported)")
         DispatchQueue.main.async {
             guard self.isPreparingShare else { return }
             if exported {
@@ -495,22 +492,14 @@ struct SheetDetailView: View {
                 event.error == nil
             else { return }
 
-            print("🟡 waitForExportEvent: export completato, ricontrollo")
             if let obs = observer { NotificationCenter.default.removeObserver(obs) }
             self.checkExportThenCreateShare(container: container, ckContainer: ckContainer, objectID: objectID)
         }
     }
 
     private func createShareAndPresentLink(container: NSPersistentCloudKitContainer, ckContainer: CKContainer) {
-        let storeName = sheet.objectID.persistentStore?.url?.lastPathComponent ?? "nil"
-        print("🟡 createShareAndPresentLink: foglio nello store '\(storeName)' | hasChanges=\(container.viewContext.hasChanges)")
-        CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses").accountStatus { status, err in
-            print("🟡 accountStatus = \(status.rawValue) err=\(String(describing: err))")
-        }
-        print("🟡 createShareAndPresentLink: chiamo container.share()")
         let sheetName = sheet.name ?? "Foglio Condiviso"
         container.share([sheet], to: nil) { _, share, _, error in
-            print("🟡 container.share() callback: share=\(share != nil) error=\(String(describing: error))")
             DispatchQueue.main.async {
                 guard self.isPreparingShare else { return }
                 guard let share = share, error == nil else {
@@ -528,18 +517,15 @@ struct SheetDetailView: View {
     // Salva la share su CloudKit (direttamente) per ottenerne la URL e presenta il link.
     private func uploadAndPresentShareLink(_ share: CKShare, using ckContainer: CKContainer) {
         if let url = share.url {
-            print("🟢 uploadAndPresentShareLink: URL già presente sulla share")
             presentShareLink(url)
             return
         }
 
-        print("🟡 uploadAndPresentShareLink: avvio CKModifyRecordsOperation")
         let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
         op.savePolicy = .changedKeys
         op.configuration.timeoutIntervalForRequest = 20
         op.configuration.timeoutIntervalForResource = 20
         op.modifyRecordsResultBlock = { result in
-            print("🟡 CKModifyRecordsOperation result: \(result)")
             DispatchQueue.main.async {
                 guard self.isPreparingShare else { return }
                 switch result {
