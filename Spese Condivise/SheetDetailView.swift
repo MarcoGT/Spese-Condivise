@@ -438,42 +438,74 @@ struct SheetDetailView: View {
         }
 
         isPreparingShare = true
+        print("🔵 openShare: avviato per \(objectID)")
 
         // Timeout di sicurezza: lo spinner non resta mai appeso all'infinito.
         DispatchQueue.main.asyncAfter(deadline: .now() + 30) {
+            print("🔴 openShare: timeout 30s scattato (isPreparingShare=\(self.isPreparingShare))")
             self.finishShare(error: NSLocalizedString("share_not_synced", comment: ""))
         }
 
         DispatchQueue.global(qos: .userInitiated).async {
             // Share già esistente con link → mostralo subito
             if let url = (try? container.fetchShares(matching: [objectID]))?[objectID]?.url {
+                print("🟢 openShare: share esistente trovata, link pronto")
                 DispatchQueue.main.async { self.presentShareLink(url) }
                 return
             }
-            // Attendi che il foglio sia su iCloud, poi crea la share
-            self.pollExportThenCreateShare(container: container, ckContainer: ckContainer, objectID: objectID)
+            print("🟡 openShare: nessuna share esistente, verifico export")
+            self.checkExportThenCreateShare(container: container, ckContainer: ckContainer, objectID: objectID)
         }
     }
 
-    // Verifica (off-main) se il foglio è esportato su CloudKit; se sì crea la
-    // share, altrimenti riprova ogni 1,5s finché lo spinner è attivo.
-    private func pollExportThenCreateShare(container: NSPersistentCloudKitContainer, ckContainer: CKContainer, objectID: NSManagedObjectID) {
+    // Verifica (off-main, UNA volta) se il foglio è già esportato. Se non lo è,
+    // si mette in ascolto dell'evento di export di NSPersistentCloudKitContainer
+    // (nessun polling a intervalli: evita di martellare il persistent store
+    // coordinator da background, che può bloccare il main thread).
+    private func checkExportThenCreateShare(container: NSPersistentCloudKitContainer, ckContainer: CKContainer, objectID: NSManagedObjectID) {
         let exported = container.record(for: objectID) != nil
+        print("🟡 checkExportThenCreateShare: exported=\(exported)")
         DispatchQueue.main.async {
-            guard self.isPreparingShare else { return }   // già finito o scaduto
+            guard self.isPreparingShare else { return }
             if exported {
                 self.createShareAndPresentLink(container: container, ckContainer: ckContainer)
             } else {
-                DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 1.5) {
-                    self.pollExportThenCreateShare(container: container, ckContainer: ckContainer, objectID: objectID)
-                }
+                self.waitForExportEvent(container: container, ckContainer: ckContainer, objectID: objectID)
             }
+        }
+    }
+
+    private func waitForExportEvent(container: NSPersistentCloudKitContainer, ckContainer: CKContainer, objectID: NSManagedObjectID) {
+        var observer: NSObjectProtocol?
+        observer = NotificationCenter.default.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard self.isPreparingShare else {
+                if let obs = observer { NotificationCenter.default.removeObserver(obs) }
+                return
+            }
+            guard
+                let event = notification.userInfo?[
+                    NSPersistentCloudKitContainer.eventNotificationUserInfoKey
+                ] as? NSPersistentCloudKitContainer.Event,
+                event.type == .export,
+                event.endDate != nil,
+                event.error == nil
+            else { return }
+
+            print("🟡 waitForExportEvent: export completato, ricontrollo")
+            if let obs = observer { NotificationCenter.default.removeObserver(obs) }
+            self.checkExportThenCreateShare(container: container, ckContainer: ckContainer, objectID: objectID)
         }
     }
 
     private func createShareAndPresentLink(container: NSPersistentCloudKitContainer, ckContainer: CKContainer) {
+        print("🟡 createShareAndPresentLink: chiamo container.share()")
         let sheetName = sheet.name ?? "Foglio Condiviso"
         container.share([sheet], to: nil) { _, share, _, error in
+            print("🟡 container.share() callback: share=\(share != nil) error=\(String(describing: error))")
             DispatchQueue.main.async {
                 guard self.isPreparingShare else { return }
                 guard let share = share, error == nil else {
@@ -491,15 +523,18 @@ struct SheetDetailView: View {
     // Salva la share su CloudKit (direttamente) per ottenerne la URL e presenta il link.
     private func uploadAndPresentShareLink(_ share: CKShare, using ckContainer: CKContainer) {
         if let url = share.url {
+            print("🟢 uploadAndPresentShareLink: URL già presente sulla share")
             presentShareLink(url)
             return
         }
 
+        print("🟡 uploadAndPresentShareLink: avvio CKModifyRecordsOperation")
         let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
         op.savePolicy = .changedKeys
         op.configuration.timeoutIntervalForRequest = 20
         op.configuration.timeoutIntervalForResource = 20
         op.modifyRecordsResultBlock = { result in
+            print("🟡 CKModifyRecordsOperation result: \(result)")
             DispatchQueue.main.async {
                 guard self.isPreparingShare else { return }
                 switch result {
