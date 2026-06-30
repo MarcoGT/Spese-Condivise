@@ -1644,6 +1644,24 @@
         }
       }
     },
+    "settings_force_resync" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Force sync now" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Forza sincronizzazione" } }
+      }
+    },
+    "settings_force_resync_done_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Sync restarted" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Sincronizzazione riavviata" } }
+      }
+    },
+    "settings_force_resync_done_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "iCloud sync was restarted. Try sharing again now." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "La sincronizzazione iCloud è stata riavviata. Riprova a condividere adesso." } }
+      }
+    },
     "settings_title" : {
       "localizations" : {
         "en" : {

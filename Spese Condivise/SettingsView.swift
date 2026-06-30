@@ -6,6 +6,8 @@ struct SettingsView: View {
 
     @State private var showResetConfirm = false
     @State private var showResetDone = false
+    @State private var isResyncing = false
+    @State private var showResyncDone = false
 
     private var version: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
@@ -27,6 +29,20 @@ struct SettingsView: View {
 
                 // MARK: Sincronizzazione
                 Section {
+                    Button {
+                        runForceResync()
+                    } label: {
+                        HStack {
+                            Label(NSLocalizedString("settings_force_resync", comment: ""),
+                                  systemImage: "arrow.clockwise.icloud")
+                            if isResyncing {
+                                Spacer()
+                                ProgressView()
+                            }
+                        }
+                    }
+                    .disabled(isResyncing)
+
                     Button(role: .destructive) {
                         showResetConfirm = true
                     } label: {
@@ -60,6 +76,14 @@ struct SettingsView: View {
                 Text(NSLocalizedString("settings_reset_sync_confirm_message", comment: ""))
             }
             .alert(
+                NSLocalizedString("settings_force_resync_done_title", comment: ""),
+                isPresented: $showResyncDone
+            ) {
+                Button(NSLocalizedString("Fine", comment: "")) { dismiss() }
+            } message: {
+                Text(NSLocalizedString("settings_force_resync_done_message", comment: ""))
+            }
+            .alert(
                 NSLocalizedString("settings_reset_done_title", comment: ""),
                 isPresented: $showResetDone
             ) {
@@ -70,6 +94,17 @@ struct SettingsView: View {
                 }
             } message: {
                 Text(NSLocalizedString("settings_reset_done_message", comment: ""))
+            }
+        }
+    }
+
+    private func runForceResync() {
+        isResyncing = true
+        persistence.forceResync {
+            // Lascia un attimo alla sync per assestarsi dopo il ricaricamento.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                isResyncing = false
+                showResyncDone = true
             }
         }
     }

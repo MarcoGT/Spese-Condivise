@@ -19,6 +19,35 @@ final class PersistenceController: ObservableObject {
         UserDefaults.standard.synchronize()
     }
 
+    /// Ricarica gli store CloudKit a runtime SENZA cancellare dati: rimuove gli
+    /// store dal coordinator e li riaggancia, ri-innescando il ciclo di sync di
+    /// NSPersistentCloudKitContainer come avviene all'avvio dell'app. Serve a
+    /// "sbloccare" il mirroring quando container.share() non completa in-sessione.
+    /// `completion` è chiamata sul main thread quando gli store sono ricaricati.
+    func forceResync(completion: @escaping () -> Void) {
+        let coordinator = container.persistentStoreCoordinator
+
+        // Svuota il contesto per non lasciare oggetti che puntano a store rimossi.
+        container.viewContext.reset()
+
+        for store in coordinator.persistentStores {
+            try? coordinator.remove(store)
+        }
+
+        loadedStoreCount = 0
+        container.loadPersistentStores { _, error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ forceResync: errore ricarica store: \(error)")
+                }
+                self.container.viewContext.automaticallyMergesChangesFromParent = true
+                self.container.viewContext.refreshAllObjects()
+                self.storeDidLoad()
+                completion()
+            }
+        }
+    }
+
     private static func deleteStoreFiles(_ urls: [URL]) {
         let fm = FileManager.default
         for base in urls {
