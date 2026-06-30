@@ -964,6 +964,72 @@
         "it" : { "stringUnit" : { "state" : "translated", "value" : "Il foglio non si è ancora sincronizzato con iCloud. Attendi qualche secondo e riprova." } }
       }
     },
+    "settings_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Settings" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Impostazioni" } }
+      }
+    },
+    "settings_info_section" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "App" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "App" } }
+      }
+    },
+    "settings_sync_section" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Synchronization" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Sincronizzazione" } }
+      }
+    },
+    "settings_reset_sync" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reset iCloud sync" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ripristina sincronizzazione iCloud" } }
+      }
+    },
+    "settings_reset_sync_footer" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Use this if sheets or sharing stop syncing. Your data stays in iCloud and is downloaded again; only the local copy is rebuilt." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Usalo se i fogli o la condivisione smettono di sincronizzarsi. I tuoi dati restano su iCloud e vengono riscaricati; viene ricostruita solo la copia locale." } }
+      }
+    },
+    "settings_reset_sync_confirm_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reset synchronization?" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ripristinare la sincronizzazione?" } }
+      }
+    },
+    "settings_reset_sync_confirm_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "The app will close and rebuild its local data from iCloud on next launch. Your sheets and expenses are safe in iCloud." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "L'app si chiuderà e al riavvio ricostruirà i dati locali da iCloud. I tuoi fogli e le spese restano al sicuro su iCloud." } }
+      }
+    },
+    "settings_reset_sync_confirm_action" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Reset and close" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Ripristina e chiudi" } }
+      }
+    },
+    "settings_reset_done_title" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Restart needed" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Riavvio necessario" } }
+      }
+    },
+    "settings_reset_done_message" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Tap Close, then reopen Shared Expenses. Your data will sync again from iCloud." } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Tocca Chiudi, poi riapri Spese Condivise. I dati si sincronizzeranno di nuovo da iCloud." } }
+      }
+    },
+    "settings_reset_done_action" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Close app" } },
+        "it" : { "stringUnit" : { "state" : "translated", "value" : "Chiudi l'app" } }
+      }
+    },
     "manage_sharing" : {
       "comment" : "Long-press action to manage an existing share",
       "localizations" : {

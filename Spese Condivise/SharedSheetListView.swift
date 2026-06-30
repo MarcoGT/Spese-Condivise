@@ -6,6 +6,7 @@ struct SharedSheetListView: View {
     // MARK: - ENVIRONMENT
     @EnvironmentObject private var currentUser: CurrentUser
     @EnvironmentObject private var syncState: AppSyncState
+    @EnvironmentObject private var persistence: PersistenceController
     @Environment(\.managedObjectContext) private var viewContext
 
     // MARK: - FETCH
@@ -17,7 +18,7 @@ struct SharedSheetListView: View {
 
     // MARK: - STATE
     @State private var showingAddSheet = false
-    @State private var showingAbout = false
+    @State private var showingSettings = false
     @State private var shareAlertMessage = ""
     @State private var showingShareAlert = false
     @State private var shareAlertIsSuccess = false
@@ -103,9 +104,9 @@ struct SharedSheetListView: View {
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button {
-                            showingAbout = true
+                            showingSettings = true
                         } label: {
-                            Image(systemName: "info.circle")
+                            Image(systemName: "gearshape")
                         }
                     }
                     ToolbarItem(placement: .navigationBarTrailing) {
@@ -120,8 +121,9 @@ struct SharedSheetListView: View {
                 .sheet(isPresented: $showingAddSheet) {
                     AddSharedSheetView()
                 }
-                .sheet(isPresented: $showingAbout) {
-                    AboutView()
+                .sheet(isPresented: $showingSettings) {
+                    SettingsView()
+                        .environmentObject(persistence)
                 }
             }
 

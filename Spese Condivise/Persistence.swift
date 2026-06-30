@@ -7,6 +7,28 @@ final class PersistenceController: ObservableObject {
 
     let container: NSPersistentCloudKitContainer
 
+    // Flag persistente: se attivo, al prossimo avvio i file dello store locale
+    // vengono cancellati PRIMA di caricarli, recuperando da uno stato di sync
+    // CloudKit corrotto (metadati share orfani che bloccano container.share()).
+    private static let pendingResetKey = "pendingLocalStoreReset"
+
+    /// Richiede il ripristino della sincronizzazione: alla prossima apertura
+    /// l'app cancella lo store locale e ri-scarica i dati puliti da iCloud.
+    func requestSyncReset() {
+        UserDefaults.standard.set(true, forKey: Self.pendingResetKey)
+        UserDefaults.standard.synchronize()
+    }
+
+    private static func deleteStoreFiles(_ urls: [URL]) {
+        let fm = FileManager.default
+        for base in urls {
+            for suffix in ["", "-wal", "-shm"] {
+                let f = URL(fileURLWithPath: base.path + suffix)
+                try? fm.removeItem(at: f)
+            }
+        }
+    }
+
     var sharedPersistentStore: NSPersistentStore? {
         // Cerca per URL (più affidabile di configurationName che può variare)
         return container.persistentStoreCoordinator.persistentStores.first {
@@ -47,7 +69,19 @@ final class PersistenceController: ObservableObject {
         }
         
         let storesURL = privateStoreDescription.url!.deletingLastPathComponent()
-        
+
+        // Ripristino sincronizzazione richiesto: cancella i file degli store
+        // PRIMA di caricarli (niente lock), poi spegne il flag.
+        if UserDefaults.standard.bool(forKey: Self.pendingResetKey) {
+            Self.deleteStoreFiles([
+                privateStoreDescription.url!,
+                storesURL.appendingPathComponent("shared.sqlite")
+            ])
+            UserDefaults.standard.set(false, forKey: Self.pendingResetKey)
+            UserDefaults.standard.synchronize()
+            print("♻️ Store locale cancellato: ripristino sincronizzazione iCloud")
+        }
+
         if inMemory {
             privateStoreDescription.url = URL(fileURLWithPath: "/dev/null")
         }
