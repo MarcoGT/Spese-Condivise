@@ -502,6 +502,11 @@ struct SheetDetailView: View {
     }
 
     private func createShareAndPresentLink(container: NSPersistentCloudKitContainer, ckContainer: CKContainer) {
+        let storeName = sheet.objectID.persistentStore?.url?.lastPathComponent ?? "nil"
+        print("🟡 createShareAndPresentLink: foglio nello store '\(storeName)' | hasChanges=\(container.viewContext.hasChanges)")
+        CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses").accountStatus { status, err in
+            print("🟡 accountStatus = \(status.rawValue) err=\(String(describing: err))")
+        }
         print("🟡 createShareAndPresentLink: chiamo container.share()")
         let sheetName = sheet.name ?? "Foglio Condiviso"
         container.share([sheet], to: nil) { _, share, _, error in
