@@ -86,22 +86,28 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // che con più push ravvicinate veniva sovrascritta causando doppie chiamate.
         let persistence = PersistenceController.shared
 
-        var observer: NSObjectProtocol?
-        var fired = false
+        // Contenitore reference-type: le closure @Sendable non possono mutare
+        // var locali catturate (warning Swift 6), quindi lo stato per-invocazione
+        // vive in una piccola classe condivisa tra observer e fallback.
+        final class State {
+            var observer: NSObjectProtocol?
+            var fired = false
+        }
+        let state = State()
 
         // Chiamato sia dall'evento di import sia dal fallback: garantisce
         // una sola chiamata al completionHandler e una sola rimozione dell'observer.
         let finish: (UIBackgroundFetchResult) -> Void = { result in
-            guard !fired else { return }
-            fired = true
-            if let obs = observer {
+            guard !state.fired else { return }
+            state.fired = true
+            if let obs = state.observer {
                 NotificationCenter.default.removeObserver(obs)
-                observer = nil
+                state.observer = nil
             }
             completionHandler(result)
         }
 
-        observer = NotificationCenter.default.addObserver(
+        state.observer = NotificationCenter.default.addObserver(
             forName: NSPersistentCloudKitContainer.eventChangedNotification,
             object: nil,
             queue: .main
