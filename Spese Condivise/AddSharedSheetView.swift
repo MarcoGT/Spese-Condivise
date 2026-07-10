@@ -67,6 +67,13 @@ struct AddSharedSheetView: View {
         
         do {
             try viewContext.save()
+
+            // 🔗 Pre-crea la CKShare SUBITO, in background: sull'oggetto appena
+            // salvato (non ancora esportato) CloudKit lo colloca direttamente
+            // nella zona condivisibile. Al tap su "condividi" la share esiste
+            // già → link istantaneo, niente spostamento di zona che si impalla.
+            ShareService.ensureShare(for: sheet.objectID)
+
             dismiss()
         } catch {
             print("❌ Errore salvataggio foglio:", error)

@@ -419,19 +419,15 @@ struct SheetDetailView: View {
 
     // MARK: - CONDIVISIONE (CORE)
 
-    // Tap sul tasto condividi: genera/recupera il link della share e lo mostra
+    // Tap sul tasto condividi: recupera (o crea) il link della share e lo mostra
     // nel pannello di condivisione iOS standard.
     //
-    // NB: NON usiamo UICloudSharingController per CREARE la share (al tap su
-    // un'app fa un upload via mirroring che si impalla quando la sync è lenta).
-    // Inoltre attendiamo che il foglio sia ESPORTATO su iCloud prima di creare
-    // la share: su un foglio non ancora sincronizzato container.share() non
-    // chiamerebbe mai la callback e lo spinner resterebbe appeso. Un timeout
-    // garantisce comunque che lo spinner non resti mai bloccato.
+    // La share viene PRE-CREATA in background alla creazione del foglio (vedi
+    // ShareService/AddSharedSheetView): nel caso normale qui la troviamo già
+    // pronta e il pannello è istantaneo. La creazione al tap resta come
+    // fallback per i fogli creati con versioni precedenti.
     private func openShare() {
         let container = PersistenceController.shared.container
-        let ckContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
-        let objectID = sheet.objectID
 
         if container.viewContext.hasChanges {
             try? container.viewContext.save()
@@ -440,107 +436,18 @@ struct SheetDetailView: View {
         isPreparingShare = true
 
         // Timeout di sicurezza: lo spinner non resta mai appeso all'infinito.
-        // Un foglio appena creato può metterci un po' a essere esportato su
-        // iCloud prima che container.share() possa completare.
         DispatchQueue.main.asyncAfter(deadline: .now() + 45) {
             self.finishShare(error: NSLocalizedString("share_not_synced", comment: ""))
         }
 
-        DispatchQueue.global(qos: .userInitiated).async {
-            // Share già esistente con link → mostralo subito
-            if let url = (try? container.fetchShares(matching: [objectID]))?[objectID]?.url {
-                DispatchQueue.main.async { self.presentShareLink(url) }
-                return
-            }
-            self.checkExportThenCreateShare(container: container, ckContainer: ckContainer, objectID: objectID)
-        }
-    }
-
-    // Verifica (off-main, UNA volta) se il foglio è già esportato. Se non lo è,
-    // si mette in ascolto dell'evento di export di NSPersistentCloudKitContainer
-    // (nessun polling a intervalli: evita di martellare il persistent store
-    // coordinator da background, che può bloccare il main thread).
-    private func checkExportThenCreateShare(container: NSPersistentCloudKitContainer, ckContainer: CKContainer, objectID: NSManagedObjectID) {
-        let exported = container.record(for: objectID) != nil
-        DispatchQueue.main.async {
-            guard self.isPreparingShare else { return }
-            if exported {
-                self.createShareAndPresentLink(container: container, ckContainer: ckContainer)
-            } else {
-                self.waitForExportEvent(container: container, ckContainer: ckContainer, objectID: objectID)
+        ShareService.ensureShare(for: sheet.objectID) { result in
+            switch result {
+                case .success(let url):
+                    self.presentShareLink(url)
+                case .failure(let error):
+                    self.finishShare(error: error.localizedDescription)
             }
         }
-    }
-
-    private func waitForExportEvent(container: NSPersistentCloudKitContainer, ckContainer: CKContainer, objectID: NSManagedObjectID) {
-        var observer: NSObjectProtocol?
-        observer = NotificationCenter.default.addObserver(
-            forName: NSPersistentCloudKitContainer.eventChangedNotification,
-            object: nil,
-            queue: .main
-        ) { notification in
-            guard self.isPreparingShare else {
-                if let obs = observer { NotificationCenter.default.removeObserver(obs) }
-                return
-            }
-            guard
-                let event = notification.userInfo?[
-                    NSPersistentCloudKitContainer.eventNotificationUserInfoKey
-                ] as? NSPersistentCloudKitContainer.Event,
-                event.type == .export,
-                event.endDate != nil,
-                event.error == nil
-            else { return }
-
-            if let obs = observer { NotificationCenter.default.removeObserver(obs) }
-            self.checkExportThenCreateShare(container: container, ckContainer: ckContainer, objectID: objectID)
-        }
-    }
-
-    private func createShareAndPresentLink(container: NSPersistentCloudKitContainer, ckContainer: CKContainer) {
-        let sheetName = sheet.name ?? "Foglio Condiviso"
-        container.share([sheet], to: nil) { _, share, _, error in
-            DispatchQueue.main.async {
-                guard self.isPreparingShare else { return }
-                guard let share = share, error == nil else {
-                    self.finishShare(error: error?.localizedDescription
-                        ?? NSLocalizedString("share_creation_failed", comment: ""))
-                    return
-                }
-                share[CKShare.SystemFieldKey.title] = sheetName as CKRecordValue
-                share.publicPermission = .readWrite
-                self.uploadAndPresentShareLink(share, using: ckContainer)
-            }
-        }
-    }
-
-    // Salva la share su CloudKit (direttamente) per ottenerne la URL e presenta il link.
-    private func uploadAndPresentShareLink(_ share: CKShare, using ckContainer: CKContainer) {
-        if let url = share.url {
-            presentShareLink(url)
-            return
-        }
-
-        let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
-        op.savePolicy = .changedKeys
-        op.configuration.timeoutIntervalForRequest = 20
-        op.configuration.timeoutIntervalForResource = 20
-        op.modifyRecordsResultBlock = { result in
-            DispatchQueue.main.async {
-                guard self.isPreparingShare else { return }
-                switch result {
-                    case .success:
-                        if let url = share.url {
-                            self.presentShareLink(url)
-                        } else {
-                            self.finishShare(error: NSLocalizedString("Link non disponibile. Riprova tra qualche secondo.", comment: ""))
-                        }
-                    case .failure(let error):
-                        self.finishShare(error: error.localizedDescription)
-                }
-            }
-        }
-        ckContainer.privateCloudDatabase.add(op)
     }
 
     private func presentShareLink(_ url: URL) {
