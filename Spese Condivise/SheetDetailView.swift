@@ -108,6 +108,41 @@ struct SheetDetailView: View {
                     }
                 }
 
+                // MARK: Settle-up section (chi paga chi)
+                if !expenses.isEmpty {
+                    let transfers = sheet.suggestedTransfers()
+                    Section {
+                        if transfers.isEmpty {
+                            HStack(spacing: 10) {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                                Text(NSLocalizedString("settle_all_even", comment: ""))
+                                    .foregroundColor(.secondary)
+                                Spacer()
+                            }
+                            .padding(.vertical, 4)
+                        } else {
+                            ForEach(transfers) { t in
+                                HStack(spacing: 8) {
+                                    Text(t.from.name ?? "—")
+                                        .fontWeight(.medium)
+                                    Image(systemName: "arrow.right")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                    Text(t.to.name ?? "—")
+                                        .fontWeight(.medium)
+                                    Spacer()
+                                    Text(AmountFormatter.format(t.amount))
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.accentColor)
+                                }
+                            }
+                        }
+                    } header: {
+                        SectionHeader(title: NSLocalizedString("settle_who_pays_whom", comment: ""))
+                    }
+                }
+
                 // MARK: Category filter chips
                 if !expenses.isEmpty {
                     Section {
