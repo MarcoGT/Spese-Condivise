@@ -26,10 +26,20 @@ enum ShareService {
         let ckContainer = CKContainer(identifier: containerID)
 
         DispatchQueue.global(qos: .userInitiated).async {
-            // Share già esistente con URL → fatto.
-            if let existing = (try? container.fetchShares(matching: [sheetID]))?[sheetID],
-               let url = existing.url {
-                DispatchQueue.main.async { completion?(.success(url)) }
+            if let existing = (try? container.fetchShares(matching: [sheetID]))?[sheetID] {
+                if let url = existing.url {
+                    // Share già esistente con URL → fatto.
+                    DispatchQueue.main.async { completion?(.success(url)) }
+                } else {
+                    // Share pre-creata ma mai arrivata sul server (mirroring
+                    // lento o inceppato): NON richiamare container.share(),
+                    // salvala direttamente su CloudKit per ottenere la URL.
+                    DispatchQueue.main.async {
+                        uploadShare(existing, to: ckContainer) { result in
+                            completion?(result)
+                        }
+                    }
+                }
                 return
             }
 
@@ -74,10 +84,13 @@ enum ShareService {
     }
 
     /// Salva la share direttamente su CloudKit (senza passare dal mirroring)
-    /// per ottenerne la URL.
+    /// per ottenerne la URL. Se la zona della share non esiste ancora sul
+    /// server (mirroring che non ha mai completato l'export), la crea e
+    /// riprova: il link non dipende così dallo stato del mirroring.
     private static func uploadShare(
         _ share: CKShare,
         to ckContainer: CKContainer,
+        retryOnZoneMissing: Bool = true,
         completion: ((Result<URL, Error>) -> Void)?
     ) {
         let op = CKModifyRecordsOperation(recordsToSave: [share], recordIDsToDelete: nil)
@@ -94,11 +107,46 @@ enum ShareService {
                             completion?(.failure(ShareError.noURL))
                         }
                     case .failure(let error):
-                        completion?(.failure(error))
+                        if retryOnZoneMissing, isZoneNotFound(error) {
+                            createZoneThenRetry(share, to: ckContainer, completion: completion)
+                        } else {
+                            completion?(.failure(error))
+                        }
                 }
             }
         }
         ckContainer.privateCloudDatabase.add(op)
+    }
+
+    private static func isZoneNotFound(_ error: Error) -> Bool {
+        guard let ck = error as? CKError else { return false }
+        if ck.code == .zoneNotFound { return true }
+        if ck.code == .partialFailure,
+           let partial = ck.partialErrorsByItemID?.values.compactMap({ $0 as? CKError }) {
+            return partial.contains { $0.code == .zoneNotFound }
+        }
+        return false
+    }
+
+    private static func createZoneThenRetry(
+        _ share: CKShare,
+        to ckContainer: CKContainer,
+        completion: ((Result<URL, Error>) -> Void)?
+    ) {
+        let zone = CKRecordZone(zoneID: share.recordID.zoneID)
+        let zoneOp = CKModifyRecordZonesOperation(recordZonesToSave: [zone], recordZoneIDsToDelete: nil)
+        zoneOp.configuration.timeoutIntervalForRequest = 25
+        zoneOp.modifyRecordZonesResultBlock = { result in
+            DispatchQueue.main.async {
+                switch result {
+                    case .success:
+                        uploadShare(share, to: ckContainer, retryOnZoneMissing: false, completion: completion)
+                    case .failure(let error):
+                        completion?(.failure(error))
+                }
+            }
+        }
+        ckContainer.privateCloudDatabase.add(zoneOp)
     }
 
     enum ShareError: LocalizedError {
