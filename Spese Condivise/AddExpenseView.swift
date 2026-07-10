@@ -236,6 +236,8 @@ struct AddExpenseView: View {
             let payer = selectedPayer
         else { return }
 
+        var newExpenseID: UUID?
+
         if let expense = expenseToEdit {
             expense.amount = value
             expense.note = note
@@ -249,6 +251,7 @@ struct AddExpenseView: View {
             // ➕ ADD
             let expense = Expense(context: viewContext)
             expense.id = UUID()
+            newExpenseID = expense.id
             expense.amount = value
             expense.note = note
             expense.date = date
@@ -269,6 +272,12 @@ struct AddExpenseView: View {
 
         do {
             try viewContext.save()
+            // Registra la spesa appena creata come "già nota": non deve
+            // generarti una notifica quando il tuo stesso export ri-rientra
+            // come import (anche se blocchi il telefono subito dopo).
+            if expenseToEdit == nil {
+                LastSeenStore.markExpenseKnown(newExpenseID)
+            }
             dismiss()
         } catch {
             print("❌ Errore salvataggio spesa:", error)

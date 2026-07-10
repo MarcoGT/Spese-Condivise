@@ -59,25 +59,39 @@ final class NotificationService {
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             guard settings.authorizationStatus == .authorized else { return }
 
-            // Leggi il watermark PRIMA della query: tutte le spese con
-            // createdAt successivo a questo istante sono "nuove".
-            let since = LastSeenStore.globalLastSeen
-
             context.perform {
+                // Rilevamento per ID (indipendente dagli orologi): una spesa è
+                // "nuova" se il suo id non è mai stato visto su QUESTO device.
+                // Il vecchio confronto createdAt > watermark falliva sui fogli
+                // condivisi perché createdAt è l'orologio del mittente e il
+                // watermark veniva avanzato da import intermedi vuoti.
                 let fetch = NSFetchRequest<Expense>(entityName: "Expense")
-                fetch.predicate = NSPredicate(
-                    format: "createdAt > %@ AND archived == NO",
-                    since as CVarArg
-                )
+                fetch.predicate = NSPredicate(format: "archived == NO")
                 fetch.sortDescriptors = [NSSortDescriptor(key: "createdAt", ascending: false)]
 
-                let newExpenses = (try? context.fetch(fetch)) ?? []
+                let active = (try? context.fetch(fetch)) ?? []
+                let currentIDs = Set(active.compactMap { $0.id?.uuidString })
 
-                // Aggiorna il watermark solo ora, dopo aver letto le spese nuove.
-                LastSeenStore.globalLastSeen = Date()
+                let known = LastSeenStore.knownExpenseIDs
+
+                // Primo avvio / prima sync dopo l'installazione: registra tutto
+                // come già visto, così non piovono notifiche per spese
+                // preesistenti (es. appena si accetta un foglio condiviso).
+                guard LastSeenStore.hasSeededKnownExpenses else {
+                    LastSeenStore.knownExpenseIDs = currentIDs
+                    LastSeenStore.hasSeededKnownExpenses = true
+                    return
+                }
+
+                let newIDs = currentIDs.subtracting(known)
+
+                // Aggiorna SEMPRE il set (anche se poi non notifichiamo): così
+                // le spese aggiunte da noi stessi, o quelle viste in foreground,
+                // non riemergono come "nuove" a un import successivo.
+                LastSeenStore.knownExpenseIDs = currentIDs
 
                 guard
-                    let newest = newExpenses.first,
+                    let newest = active.first(where: { ($0.id?.uuidString).map { newIDs.contains($0) } ?? false }),
                     let sheet = newest.sheet,
                     let sheetName = sheet.name
                 else { return }
@@ -134,10 +148,50 @@ final class NotificationService {
 /// Usato sia per le notifiche che per l'highlight in UI.
 enum LastSeenStore {
 
-    /// Data globale dell'ultimo import visto (per le notifiche push)
+    /// Data globale dell'ultimo import visto (per le notifiche push).
+    /// Legacy: non più usato per il rilevamento (sostituito da knownExpenseIDs),
+    /// mantenuto per compatibilità.
     static var globalLastSeen: Date {
         get { UserDefaults.standard.object(forKey: "globalLastSeen") as? Date ?? .distantPast }
         set { UserDefaults.standard.set(newValue, forKey: "globalLastSeen") }
+    }
+
+    /// ID (UUID string) delle spese già note su questo device: base del
+    /// rilevamento delle notifiche, indipendente dagli orologi dei device.
+    static var knownExpenseIDs: Set<String> {
+        get { Set(UserDefaults.standard.stringArray(forKey: "knownExpenseIDs") ?? []) }
+        set { UserDefaults.standard.set(Array(newValue), forKey: "knownExpenseIDs") }
+    }
+
+    /// true dopo il primo popolamento di knownExpenseIDs (evita notifiche
+    /// per le spese preesistenti alla prima sincronizzazione).
+    static var hasSeededKnownExpenses: Bool {
+        get { UserDefaults.standard.bool(forKey: "hasSeededKnownExpenses") }
+        set { UserDefaults.standard.set(newValue, forKey: "hasSeededKnownExpenses") }
+    }
+
+    /// Registra una spesa come già nota (usato alla creazione locale, così
+    /// una spesa aggiunta da te non ti si ripresenta come "nuova").
+    static func markExpenseKnown(_ id: UUID?) {
+        guard let id = id else { return }
+        var set = knownExpenseIDs
+        set.insert(id.uuidString)
+        knownExpenseIDs = set
+    }
+
+    /// Registra come già note TUTTE le spese attive correnti. Usato dopo
+    /// l'accettazione di un foglio condiviso: le spese preesistenti del foglio
+    /// non devono generare notifiche (solo quelle aggiunte in seguito).
+    static func seedAllKnown(context: NSManagedObjectContext) {
+        context.perform {
+            let fetch = NSFetchRequest<Expense>(entityName: "Expense")
+            fetch.predicate = NSPredicate(format: "archived == NO")
+            let active = (try? context.fetch(fetch)) ?? []
+            var set = knownExpenseIDs
+            set.formUnion(active.compactMap { $0.id?.uuidString })
+            knownExpenseIDs = set
+            hasSeededKnownExpenses = true
+        }
     }
 
     /// Data dell'ultima apertura di un foglio specifico (per l'highlight in UI)

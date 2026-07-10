@@ -190,6 +190,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             self?.importFallbackWork = nil
 
             persistenceController.container.viewContext.refreshAllObjects()
+            // Le spese già presenti nel foglio appena accettato non devono
+            // generare notifiche: registrale tutte come già note.
+            LastSeenStore.seedAllKnown(context: persistenceController.container.viewContext)
             AppSyncState.current?.pendingShareSuccess = true
             NotificationCenter.default.post(name: .shareAcceptanceSucceeded, object: nil)
         }
