@@ -33,12 +33,17 @@ enum ShareService {
                 return
             }
 
-            DispatchQueue.main.async {
-                guard let sheet = try? container.viewContext.existingObject(with: sheetID) as? SharedSheet else {
-                    completion?(.failure(ShareError.sheetNotFound))
+            // container.share() esegue lavoro SINCRONO sul thread chiamante
+            // prima di completare in async: mai chiamarlo dal main (bloccherebbe
+            // la UI, es. al salvataggio del foglio). Si usa un background
+            // context dedicato e l'oggetto viene riletto lì.
+            let bg = container.newBackgroundContext()
+            bg.perform {
+                guard let sheet = try? bg.existingObject(with: sheetID) as? SharedSheet else {
+                    DispatchQueue.main.async { completion?(.failure(ShareError.sheetNotFound)) }
                     return
                 }
-                let title = sheet.name ?? "Foglio Condiviso"
+                let title = (sheet.value(forKey: "name") as? String) ?? "Foglio Condiviso"
 
                 container.share([sheet], to: nil) { _, share, _, error in
                     DispatchQueue.main.async {
