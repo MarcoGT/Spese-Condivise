@@ -296,14 +296,35 @@ struct SheetDetailView: View {
             LastSeenStore.markSeen(for: sheet)
         }
         .toolbar {
+            // Azioni secondarie raccolte in un unico menu "•••": con troppi
+            // item in barra iOS ne collassa uno in overflow durante la
+            // transizione, causando un flash (pulsante che appare/sparisce).
+            // Tre item in barra ci stanno larghi → niente overflow, niente flash.
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showStatistics = true
+                Menu {
+                    Button {
+                        showStatistics = true
+                    } label: {
+                        Label(NSLocalizedString("statistics", comment: ""), systemImage: "chart.bar.xaxis")
+                    }
+                    .disabled(expenses.isEmpty)
+
+                    Button {
+                        newPersonName = ""
+                        showAddPersonAlert = true
+                    } label: {
+                        Label(NSLocalizedString("add_person", comment: ""), systemImage: "person.badge.plus")
+                    }
+
+                    Button {
+                        showSettleConfirm = true
+                    } label: {
+                        Label(NSLocalizedString("settle_up", comment: ""), systemImage: "checkmark.circle")
+                    }
+                    .disabled(expenses.isEmpty)
                 } label: {
-                    Image(systemName: "chart.bar.xaxis")
+                    Image(systemName: "ellipsis.circle")
                 }
-                .labelStyle(.iconOnly)
-                .disabled(expenses.isEmpty)
             }
 
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -335,26 +356,6 @@ struct SheetDetailView: View {
                     openShare()
                 }
                 .labelStyle(.iconOnly)
-            }
-
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    newPersonName = ""
-                    showAddPersonAlert = true
-                } label: {
-                    Image(systemName: "person.badge.plus")
-                }
-                .labelStyle(.iconOnly)
-            }
-
-            ToolbarItem(placement: .navigationBarTrailing) {
-                Button {
-                    showSettleConfirm = true
-                } label: {
-                    Image(systemName: "checkmark.circle")
-                }
-                .labelStyle(.iconOnly)
-                .disabled(expenses.isEmpty)
             }
         }
         // GESTIONE MODAL AGGIUNGI/MODIFICA/SHARE

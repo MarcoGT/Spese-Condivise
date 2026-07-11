@@ -537,6 +537,22 @@
         }
       }
     },
+    "add_person": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add person"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aggiungi persona"
+          }
+        }
+      }
+    },
     "all_categories": {
       "localizations": {
         "en": {
@@ -1803,6 +1819,22 @@
         }
       }
     },
+    "settle_up": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Settle up"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Azzera conti"
+          }
+        }
+      }
+    },
     "settle_who_pays_whom": {
       "localizations": {
         "en": {
@@ -2084,6 +2116,22 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nome foglio"
+          }
+        }
+      }
+    },
+    "statistics": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistics"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Statistiche"
           }
         }
       }
