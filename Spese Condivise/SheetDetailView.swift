@@ -114,8 +114,8 @@ struct SheetDetailView: View {
                 if !expenses.isEmpty {
                     let transfers = sheet.suggestedTransfers()
                     let sheetCurrency = sheet.currencyCode ?? "EUR"
-                    let reimbCurrency = sheet.reimbursementCurrencyCode
-                    let rate = sheet.exchangeRate
+                    let reimbCurrency = ExchangeRateStore.reimbursementCurrency(for: sheet)
+                    let rate = ExchangeRateStore.exchangeRate(for: sheet)
                     let hasConversion = reimbCurrency != nil && rate > 0 && reimbCurrency != sheetCurrency
                     let currSym = currencySymbol(code: sheetCurrency)
                     let reimbSym = reimbCurrency.map { currencySymbol(code: $0) } ?? currSym

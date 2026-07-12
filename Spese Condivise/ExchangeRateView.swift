@@ -1,10 +1,8 @@
 import SwiftUI
-import CoreData
 
 struct ExchangeRateView: View {
 
-    @ObservedObject var sheet: SharedSheet
-    @Environment(\.managedObjectContext) private var viewContext
+    let sheet: SharedSheet
     @Environment(\.dismiss) private var dismiss
 
     @State private var rateText: String = ""
@@ -52,12 +50,10 @@ struct ExchangeRateView: View {
                     }
                 }
 
-                if sheet.reimbursementCurrencyCode != nil && sheet.exchangeRate > 0 {
+                if ExchangeRateStore.exchangeRate(for: sheet) > 0 {
                     Section {
                         Button(role: .destructive) {
-                            sheet.reimbursementCurrencyCode = nil
-                            sheet.exchangeRate = 0
-                            try? viewContext.save()
+                            ExchangeRateStore.remove(for: sheet)
                             dismiss()
                         } label: {
                             Label(NSLocalizedString("exchange_rate_remove", comment: ""), systemImage: "xmark.circle")
@@ -86,23 +82,21 @@ struct ExchangeRateView: View {
     }
 
     private func loadExisting() {
-        if let existing = sheet.reimbursementCurrencyCode, !existing.isEmpty, existing != sheetCurrency {
+        if let existing = ExchangeRateStore.reimbursementCurrency(for: sheet),
+           !existing.isEmpty, existing != sheetCurrency {
             currencyCode = existing
         } else {
             currencyCode = availableCurrencies.first ?? "EUR"
         }
-        if sheet.exchangeRate > 0 {
-            rateText = String(format: "%.4f", sheet.exchangeRate)
-                .replacingOccurrences(of: "0+$", with: "", options: .regularExpression)
-                .replacingOccurrences(of: "\\.$", with: "", options: .regularExpression)
+        let rate = ExchangeRateStore.exchangeRate(for: sheet)
+        if rate > 0 {
+            rateText = String(format: "%.4g", rate)
         }
     }
 
     private func save() {
         guard let rate = Double(rateText.replacingOccurrences(of: ",", with: ".")) else { return }
-        sheet.reimbursementCurrencyCode = currencyCode
-        sheet.exchangeRate = rate
-        try? viewContext.save()
+        ExchangeRateStore.set(rate: rate, currency: currencyCode, for: sheet)
         dismiss()
     }
 

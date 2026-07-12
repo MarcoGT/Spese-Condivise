@@ -6,8 +6,6 @@ extension SharedSheet: Identifiable {
     @NSManaged public var id: UUID?
     @NSManaged public var name: String?
     @NSManaged public var currencyCode: String?
-    @NSManaged public var reimbursementCurrencyCode: String?
-    @NSManaged public var exchangeRate: Double
     @NSManaged public var lastUpdated: Date?
     
         // RELAZIONI
