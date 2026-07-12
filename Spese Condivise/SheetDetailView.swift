@@ -74,6 +74,7 @@ struct SheetDetailView: View {
                                         isMe: isMe,
                                         balanceColor: balanceColor(value),
                                         balanceText: personBalanceText(value, isMe: isMe),
+                                        currencyCode: sheet.currencyCode ?? "EUR",
                                         onTap: claimMode ? { personToClaimAsMe = person } : nil
                                     )
                                 }
@@ -117,8 +118,8 @@ struct SheetDetailView: View {
                     let reimbCurrency = ExchangeRateStore.reimbursementCurrency(for: sheet)
                     let rate = ExchangeRateStore.exchangeRate(for: sheet)
                     let hasConversion = reimbCurrency != nil && rate > 0 && reimbCurrency != sheetCurrency
-                    let currSym = currencySymbol(code: sheetCurrency)
-                    let reimbSym = reimbCurrency.map { currencySymbol(code: $0) } ?? currSym
+                    let currSym = AmountFormatter.symbol(for: sheetCurrency)
+                    let reimbSym = reimbCurrency.map { AmountFormatter.symbol(for: $0) } ?? currSym
 
                     Section {
                         if transfers.isEmpty {
@@ -604,13 +605,6 @@ struct SheetDetailView: View {
         try? viewContext.save()
     }
 
-    // MARK: - HELPERS
-
-    private func currencySymbol(code: String) -> String {
-        let locale = NSLocale(localeIdentifier: NSLocale.localeIdentifier(fromComponents: [NSLocale.Key.currencyCode.rawValue: code]))
-        return locale.displayName(forKey: .currencySymbol, value: code) ?? code
-    }
-
     // MARK: - EXPORT PDF
 
     private func exportPDF() {
@@ -676,9 +670,8 @@ struct SheetDetailView: View {
     }
 
     func personBalanceText(_ value: Double, isMe: Bool) -> String {
-        // Usato solo come label accessibile — testo neutro per qualsiasi persona
         if abs(value) < 0.01 { return NSLocalizedString("In pari", comment: "") }
-        let amount = AmountFormatter.format(abs(value))
+        let amount = AmountFormatter.format(abs(value), currencyCode: sheet.currencyCode ?? "EUR")
         return value > 0 ? "\(amount) in credito" : "\(amount) in debito"
     }
 }
@@ -704,6 +697,7 @@ private struct PersonBalanceCard: View {
     let isMe: Bool
     let balanceColor: Color
     let balanceText: String
+    let currencyCode: String
     var onTap: (() -> Void)? = nil
 
     private var balanceLabel: String {
@@ -714,8 +708,8 @@ private struct PersonBalanceCard: View {
     }
 
     private var formattedAmount: String {
-        if abs(value) < 0.01 { return AmountFormatter.format(0) }
-        return AmountFormatter.format(abs(value))
+        if abs(value) < 0.01 { return AmountFormatter.format(0, currencyCode: currencyCode) }
+        return AmountFormatter.format(abs(value), currencyCode: currencyCode)
     }
 
     var body: some View {

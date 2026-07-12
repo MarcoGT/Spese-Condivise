@@ -43,7 +43,7 @@ struct ExpenseRowView: View {
             Spacer()
 
             // RIGHT — amount
-            Text(expense.amount.amountString)
+            Text(AmountFormatter.format(expense.amount, currencyCode: expense.sheet?.currencyCode ?? "EUR"))
                 .font(.system(size: 17, weight: .bold, design: .rounded))
                 .foregroundColor(.primary)
         }

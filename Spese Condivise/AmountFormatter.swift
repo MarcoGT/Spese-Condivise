@@ -13,11 +13,24 @@ enum AmountFormatter {
         return f
     }()
 
-    /// Restituisce una stringa come "14,30 €" o "14.30 €" a seconda del locale.
+    /// Restituisce una stringa come "14,30 €" o "14.30 $" a seconda del locale e della valuta.
     static func format(_ value: Double, currencySymbol: String = "€") -> String {
         let formatted = formatter.string(from: NSNumber(value: value))
             ?? String(format: "%.2f", value)
         return "\(formatted) \(currencySymbol)"
+    }
+
+    /// Formatta usando il codice ISO della valuta (es. "USD" → "$").
+    static func format(_ value: Double, currencyCode: String) -> String {
+        format(value, currencySymbol: symbol(for: currencyCode))
+    }
+
+    /// Converte un codice ISO valuta nel simbolo locale (es. "USD" → "$", "EUR" → "€").
+    static func symbol(for code: String) -> String {
+        let locale = NSLocale(localeIdentifier: NSLocale.localeIdentifier(
+            fromComponents: [NSLocale.Key.currencyCode.rawValue: code]
+        ))
+        return locale.displayName(forKey: .currencySymbol, value: code) ?? code
     }
 }
 

@@ -47,7 +47,7 @@ struct AddExpenseView: View {
                                 let filtered = newValue.filter { $0.isNumber || $0 == "," || $0 == "." }
                                 if filtered != newValue { amount = filtered }
                             }
-                        Text("€")
+                        Text(AmountFormatter.symbol(for: sheet?.currencyCode ?? "EUR"))
                             .font(.system(size: 28, weight: .bold, design: .rounded))
                             .foregroundColor(.secondary)
                         Spacer()

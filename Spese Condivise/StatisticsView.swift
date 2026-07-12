@@ -87,19 +87,21 @@ struct StatisticsView: View {
 
     // MARK: - Riepilogo cards
 
+    private var currencyCode: String { sheet.currencyCode ?? "EUR" }
+
     private var summaryCards: some View {
         LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
             summaryCard(
-                icon: "eurosign.circle.fill",
+                icon: "banknote",
                 color: .blue,
                 label: NSLocalizedString("stats_total", comment: ""),
-                value: AmountFormatter.format(totalAmount)
+                value: AmountFormatter.format(totalAmount, currencyCode: currencyCode)
             )
             summaryCard(
                 icon: "person.2.fill",
                 color: .purple,
                 label: NSLocalizedString("stats_avg_per_person", comment: ""),
-                value: AmountFormatter.format(avgPerPerson)
+                value: AmountFormatter.format(avgPerPerson, currencyCode: currencyCode)
             )
             summaryCard(
                 icon: "list.number",
@@ -111,7 +113,7 @@ struct StatisticsView: View {
                 icon: "arrow.up.circle.fill",
                 color: .red,
                 label: NSLocalizedString("stats_most_expensive", comment: ""),
-                value: mostExpensive.map { AmountFormatter.format($0.amount) } ?? "—"
+                value: mostExpensive.map { AmountFormatter.format($0.amount, currencyCode: currencyCode) } ?? "—"
             )
         }
     }
@@ -152,7 +154,7 @@ struct StatisticsView: View {
                             .font(.subheadline)
                             .foregroundColor(.primary)
                         Spacer()
-                        Text(AmountFormatter.format(item.total))
+                        Text(AmountFormatter.format(item.total, currencyCode: currencyCode))
                             .font(.subheadline)
                             .fontWeight(.semibold)
                             .foregroundColor(.secondary)
@@ -187,7 +189,7 @@ struct StatisticsView: View {
             .foregroundStyle(Color.accentColor.gradient)
             .cornerRadius(6)
             .annotation(position: .trailing) {
-                Text(AmountFormatter.format(item.total))
+                Text(AmountFormatter.format(item.total, currencyCode: currencyCode))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

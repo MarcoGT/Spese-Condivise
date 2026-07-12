@@ -235,7 +235,6 @@ enum PDFExporter {
     }
 
     private static func currencySymbol(for code: String) -> String {
-        let locale = NSLocale(localeIdentifier: NSLocale.localeIdentifier(fromComponents: [NSLocale.Key.currencyCode.rawValue: code]))
-        return locale.displayName(forKey: .currencySymbol, value: code) ?? code
+        AmountFormatter.symbol(for: code)
     }
 }
