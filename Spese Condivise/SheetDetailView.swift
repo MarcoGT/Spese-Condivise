@@ -24,6 +24,7 @@ struct SheetDetailView: View {
     @State private var selectedCategoryFilter: ExpenseCategory? = nil
     @State private var personToClaimAsMe: Person? = nil
     @State private var isExportingPDF = false
+    @State private var showExchangeRateEditor = false
 
     enum ActiveModal: Identifiable {
         case add
@@ -112,6 +113,13 @@ struct SheetDetailView: View {
                 // MARK: Settle-up section (chi paga chi)
                 if !expenses.isEmpty {
                     let transfers = sheet.suggestedTransfers()
+                    let sheetCurrency = sheet.currencyCode ?? "EUR"
+                    let reimbCurrency = sheet.reimbursementCurrencyCode
+                    let rate = sheet.exchangeRate
+                    let hasConversion = reimbCurrency != nil && rate > 0 && reimbCurrency != sheetCurrency
+                    let currSym = currencySymbol(code: sheetCurrency)
+                    let reimbSym = reimbCurrency.map { currencySymbol(code: $0) } ?? currSym
+
                     Section {
                         if transfers.isEmpty {
                             HStack(spacing: 10) {
@@ -133,11 +141,35 @@ struct SheetDetailView: View {
                                     Text(t.to.name ?? "—")
                                         .fontWeight(.medium)
                                     Spacer()
-                                    Text(AmountFormatter.format(t.amount))
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(.accentColor)
+                                    VStack(alignment: .trailing, spacing: 2) {
+                                        Text(AmountFormatter.format(t.amount, currencySymbol: currSym))
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.accentColor)
+                                        if hasConversion {
+                                            Text("≈ " + AmountFormatter.format(t.amount * rate, currencySymbol: reimbSym))
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
                                 }
                             }
+
+                            Button {
+                                showExchangeRateEditor = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: hasConversion ? "arrow.2.circlepath" : "plusminus.circle")
+                                        .foregroundColor(.secondary)
+                                    Text(hasConversion
+                                         ? String(format: NSLocalizedString("exchange_rate_edit", comment: ""), sheetCurrency, reimbCurrency ?? "", rate)
+                                         : NSLocalizedString("exchange_rate_set", comment: ""))
+                                        .font(.subheadline)
+                                        .foregroundColor(.secondary)
+                                    Spacer()
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.vertical, 2)
                         }
                     } header: {
                         SectionHeader(title: NSLocalizedString("settle_who_pays_whom", comment: ""))
@@ -385,6 +417,11 @@ struct SheetDetailView: View {
         .sheet(isPresented: $showStatistics) {
             StatisticsView(sheet: sheet)
         }
+        // TASSO DI CAMBIO
+        .sheet(isPresented: $showExchangeRateEditor) {
+            ExchangeRateView(sheet: sheet)
+                .environment(\.managedObjectContext, viewContext)
+        }
         // CONFERMA AZZERAMENTO SALDO
         .confirmationDialog(
             NSLocalizedString("settle_confirm_title", comment: ""),
@@ -565,6 +602,13 @@ struct SheetDetailView: View {
 
         sheet.lastUpdated = Date()
         try? viewContext.save()
+    }
+
+    // MARK: - HELPERS
+
+    private func currencySymbol(code: String) -> String {
+        let locale = NSLocale(localeIdentifier: NSLocale.localeIdentifier(fromComponents: [NSLocale.Key.currencyCode.rawValue: code]))
+        return locale.displayName(forKey: .currencySymbol, value: code) ?? code
     }
 
     // MARK: - EXPORT PDF
