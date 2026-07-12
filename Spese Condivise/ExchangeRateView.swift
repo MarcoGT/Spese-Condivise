@@ -7,6 +7,9 @@ struct ExchangeRateView: View {
 
     @State private var rateText: String = ""
     @State private var currencyCode: String = "EUR"
+    @State private var isFetching = false
+    @State private var rateDate: String? = nil
+    @State private var fetchError = false
 
     private let commonCurrencies = ["EUR", "USD", "GBP", "CHF", "JPY", "CAD", "AUD", "SEK", "NOK", "DKK"]
 
@@ -36,17 +39,36 @@ struct ExchangeRateView: View {
                     .labelsHidden()
                     .pickerStyle(.wheel)
                     .frame(height: 120)
+                    .onChange(of: currencyCode) { _ in
+                        fetchRate()
+                    }
                 }
 
                 Section(header: Text(String(format: NSLocalizedString("exchange_rate_field_header", comment: ""), sheetCurrency, currencyCode))) {
                     HStack {
                         Text("1 \(sheetCurrency) =")
                             .foregroundColor(.secondary)
-                        TextField("0.92", text: $rateText)
-                            .keyboardType(.decimalPad)
-                            .multilineTextAlignment(.trailing)
+                        if isFetching {
+                            Spacer()
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        } else {
+                            TextField("0.92", text: $rateText)
+                                .keyboardType(.decimalPad)
+                                .multilineTextAlignment(.trailing)
+                        }
                         Text(currencyCode)
                             .foregroundColor(.secondary)
+                    }
+
+                    if let date = rateDate {
+                        Text(String(format: NSLocalizedString("exchange_rate_updated", comment: ""), date))
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    } else if fetchError {
+                        Text(NSLocalizedString("exchange_rate_fetch_error", comment: ""))
+                            .font(.caption)
+                            .foregroundColor(.orange)
                     }
                 }
 
@@ -69,7 +91,7 @@ struct ExchangeRateView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(NSLocalizedString("save", comment: "")) { save() }
-                        .disabled(!canSave)
+                        .disabled(!canSave || isFetching)
                 }
             }
             .onAppear { loadExisting() }
@@ -88,10 +110,41 @@ struct ExchangeRateView: View {
         } else {
             currencyCode = availableCurrencies.first ?? "EUR"
         }
-        let rate = ExchangeRateStore.exchangeRate(for: sheet)
-        if rate > 0 {
-            rateText = String(format: "%.4g", rate)
+        let saved = ExchangeRateStore.exchangeRate(for: sheet)
+        if saved > 0 {
+            rateText = String(format: "%.4g", saved)
+        } else {
+            fetchRate()
         }
+    }
+
+    private func fetchRate() {
+        isFetching = true
+        rateDate = nil
+        fetchError = false
+
+        let from = sheetCurrency.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? sheetCurrency
+        let to   = currencyCode.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? currencyCode
+        guard let url = URL(string: "https://api.frankfurter.app/latest?from=\(from)&to=\(to)") else {
+            isFetching = false; return
+        }
+
+        let task = URLSession.shared.dataTask(with: url) { data, _, error in
+            DispatchQueue.main.async {
+                isFetching = false
+                guard error == nil, let data = data,
+                      let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                      let rates = json["rates"] as? [String: Double],
+                      let rate = rates[currencyCode]
+                else {
+                    fetchError = true
+                    return
+                }
+                rateText = String(format: "%.4g", rate)
+                rateDate = json["date"] as? String
+            }
+        }
+        task.resume()
     }
 
     private func save() {

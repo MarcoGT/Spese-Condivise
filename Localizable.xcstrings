@@ -17,6 +17,16 @@
         }
       }
     },
+    "%@  %@": {
+      "localizations": {
+        "it": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@  %2$@"
+          }
+        }
+      }
+    },
     "€": {
       "localizations": {
         "en": {
@@ -49,6 +59,8 @@
         }
       }
     },
+    "0.92": {},
+    "1 %@ =": {},
     "about_build_label": {
       "comment": "Build row label",
       "localizations": {
@@ -635,6 +647,118 @@
           "stringUnit": {
             "state": "translated",
             "value": "Es. Cena, benzina…"
+          }
+        }
+      }
+    },
+    "exchange_rate_edit": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rate: 1 %@ = %.4g %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cambio: 1 %@ = %.4g %@"
+          }
+        }
+      }
+    },
+    "exchange_rate_explain": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expenses are in %@. Set the exchange rate to see reimbursements in your home currency."
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le spese sono in %@. Imposta il cambio per vedere i rimborsi nella tua valuta di casa."
+          }
+        }
+      }
+    },
+    "exchange_rate_field_header": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 %@ in %@"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 %@ in %@"
+          }
+        }
+      }
+    },
+    "exchange_rate_home_currency": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Reimbursement currency"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valuta di rimborso"
+          }
+        }
+      }
+    },
+    "exchange_rate_remove": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Remove conversion"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rimuovi conversione"
+          }
+        }
+      }
+    },
+    "exchange_rate_set": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Convert reimbursements to another currency"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Converti rimborsi in un'altra valuta"
+          }
+        }
+      }
+    },
+    "exchange_rate_title": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exchange Rate"
+          }
+        },
+        "it": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tasso di cambio"
           }
         }
       }
@@ -2179,114 +2303,34 @@
         }
       }
     },
-    "exchange_rate_set": {
+    "exchange_rate_updated": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Converti rimborsi in un'altra valuta"
+            "value": "Tasso aggiornato al %@"
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Convert reimbursements to another currency"
+            "value": "Rate updated on %@"
           }
         }
       }
     },
-    "exchange_rate_edit": {
+    "exchange_rate_fetch_error": {
       "localizations": {
         "it": {
           "stringUnit": {
             "state": "translated",
-            "value": "Cambio: 1 %@ = %.4g %@"
+            "value": "Impossibile scaricare il tasso. Inseriscilo manualmente."
           }
         },
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rate: 1 %@ = %.4g %@"
-          }
-        }
-      }
-    },
-    "exchange_rate_title": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tasso di cambio"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exchange Rate"
-          }
-        }
-      }
-    },
-    "exchange_rate_explain": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le spese sono in %@. Imposta il cambio per vedere i rimborsi nella tua valuta di casa."
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Expenses are in %@. Set the exchange rate to see reimbursements in your home currency."
-          }
-        }
-      }
-    },
-    "exchange_rate_home_currency": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valuta di rimborso"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reimbursement currency"
-          }
-        }
-      }
-    },
-    "exchange_rate_field_header": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 %@ in %@"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "1 %@ in %@"
-          }
-        }
-      }
-    },
-    "exchange_rate_remove": {
-      "localizations": {
-        "it": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rimuovi conversione"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove conversion"
+            "value": "Could not fetch rate. Enter it manually."
           }
         }
       }
