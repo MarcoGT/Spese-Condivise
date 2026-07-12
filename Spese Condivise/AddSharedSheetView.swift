@@ -9,8 +9,6 @@ struct AddSharedSheetView: View {
     @State private var name = ""
     @State private var selectedCurrency = Locale.current.currency?.identifier ?? "EUR"
     
-    let availableCurrencies = ["EUR", "USD", "GBP", "JPY", "CHF", "AUD", "CAD"]
-    
     var body: some View {
         NavigationStack {
             Form {
@@ -20,13 +18,16 @@ struct AddSharedSheetView: View {
                         text: $name
                     )
                 }
-                
-                Section {
+
+                Section(header: Text(NSLocalizedString("currency", comment: ""))) {
                     Picker(NSLocalizedString("currency", comment: ""), selection: $selectedCurrency) {
-                        ForEach(availableCurrencies, id: \.self) { code in
-                            Text(code)
+                        ForEach(CurrencyList.all, id: \.self) { code in
+                            Text(CurrencyList.label(for: code)).tag(code)
                         }
                     }
+                    .labelsHidden()
+                    .pickerStyle(.wheel)
+                    .frame(height: 140)
                 }
             }
             .navigationTitle(NSLocalizedString("new sheet", comment: ""))

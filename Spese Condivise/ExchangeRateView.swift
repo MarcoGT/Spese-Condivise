@@ -11,12 +11,10 @@ struct ExchangeRateView: View {
     @State private var rateDate: String? = nil
     @State private var fetchError = false
 
-    private let commonCurrencies = ["EUR", "USD", "GBP", "CHF", "JPY", "CAD", "AUD", "SEK", "NOK", "DKK"]
-
     private var sheetCurrency: String { sheet.currencyCode ?? "EUR" }
 
     private var availableCurrencies: [String] {
-        commonCurrencies.filter { $0 != sheetCurrency }
+        CurrencyList.all.filter { $0 != sheetCurrency }
     }
 
     var body: some View {
@@ -33,7 +31,7 @@ struct ExchangeRateView: View {
                 Section(header: Text(NSLocalizedString("exchange_rate_home_currency", comment: ""))) {
                     Picker(NSLocalizedString("exchange_rate_home_currency", comment: ""), selection: $currencyCode) {
                         ForEach(availableCurrencies, id: \.self) { code in
-                            Text("\(code)  \(currencyName(code))").tag(code)
+                            Text(CurrencyList.label(for: code)).tag(code)
                         }
                     }
                     .labelsHidden()
@@ -153,7 +151,4 @@ struct ExchangeRateView: View {
         dismiss()
     }
 
-    private func currencyName(_ code: String) -> String {
-        Locale.current.localizedString(forCurrencyCode: code) ?? code
-    }
 }
