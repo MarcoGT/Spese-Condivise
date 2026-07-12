@@ -23,6 +23,7 @@ struct SheetDetailView: View {
     @State private var searchText = ""
     @State private var selectedCategoryFilter: ExpenseCategory? = nil
     @State private var personToClaimAsMe: Person? = nil
+    @State private var isExportingPDF = false
 
     enum ActiveModal: Identifiable {
         case add
@@ -322,6 +323,15 @@ struct SheetDetailView: View {
                         Label(NSLocalizedString("settle_up", comment: ""), systemImage: "checkmark.circle")
                     }
                     .disabled(expenses.isEmpty)
+
+                    Divider()
+
+                    Button {
+                        exportPDF()
+                    } label: {
+                        Label(NSLocalizedString("export_pdf", comment: ""), systemImage: "doc.richtext")
+                    }
+                    .disabled(expenses.isEmpty)
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
@@ -555,6 +565,21 @@ struct SheetDetailView: View {
 
         sheet.lastUpdated = Date()
         try? viewContext.save()
+    }
+
+    // MARK: - EXPORT PDF
+
+    private func exportPDF() {
+        guard !isExportingPDF else { return }
+        isExportingPDF = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let url = PDFExporter.generate(for: self.sheet)
+            DispatchQueue.main.async {
+                self.isExportingPDF = false
+                let ac = UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                self.presentViewController(ac)
+            }
+        }
     }
 
     // MARK: - IDENTITÀ FOGLIO CONDIVISO
