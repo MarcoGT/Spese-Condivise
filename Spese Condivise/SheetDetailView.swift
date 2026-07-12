@@ -161,7 +161,7 @@ struct SheetDetailView: View {
                                     Image(systemName: hasConversion ? "arrow.2.circlepath" : "plusminus.circle")
                                         .foregroundColor(.secondary)
                                     Text(hasConversion
-                                         ? String(format: NSLocalizedString("exchange_rate_edit", comment: ""), sheetCurrency, reimbCurrency ?? "", rate)
+                                         ? String(format: NSLocalizedString("exchange_rate_edit", comment: ""), sheetCurrency, rate, reimbCurrency ?? "")
                                          : NSLocalizedString("exchange_rate_set", comment: ""))
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
