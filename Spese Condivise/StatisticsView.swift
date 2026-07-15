@@ -18,7 +18,7 @@ struct StatisticsView: View {
         guard !expenses.isEmpty else { return 0 }
         let fallback = max(sheet.personsArray.count, 1)
         let sumShares = expenses.reduce(0.0) { sum, e in
-            let n = (e.splitBetween as? NSSet)?.count ?? 0
+            let n = e.splitBetween?.count ?? 0
             return sum + e.amount / Double(n > 0 ? n : fallback)
         }
         return sumShares / Double(expenses.count)
