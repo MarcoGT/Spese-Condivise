@@ -3,7 +3,6 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var persistence: PersistenceController
-
     @State private var showResetConfirm = false
     @State private var showResetDone = false
     @State private var isResyncing = false

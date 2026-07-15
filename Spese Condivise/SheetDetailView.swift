@@ -15,6 +15,11 @@ struct SheetDetailView: View {
     @State private var activeModal: ActiveModal?
     @State private var showAddPersonAlert = false
     @State private var newPersonName = ""
+    @State private var showRenameAlert = false
+    @State private var renameText = ""
+    @State private var personToDelete: Person? = nil
+    @State private var showDeletePersonBlocked = false
+    @State private var showDeletePersonConfirm = false
     @State private var showingShareError = false
     @State private var shareErrorMessage = ""
     @State private var isPreparingShare = false
@@ -25,6 +30,7 @@ struct SheetDetailView: View {
     @State private var personToClaimAsMe: Person? = nil
     @State private var isExportingPDF = false
     @State private var showExchangeRateEditor = false
+    @State private var isRepairingShare = false
 
     enum ActiveModal: Identifiable {
         case add
@@ -77,6 +83,18 @@ struct SheetDetailView: View {
                                         currencyCode: sheet.currencyCode ?? "EUR",
                                         onTap: claimMode ? { personToClaimAsMe = person } : nil
                                     )
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            personToDelete = person
+                                            if personHasExpenses(person) {
+                                                showDeletePersonBlocked = true
+                                            } else {
+                                                showDeletePersonConfirm = true
+                                            }
+                                        } label: {
+                                            Label(NSLocalizedString("person_remove", comment: ""), systemImage: "trash")
+                                        }
+                                    }
                                 }
                             }
                             .padding(.horizontal, 16)
@@ -344,6 +362,13 @@ struct SheetDetailView: View {
                     .disabled(expenses.isEmpty)
 
                     Button {
+                        renameText = sheet.name ?? ""
+                        showRenameAlert = true
+                    } label: {
+                        Label(NSLocalizedString("rename_sheet", comment: ""), systemImage: "pencil")
+                    }
+
+                    Button {
                         newPersonName = ""
                         showAddPersonAlert = true
                     } label: {
@@ -365,6 +390,19 @@ struct SheetDetailView: View {
                         Label(NSLocalizedString("export_pdf", comment: ""), systemImage: "doc.richtext")
                     }
                     .disabled(expenses.isEmpty)
+
+                    Divider()
+
+                    Button {
+                        repairShare()
+                    } label: {
+                        if isRepairingShare {
+                            Label(NSLocalizedString("share_repairing", comment: ""), systemImage: "arrow.clockwise")
+                        } else {
+                            Label(NSLocalizedString("share_repair", comment: ""), systemImage: "link.badge.plus")
+                        }
+                    }
+                    .disabled(isRepairingShare)
                 } label: {
                     Image(systemName: "ellipsis.circle")
                 }
@@ -449,6 +487,28 @@ struct SheetDetailView: View {
             Button("Aggiungi") { addPerson() }
         } message: {
             Text("Inserisci il nome della persona")
+        }
+        .alert(NSLocalizedString("rename_sheet", comment: ""), isPresented: $showRenameAlert) {
+            TextField(NSLocalizedString("sheet_name_placeholder", comment: ""), text: $renameText)
+            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {}
+            Button(NSLocalizedString("rename_confirm", comment: "")) { renameSheet() }
+        }
+        .alert(NSLocalizedString("person_remove_blocked_title", comment: ""), isPresented: $showDeletePersonBlocked) {
+            Button(NSLocalizedString("ok", comment: ""), role: .cancel) { personToDelete = nil }
+        } message: {
+            if let p = personToDelete {
+                Text(String(format: NSLocalizedString("person_remove_blocked_message", comment: ""), p.name ?? ""))
+            }
+        }
+        .alert(NSLocalizedString("person_remove_confirm_title", comment: ""), isPresented: $showDeletePersonConfirm) {
+            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) { personToDelete = nil }
+            Button(NSLocalizedString("person_remove", comment: ""), role: .destructive) {
+                if let p = personToDelete { deletePerson(p) }
+            }
+        } message: {
+            if let p = personToDelete {
+                Text(String(format: NSLocalizedString("person_remove_confirm_message", comment: ""), p.name ?? ""))
+            }
         }
         // CONFERMA IDENTIFICAZIONE PERSONA
         .confirmationDialog(
@@ -547,6 +607,22 @@ struct SheetDetailView: View {
         showingShareError = true
     }
 
+    private func repairShare() {
+        isRepairingShare = true
+        ShareService.forceRecreateShare(for: sheet.objectID) { result in
+            self.isRepairingShare = false
+            switch result {
+            case .success(let url):
+                self.presentViewController(
+                    UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                )
+            case .failure(let error):
+                self.shareErrorMessage = error.localizedDescription
+                self.showingShareError = true
+            }
+        }
+    }
+
     // Long-press: gestione condivisione (partecipanti, permessi, interrompi).
     private func manageShare() {
         let container = PersistenceController.shared.container
@@ -601,6 +677,29 @@ struct SheetDetailView: View {
             viewContext.assign(person, to: sheetStore)
         }
 
+        sheet.lastUpdated = Date()
+        try? viewContext.save()
+    }
+
+    private func personHasExpenses(_ person: Person) -> Bool {
+        let asPayer = expenses.contains { $0.paidBy?.objectID == person.objectID }
+        let asParticipant = expenses.contains {
+            ($0.splitBetween as? Set<Person>)?.contains(where: { $0.objectID == person.objectID }) == true
+        }
+        return asPayer || asParticipant
+    }
+
+    private func deletePerson(_ person: Person) {
+        viewContext.delete(person)
+        sheet.lastUpdated = Date()
+        try? viewContext.save()
+        personToDelete = nil
+    }
+
+    private func renameSheet() {
+        let trimmed = renameText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        sheet.name = trimmed
         sheet.lastUpdated = Date()
         try? viewContext.save()
     }

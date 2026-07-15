@@ -149,6 +149,65 @@ enum ShareService {
         ckContainer.privateCloudDatabase.add(zoneOp)
     }
 
+    /// Cancella la CKShare esistente (rotta/senza URL) e ne crea una nuova.
+    /// Utile quando la share pre-creata non è mai arrivata su CloudKit Production.
+    static func forceRecreateShare(
+        for sheetID: NSManagedObjectID,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) {
+        let container = PersistenceController.shared.container
+        let ckContainer = CKContainer(identifier: containerID)
+
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Cancella la share esistente se presente
+            if let existing = (try? container.fetchShares(matching: [sheetID]))?[sheetID] {
+                let deleteOp = CKModifyRecordsOperation(
+                    recordsToSave: nil,
+                    recordIDsToDelete: [existing.recordID]
+                )
+                deleteOp.configuration.timeoutIntervalForRequest = 25
+                deleteOp.modifyRecordsResultBlock = { _ in
+                    // Ricrea indipendentemente dall'esito della cancellazione
+                    DispatchQueue.main.async {
+                        createFreshShare(for: sheetID, container: container, ckContainer: ckContainer, completion: completion)
+                    }
+                }
+                ckContainer.privateCloudDatabase.add(deleteOp)
+            } else {
+                DispatchQueue.main.async {
+                    createFreshShare(for: sheetID, container: container, ckContainer: ckContainer, completion: completion)
+                }
+            }
+        }
+    }
+
+    private static func createFreshShare(
+        for sheetID: NSManagedObjectID,
+        container: NSPersistentCloudKitContainer,
+        ckContainer: CKContainer,
+        completion: @escaping (Result<URL, Error>) -> Void
+    ) {
+        let bg = container.newBackgroundContext()
+        bg.perform {
+            guard let sheet = try? bg.existingObject(with: sheetID) as? SharedSheet else {
+                DispatchQueue.main.async { completion(.failure(ShareError.sheetNotFound)) }
+                return
+            }
+            let title = (sheet.value(forKey: "name") as? String) ?? "Foglio Condiviso"
+            container.share([sheet], to: nil) { _, share, _, error in
+                DispatchQueue.main.async {
+                    if let error = error { completion(.failure(error)); return }
+                    guard let share = share else { completion(.failure(ShareError.noShareReturned)); return }
+                    share[CKShare.SystemFieldKey.title] = title as CKRecordValue
+                    share.publicPermission = .readWrite
+                    uploadShare(share, to: ckContainer) { result in
+                        completion(result)
+                    }
+                }
+            }
+        }
+    }
+
     enum ShareError: LocalizedError {
         case sheetNotFound
         case noShareReturned
