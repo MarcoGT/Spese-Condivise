@@ -2,6 +2,48 @@ import SwiftUI
 import CloudKit
 import CoreData
 
+extension Notification.Name {
+    static let macMenuSettings  = Notification.Name("macMenuSettings")
+}
+
+// MARK: - Focused values per comandi context-sensitive
+
+private struct NewActionKey: FocusedValueKey {
+    typealias Value = () -> Void
+}
+private struct ExportActionKey: FocusedValueKey {
+    typealias Value = () -> Void
+}
+
+extension FocusedValues {
+    var newAction: (() -> Void)? {
+        get { self[NewActionKey.self] }
+        set { self[NewActionKey.self] = newValue }
+    }
+    var exportAction: (() -> Void)? {
+        get { self[ExportActionKey.self] }
+        set { self[ExportActionKey.self] = newValue }
+    }
+}
+
+private struct NewCommandButton: View {
+    @FocusedValue(\.newAction) var newAction
+    var body: some View {
+        Button(NSLocalizedString("menu_new", comment: "")) { newAction?() }
+            .keyboardShortcut("n", modifiers: .command)
+            .disabled(newAction == nil)
+    }
+}
+
+private struct ExportCommandButton: View {
+    @FocusedValue(\.exportAction) var exportAction
+    var body: some View {
+        Button(NSLocalizedString("menu_export_pdf", comment: "")) { exportAction?() }
+            .keyboardShortcut("p", modifiers: .command)
+            .disabled(exportAction == nil)
+    }
+}
+
 @main
 struct SharedExpensesApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
@@ -53,6 +95,22 @@ struct SharedExpensesApp: App {
                     NotificationService.shared.setupSubscriptions()
                 }
         }
+        #if targetEnvironment(macCatalyst)
+        .commands {
+            CommandGroup(replacing: .newItem) {
+                NewCommandButton()
+            }
+            CommandGroup(replacing: .appSettings) {
+                Button(NSLocalizedString("menu_settings", comment: "")) {
+                    NotificationCenter.default.post(name: .macMenuSettings, object: nil)
+                }
+                .keyboardShortcut(",", modifiers: .command)
+            }
+CommandGroup(replacing: .printItem) {
+                ExportCommandButton()
+            }
+        }
+        #endif
     }
 
     // MARK: - CloudKit sync observer

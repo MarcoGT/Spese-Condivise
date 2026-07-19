@@ -226,4 +226,5 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         // Richiedi subito un refresh per innescare il ciclo di sync
         persistenceController.container.viewContext.refreshAllObjects()
     }
+
 }

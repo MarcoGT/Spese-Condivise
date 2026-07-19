@@ -37,8 +37,8 @@ struct ExchangeRateView: View {
                     .labelsHidden()
                     .pickerStyle(.wheel)
                     .frame(height: 120)
-                    .onChange(of: currencyCode) { _ in
-                        fetchRate()
+                    .onChange(of: currencyCode) { newCode in
+                        fetchRate(for: newCode)
                     }
                 }
 
@@ -112,17 +112,18 @@ struct ExchangeRateView: View {
         if saved > 0 {
             rateText = String(format: "%.4g", saved)
         } else {
-            fetchRate()
+            fetchRate(for: currencyCode)
         }
     }
 
-    private func fetchRate() {
+    private func fetchRate(for targetCode: String? = nil) {
+        let code = targetCode ?? currencyCode
         isFetching = true
         rateDate = nil
         fetchError = false
 
         let from = sheetCurrency.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? sheetCurrency
-        let to   = currencyCode.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? currencyCode
+        let to   = code.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? code
         guard let url = URL(string: "https://api.frankfurter.app/latest?from=\(from)&to=\(to)") else {
             isFetching = false; return
         }
@@ -133,7 +134,7 @@ struct ExchangeRateView: View {
                 guard error == nil, let data = data,
                       let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                       let rates = json["rates"] as? [String: Double],
-                      let rate = rates[currencyCode]
+                      let rate = rates[code]
                 else {
                     fetchError = true
                     return

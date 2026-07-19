@@ -10,6 +10,7 @@ struct SheetRowView: View {
     let balanceText: String
     let balanceColor: Color
     let lastSeenRefresh: Date
+    var isShared: Bool = false
 
     private var iconName: String {
         balanceColor == .green ? "arrow.up"
@@ -41,6 +42,12 @@ struct SheetRowView: View {
                     .font(.headline)
                     .foregroundColor(.primary)
                     .lineLimit(1)
+
+                if isShared {
+                    Image(systemName: "person.2.fill")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.secondary)
+                }
 
                 if LastSeenStore.newExpensesCount(for: sheet) > 0 {
                     Circle()

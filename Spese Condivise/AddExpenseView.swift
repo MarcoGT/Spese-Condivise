@@ -104,6 +104,11 @@ struct AddExpenseView: View {
                         NSLocalizedString("Pagato da", comment: "paid by picker"),
                         selection: $selectedPayer
                     ) {
+                        if selectedPayer == nil {
+                            Text(NSLocalizedString("select_payer", comment: ""))
+                                .foregroundColor(.secondary)
+                                .tag(nil as Person?)
+                        }
                         ForEach(persons) { person in
                             Text(person.name ?? "—")
                                 .tag(Optional(person))

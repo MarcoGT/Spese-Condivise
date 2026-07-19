@@ -26,7 +26,7 @@ struct SheetDetailView: View {
     @State private var showSettleConfirm = false
     @State private var showStatistics = false
     @State private var searchText = ""
-    @State private var selectedCategoryFilter: ExpenseCategory? = nil
+@State private var selectedCategoryFilter: ExpenseCategory? = nil
     @State private var personToClaimAsMe: Person? = nil
     @State private var isExportingPDF = false
     @State private var showExchangeRateEditor = false
@@ -60,290 +60,61 @@ struct SheetDetailView: View {
     }
 
     var body: some View {
+        mainContent
+            .alert(NSLocalizedString("person_remove_blocked_title", comment: ""), isPresented: $showDeletePersonBlocked) {
+                Button(NSLocalizedString("ok", comment: ""), role: .cancel) { personToDelete = nil }
+            } message: {
+                if let p = personToDelete {
+                    Text(String(format: NSLocalizedString("person_remove_blocked_message", comment: ""), p.name ?? ""))
+                }
+            }
+            .alert(NSLocalizedString("person_remove_confirm_title", comment: ""), isPresented: $showDeletePersonConfirm) {
+                Button(NSLocalizedString("cancel", comment: ""), role: .cancel) { personToDelete = nil }
+                Button(NSLocalizedString("person_remove", comment: ""), role: .destructive) {
+                    if let p = personToDelete { deletePerson(p) }
+                }
+            } message: {
+                if let p = personToDelete {
+                    Text(String(format: NSLocalizedString("person_remove_confirm_message", comment: ""), p.name ?? ""))
+                }
+            }
+            .confirmationDialog(
+                NSLocalizedString("identify_confirm_title", comment: ""),
+                isPresented: Binding(get: { personToClaimAsMe != nil }, set: { if !$0 { personToClaimAsMe = nil } }),
+                titleVisibility: .visible
+            ) {
+                if let person = personToClaimAsMe {
+                    Button(String(format: NSLocalizedString("identify_confirm_action", comment: ""), person.name ?? "")) {
+                        if let pid = person.id, let sid = sheet.id {
+                            currentUser.setPersonID(pid, forSheet: sid)
+                        }
+                        personToClaimAsMe = nil
+                    }
+                }
+                Button(NSLocalizedString("Annulla", comment: ""), role: .cancel) { personToClaimAsMe = nil }
+            } message: {
+                if let person = personToClaimAsMe {
+                    Text(String(format: NSLocalizedString("identify_confirm_message", comment: ""), person.name ?? ""))
+                }
+            }
+    }
+
+    private var mainContent: some View {
         ZStack {
             Color(.systemGroupedBackground).ignoresSafeArea()
-
             List {
-                // MARK: Persons section
-                if let persons = sheet.persons as? Set<Person>, !persons.isEmpty {
-                    Section {
-                        let balances = balancesPerPerson(sheet: sheet)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                ForEach(sheet.personsArray) { person in
-                                    let value = balances[person] ?? 0
-                                    let isMe = person.objectID == myPerson?.objectID
-                                    let claimMode = isSharedSheet && !isIdentifiedInSheet
-                                    PersonBalanceCard(
-                                        person: person,
-                                        value: value,
-                                        isMe: isMe,
-                                        balanceColor: balanceColor(value),
-                                        balanceText: personBalanceText(value, isMe: isMe),
-                                        currencyCode: sheet.currencyCode ?? "EUR",
-                                        onTap: claimMode ? { personToClaimAsMe = person } : nil
-                                    )
-                                    .contextMenu {
-                                        Button(role: .destructive) {
-                                            personToDelete = person
-                                            if personHasExpenses(person) {
-                                                showDeletePersonBlocked = true
-                                            } else {
-                                                showDeletePersonConfirm = true
-                                            }
-                                        } label: {
-                                            Label(NSLocalizedString("person_remove", comment: ""), systemImage: "trash")
-                                        }
-                                    }
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 8)
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets())
-
-                        // Banner "chi sei tu?" visibile solo nei fogli condivisi
-                        // dove l'utente non si è ancora identificato
-                        if isSharedSheet && !isIdentifiedInSheet {
-                            HStack(spacing: 10) {
-                                Image(systemName: "person.fill.questionmark")
-                                    .foregroundColor(.accentColor)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(NSLocalizedString("identify_prompt_title", comment: ""))
-                                        .font(.subheadline)
-                                        .fontWeight(.medium)
-                                    Text(NSLocalizedString("identify_prompt_body", comment: ""))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                Spacer()
-                            }
-                            .padding(.vertical, 8)
-                            .padding(.horizontal, 4)
-                            .listRowBackground(Color.accentColor.opacity(0.06))
-                        }
-                    } header: {
-                        SectionHeader(title: NSLocalizedString("Persone", comment: "people"))
-                    }
-                }
-
-                // MARK: Settle-up section (chi paga chi)
-                if !expenses.isEmpty {
-                    let transfers = sheet.suggestedTransfers()
-                    let sheetCurrency = sheet.currencyCode ?? "EUR"
-                    let reimbCurrency = ExchangeRateStore.reimbursementCurrency(for: sheet)
-                    let rate = ExchangeRateStore.exchangeRate(for: sheet)
-                    let hasConversion = reimbCurrency != nil && rate > 0 && reimbCurrency != sheetCurrency
-                    let currSym = AmountFormatter.symbol(for: sheetCurrency)
-                    let reimbSym = reimbCurrency.map { AmountFormatter.symbol(for: $0) } ?? currSym
-
-                    Section {
-                        if transfers.isEmpty {
-                            HStack(spacing: 10) {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                                Text(NSLocalizedString("settle_all_even", comment: ""))
-                                    .foregroundColor(.secondary)
-                                Spacer()
-                            }
-                            .padding(.vertical, 4)
-                        } else {
-                            ForEach(transfers) { t in
-                                HStack(spacing: 8) {
-                                    Text(t.from.name ?? "—")
-                                        .fontWeight(.medium)
-                                    Image(systemName: "arrow.right")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                    Text(t.to.name ?? "—")
-                                        .fontWeight(.medium)
-                                    Spacer()
-                                    VStack(alignment: .trailing, spacing: 2) {
-                                        Text(AmountFormatter.format(t.amount, currencySymbol: currSym))
-                                            .fontWeight(.semibold)
-                                            .foregroundColor(.accentColor)
-                                        if hasConversion {
-                                            Text("≈ " + AmountFormatter.format(t.amount * rate, currencySymbol: reimbSym))
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-                                    }
-                                }
-                            }
-
-                            Button {
-                                showExchangeRateEditor = true
-                            } label: {
-                                HStack {
-                                    Image(systemName: hasConversion ? "arrow.2.circlepath" : "plusminus.circle")
-                                        .foregroundColor(.secondary)
-                                    Text(hasConversion
-                                         ? String(format: NSLocalizedString("exchange_rate_edit", comment: ""), sheetCurrency, rate, reimbCurrency ?? "")
-                                         : NSLocalizedString("exchange_rate_set", comment: ""))
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                    Spacer()
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .padding(.vertical, 2)
-                        }
-                    } header: {
-                        SectionHeader(title: NSLocalizedString("settle_who_pays_whom", comment: ""))
-                    }
-                }
-
-                // MARK: Category filter chips
-                if !expenses.isEmpty {
-                    Section {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 8) {
-                                // "Tutte" chip
-                                Button {
-                                    selectedCategoryFilter = nil
-                                } label: {
-                                    Text(NSLocalizedString("all_categories", comment: ""))
-                                        .font(.subheadline)
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 7)
-                                        .background(selectedCategoryFilter == nil ? Color.accentColor : Color(.systemGray5))
-                                        .foregroundColor(selectedCategoryFilter == nil ? .white : .primary)
-                                        .clipShape(Capsule())
-                                }
-                                .buttonStyle(.plain)
-
-                                // Una chip per ogni categoria presente nelle spese
-                                ForEach(usedCategories, id: \.self) { cat in
-                                    let isSelected = selectedCategoryFilter == cat
-                                    Button {
-                                        selectedCategoryFilter = isSelected ? nil : cat
-                                    } label: {
-                                        HStack(spacing: 5) {
-                                            Image(systemName: cat.icon)
-                                                .font(.caption)
-                                            Text(cat.localizedName)
-                                                .font(.subheadline)
-                                        }
-                                        .padding(.horizontal, 14)
-                                        .padding(.vertical, 7)
-                                        .background(isSelected ? cat.color : Color(.systemGray5))
-                                        .foregroundColor(isSelected ? .white : .primary)
-                                        .clipShape(Capsule())
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.horizontal, 16)
-                            .padding(.vertical, 4)
-                        }
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets())
-                    }
-                }
-
-                // MARK: Expenses section
-                Section {
-                    if expenses.isEmpty {
-                        if !sheet.settlementsArray.isEmpty {
-                            // Tutte le spese sono state archiviate con un azzeramento
-                            AllSettledEmptyView { activeModal = .add }
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                        } else if isSharedSheet && !isIdentifiedInSheet {
-                            // Foglio condiviso appena accettato: dati ancora in arrivo
-                            SharedSyncEmptyView()
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                        } else {
-                            EmptyExpensesView { activeModal = .add }
-                                .listRowBackground(Color.clear)
-                                .listRowSeparator(.hidden)
-                        }
-                    } else if filteredExpenses.isEmpty {
-                        // Nessun risultato per ricerca/filtro
-                        VStack(spacing: 8) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.system(size: 32))
-                                .foregroundColor(.secondary)
-                            Text(NSLocalizedString("no_results", comment: ""))
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 32)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                    } else {
-                        ForEach(filteredExpenses) { expense in
-                            let isNew = (expense.createdAt ?? .distantPast) > LastSeenStore.lastSeen(for: sheet)
-                            Button {
-                                activeModal = .edit(expense)
-                            } label: {
-                                ExpenseRowView(expense: expense)
-                                    .background(Color(.systemBackground))
-                                    .cornerRadius(14)
-                                    .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 14)
-                                            .stroke(Color.blue.opacity(isNew ? 0.5 : 0), lineWidth: 1.5)
-                                    )
-                            }
-                            .buttonStyle(.plain)
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
-                            .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                Button {
-                                    activeModal = .edit(expense)
-                                } label: {
-                                    Label(NSLocalizedString("edit", comment: ""), systemImage: "pencil")
-                                }
-                                .tint(.blue)
-                            }
-                        }
-                        .onDelete(perform: deleteExpenses)
-                    }
-                } header: {
-                    SectionHeader(title: NSLocalizedString("Spese", comment: "expenses"))
-                }
-
-                // MARK: Archive link
-                if !sheet.settlementsArray.isEmpty {
-                    Section {
-                        NavigationLink {
-                            ArchiveView(sheet: sheet)
-                        } label: {
-                            HStack(spacing: 12) {
-                                Image(systemName: "archivebox.fill")
-                                    .foregroundColor(.secondary)
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(NSLocalizedString("archive_title", comment: ""))
-                                        .font(.body)
-                                        .fontWeight(.medium)
-                                    Text(String(
-                                        format: NSLocalizedString("archive_settlement_count", comment: ""),
-                                        sheet.settlementsArray.count
-                                    ))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                                }
-                            }
-                            .padding(.vertical, 4)
-                        }
-                        .listRowBackground(Color(.systemBackground))
-                    }
-                }
+                personsSection
+                settleUpSection
+                categoryFilterSection
+                expensesSection
+                archiveSection
             }
             .listStyle(.plain)
         }
         .navigationTitle(sheet.name ?? NSLocalizedString("sheet", comment: ""))
-        .searchable(
-            text: $searchText,
-            prompt: NSLocalizedString("search_expenses", comment: "")
-        )
+        .searchable(text: $searchText, prompt: NSLocalizedString("search_expenses", comment: ""))
+        .focusedSceneValue(\.newAction, openAddExpense)
+        .focusedSceneValue(\.exportAction, exportPDF)
         .onAppear {
             LastSeenStore.markSeen(for: sheet)
         }
@@ -493,48 +264,6 @@ struct SheetDetailView: View {
             Button(NSLocalizedString("cancel", comment: ""), role: .cancel) {}
             Button(NSLocalizedString("rename_confirm", comment: "")) { renameSheet() }
         }
-        .alert(NSLocalizedString("person_remove_blocked_title", comment: ""), isPresented: $showDeletePersonBlocked) {
-            Button(NSLocalizedString("ok", comment: ""), role: .cancel) { personToDelete = nil }
-        } message: {
-            if let p = personToDelete {
-                Text(String(format: NSLocalizedString("person_remove_blocked_message", comment: ""), p.name ?? ""))
-            }
-        }
-        .alert(NSLocalizedString("person_remove_confirm_title", comment: ""), isPresented: $showDeletePersonConfirm) {
-            Button(NSLocalizedString("cancel", comment: ""), role: .cancel) { personToDelete = nil }
-            Button(NSLocalizedString("person_remove", comment: ""), role: .destructive) {
-                if let p = personToDelete { deletePerson(p) }
-            }
-        } message: {
-            if let p = personToDelete {
-                Text(String(format: NSLocalizedString("person_remove_confirm_message", comment: ""), p.name ?? ""))
-            }
-        }
-        // CONFERMA IDENTIFICAZIONE PERSONA
-        .confirmationDialog(
-            NSLocalizedString("identify_confirm_title", comment: ""),
-            isPresented: Binding(
-                get: { personToClaimAsMe != nil },
-                set: { if !$0 { personToClaimAsMe = nil } }
-            ),
-            titleVisibility: .visible
-        ) {
-            if let person = personToClaimAsMe {
-                Button(String(format: NSLocalizedString("identify_confirm_action", comment: ""), person.name ?? "")) {
-                    if let pid = person.id, let sid = sheet.id {
-                        currentUser.setPersonID(pid, forSheet: sid)
-                    }
-                    personToClaimAsMe = nil
-                }
-            }
-            Button(NSLocalizedString("Annulla", comment: ""), role: .cancel) {
-                personToClaimAsMe = nil
-            }
-        } message: {
-            if let person = personToClaimAsMe {
-                Text(String(format: NSLocalizedString("identify_confirm_message", comment: ""), person.name ?? ""))
-            }
-        }
     }
 
     // MARK: - FILTRO
@@ -605,6 +334,234 @@ struct SheetDetailView: View {
         isPreparingShare = false
         shareErrorMessage = error
         showingShareError = true
+    }
+
+    // MARK: - Body sections
+
+    @ViewBuilder private var personsSection: some View {
+        if let persons = sheet.persons as? Set<Person>, !persons.isEmpty {
+            let balances = balancesPerPerson(sheet: sheet)
+            Section {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 12) {
+                        ForEach(sheet.personsArray) { person in
+                            let value = balances[person] ?? 0
+                            let isMe = person.objectID == myPerson?.objectID
+                            let claimMode = isSharedSheet && !isIdentifiedInSheet
+                            PersonBalanceCard(
+                                person: person,
+                                value: value,
+                                isMe: isMe,
+                                balanceColor: balanceColor(value),
+                                balanceText: personBalanceText(value, isMe: isMe),
+                                currencyCode: sheet.currencyCode ?? "EUR",
+                                onTap: claimMode ? { personToClaimAsMe = person } : nil
+                            )
+                            .contextMenu {
+                                Button(role: .destructive) {
+                                    personToDelete = person
+                                    if personHasExpenses(person) {
+                                        showDeletePersonBlocked = true
+                                    } else {
+                                        showDeletePersonConfirm = true
+                                    }
+                                } label: {
+                                    Label(NSLocalizedString("person_remove", comment: ""), systemImage: "trash")
+                                }
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets())
+
+                if isSharedSheet && !isIdentifiedInSheet {
+                    HStack(spacing: 10) {
+                        Image(systemName: "person.fill.questionmark")
+                            .foregroundColor(.accentColor)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(NSLocalizedString("identify_prompt_title", comment: ""))
+                                .font(.subheadline).fontWeight(.medium)
+                            Text(NSLocalizedString("identify_prompt_body", comment: ""))
+                                .font(.caption).foregroundColor(.secondary)
+                        }
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 4)
+                    .listRowBackground(Color.accentColor.opacity(0.06))
+                }
+            } header: {
+                SectionHeader(title: NSLocalizedString("Persone", comment: "people"))
+            }
+        }
+    }
+
+    @ViewBuilder private var settleUpSection: some View {
+        if !expenses.isEmpty {
+            let transfers = sheet.suggestedTransfers()
+            let sheetCurrency = sheet.currencyCode ?? "EUR"
+            let reimbCurrency = ExchangeRateStore.reimbursementCurrency(for: sheet)
+            let rate = ExchangeRateStore.exchangeRate(for: sheet)
+            let hasConversion = reimbCurrency != nil && rate > 0 && reimbCurrency != sheetCurrency
+            let currSym = AmountFormatter.symbol(for: sheetCurrency)
+            let reimbSym = reimbCurrency.map { AmountFormatter.symbol(for: $0) } ?? currSym
+            Section {
+                if transfers.isEmpty {
+                    HStack(spacing: 10) {
+                        Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                        Text(NSLocalizedString("settle_all_even", comment: "")).foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .padding(.vertical, 4)
+                } else {
+                    ForEach(transfers) { t in
+                        HStack(spacing: 8) {
+                            Text(t.from.name ?? "—").fontWeight(.medium)
+                            Image(systemName: "arrow.right").font(.caption).foregroundColor(.secondary)
+                            Text(t.to.name ?? "—").fontWeight(.medium)
+                            Spacer()
+                            VStack(alignment: .trailing, spacing: 2) {
+                                Text(AmountFormatter.format(t.amount, currencySymbol: currSym))
+                                    .fontWeight(.semibold).foregroundColor(.accentColor)
+                                if hasConversion {
+                                    Text("≈ " + AmountFormatter.format(t.amount * rate, currencySymbol: reimbSym))
+                                        .font(.caption).foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                    }
+                    Button {
+                        showExchangeRateEditor = true
+                    } label: {
+                        HStack {
+                            Image(systemName: hasConversion ? "arrow.2.circlepath" : "plusminus.circle")
+                                .foregroundColor(.secondary)
+                            Text(hasConversion
+                                 ? String(format: NSLocalizedString("exchange_rate_edit", comment: ""), sheetCurrency, rate, reimbCurrency ?? "")
+                                 : NSLocalizedString("exchange_rate_set", comment: ""))
+                                .font(.subheadline).foregroundColor(.secondary)
+                            Spacer()
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.vertical, 2)
+                }
+            } header: {
+                SectionHeader(title: NSLocalizedString("settle_who_pays_whom", comment: ""))
+            }
+        }
+    }
+
+    @ViewBuilder private var categoryFilterSection: some View {
+        if !expenses.isEmpty {
+            Section {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        Button { selectedCategoryFilter = nil } label: {
+                            Text(NSLocalizedString("all_categories", comment: ""))
+                                .font(.subheadline)
+                                .padding(.horizontal, 14).padding(.vertical, 7)
+                                .background(selectedCategoryFilter == nil ? Color.accentColor : Color(.systemGray5))
+                                .foregroundColor(selectedCategoryFilter == nil ? .white : .primary)
+                                .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                        ForEach(usedCategories, id: \.self) { cat in
+                            let isSelected = selectedCategoryFilter == cat
+                            Button { selectedCategoryFilter = isSelected ? nil : cat } label: {
+                                HStack(spacing: 5) {
+                                    Image(systemName: cat.icon).font(.caption)
+                                    Text(cat.localizedName).font(.subheadline)
+                                }
+                                .padding(.horizontal, 14).padding(.vertical, 7)
+                                .background(isSelected ? cat.color : Color(.systemGray5))
+                                .foregroundColor(isSelected ? .white : .primary)
+                                .clipShape(Capsule())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(.horizontal, 16).padding(.vertical, 4)
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets())
+            }
+        }
+    }
+
+    @ViewBuilder private var expensesSection: some View {
+        Section {
+            if expenses.isEmpty {
+                if !sheet.settlementsArray.isEmpty {
+                    AllSettledEmptyView { activeModal = .add }
+                        .listRowBackground(Color.clear).listRowSeparator(.hidden)
+                } else if isSharedSheet && !isIdentifiedInSheet {
+                    SharedSyncEmptyView()
+                        .listRowBackground(Color.clear).listRowSeparator(.hidden)
+                } else {
+                    EmptyExpensesView { activeModal = .add }
+                        .listRowBackground(Color.clear).listRowSeparator(.hidden)
+                }
+            } else if filteredExpenses.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "magnifyingglass").font(.system(size: 32)).foregroundColor(.secondary)
+                    Text(NSLocalizedString("no_results", comment: "")).font(.subheadline).foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity).padding(.vertical, 32)
+                .listRowBackground(Color.clear).listRowSeparator(.hidden)
+            } else {
+                ForEach(filteredExpenses) { expense in
+                    let isNew = (expense.createdAt ?? .distantPast) > LastSeenStore.lastSeen(for: sheet)
+                    Button { activeModal = .edit(expense) } label: {
+                        ExpenseRowView(expense: expense)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(14)
+                            .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.blue.opacity(isNew ? 0.5 : 0), lineWidth: 1.5))
+                    }
+                    .buttonStyle(.plain)
+                    .listRowBackground(Color.clear).listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
+                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                        Button { activeModal = .edit(expense) } label: {
+                            Label(NSLocalizedString("edit", comment: ""), systemImage: "pencil")
+                        }
+                        .tint(.blue)
+                    }
+                }
+                .onDelete(perform: deleteExpenses)
+            }
+        } header: {
+            SectionHeader(title: NSLocalizedString("Spese", comment: "expenses"))
+        }
+    }
+
+    @ViewBuilder private var archiveSection: some View {
+        if !sheet.settlementsArray.isEmpty {
+            Section {
+                NavigationLink { ArchiveView(sheet: sheet) } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "archivebox.fill").foregroundColor(.secondary)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(NSLocalizedString("archive_title", comment: "")).font(.body).fontWeight(.medium)
+                            Text(String(format: NSLocalizedString("archive_settlement_count", comment: ""), sheet.settlementsArray.count))
+                                .font(.caption).foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(.vertical, 4)
+                }
+                .listRowBackground(Color(.systemBackground))
+            }
+        }
+    }
+
+    private func openAddExpense() {
+        activeModal = .add
     }
 
     private func repairShare() {

@@ -27,6 +27,7 @@ struct SharedSheetListView: View {
     // Emoji e colori per foglio — aggiornati subito al salvataggio
     @State private var sheetEmojis:  [NSManagedObjectID: String] = [:]
     @State private var sheetColors:  [NSManagedObjectID: Color]  = [:]
+    @State private var sharedSheetIDs: Set<NSManagedObjectID> = []
 
     private let remoteChangePublisher = NotificationCenter.default
         .publisher(for: .NSPersistentStoreRemoteChange)
@@ -66,7 +67,8 @@ struct SharedSheetListView: View {
                                                 let b = sheetBalance(sheet)
                                                 return b == 0 ? .gray : (b > 0 ? .green : .red)
                                             }(),
-                                            lastSeenRefresh: lastSeenRefresh
+                                            lastSeenRefresh: lastSeenRefresh,
+                                            isShared: sharedSheetIDs.contains(sheet.objectID)
                                         )
                                     }
                                     .contextMenu {
@@ -136,6 +138,7 @@ struct SharedSheetListView: View {
             bootstrapCurrentUserIfNeeded()
             AppSyncState.current = syncState
             loadSavedAppearances()
+            refreshSharedStatus()
             updateWidget()
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
@@ -152,7 +155,12 @@ struct SharedSheetListView: View {
         .onReceive(remoteChangePublisher) { _ in
             viewContext.refreshAllObjects()
             updateWidget()
+            refreshSharedStatus()
         }
+        .onReceive(NotificationCenter.default.publisher(for: .macMenuSettings)) { _ in
+            showingSettings = true
+        }
+        .focusedSceneValue(\.newAction, { showingAddSheet = true })
         .onChange(of: currentUser.name) { _ in
             bootstrapCurrentUserIfNeeded()
             updateWidget()
@@ -290,6 +298,27 @@ struct SharedSheetListView: View {
             .padding(.top, 4)
 
             Spacer()
+        }
+    }
+
+    // MARK: - SHARE STATUS
+
+    private func refreshSharedStatus() {
+        let ids = sheets.map(\.objectID)
+        let sharedStore = persistence.sharedPersistentStore
+        DispatchQueue.global(qos: .utility).async {
+            var result: Set<NSManagedObjectID> = []
+            // Fogli condivisi da me (ho un CKShare attivo)
+            if let shares = try? persistence.container.fetchShares(matching: ids) {
+                for (oid, _) in shares { result.insert(oid) }
+            }
+            // Fogli condivisi con me (sono nel shared store)
+            if let shared = sharedStore {
+                for oid in ids {
+                    if oid.persistentStore === shared { result.insert(oid) }
+                }
+            }
+            DispatchQueue.main.async { sharedSheetIDs = result }
         }
     }
 

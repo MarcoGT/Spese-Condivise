@@ -144,112 +144,6 @@
         }
       }
     },
-    "person_remove" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Remove" }
-        },
-        "it" : {
-          "stringUnit" : { "state" : "translated", "value" : "Rimuovi" }
-        }
-      }
-    },
-    "person_remove_blocked_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Cannot remove person" }
-        },
-        "it" : {
-          "stringUnit" : { "state" : "translated", "value" : "Impossibile rimuovere" }
-        }
-      }
-    },
-    "person_remove_blocked_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "%@ has expenses associated. Delete their expenses first." }
-        },
-        "it" : {
-          "stringUnit" : { "state" : "translated", "value" : "%@ ha delle spese associate. Elimina prima le spese." }
-        }
-      }
-    },
-    "person_remove_confirm_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "Remove person?" }
-        },
-        "it" : {
-          "stringUnit" : { "state" : "translated", "value" : "Rimuovere la persona?" }
-        }
-      }
-    },
-    "person_remove_confirm_message" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : { "state" : "translated", "value" : "%@ will be permanently removed from this sheet." }
-        },
-        "it" : {
-          "stringUnit" : { "state" : "translated", "value" : "%@ verrà rimossa definitivamente dal foglio." }
-        }
-      }
-    },
-    "rename_sheet" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rename"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rinomina"
-          }
-        }
-      }
-    },
-    "rename_confirm" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rename"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rinomina"
-          }
-        }
-      }
-    },
-    "sheet_name_placeholder" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sheet name"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nome foglio"
-          }
-        }
-      }
-    },
     "add_person" : {
       "localizations" : {
         "en" : {
@@ -1570,6 +1464,64 @@
         }
       }
     },
+    "menu_export_pdf" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Export PDF…" }
+        },
+        "it" : {
+          "stringUnit" : { "state" : "translated", "value" : "Esporta PDF…" }
+        }
+      }
+    },
+    "menu_new" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "New" }
+        },
+        "it" : {
+          "stringUnit" : { "state" : "translated", "value" : "Nuovo" }
+        }
+      }
+    },
+    "menu_find" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Find…" }
+        },
+        "it" : {
+          "stringUnit" : { "state" : "translated", "value" : "Cerca…" }
+        }
+      }
+    },
+    "menu_new_sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "New Sheet" }
+        },
+        "it" : {
+          "stringUnit" : { "state" : "translated", "value" : "Nuovo foglio" }
+        }
+      }
+    },
+    "menu_settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : { "state" : "translated", "value" : "Settings…" }
+        },
+        "it" : {
+          "stringUnit" : { "state" : "translated", "value" : "Impostazioni…" }
+        }
+      }
+    },
+    "ok" : {
+
+    },
     "OK" : {
       "comment" : "OK",
       "localizations" : {
@@ -1790,6 +1742,91 @@
         }
       }
     },
+    "person_remove" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovi"
+          }
+        }
+      }
+    },
+    "person_remove_blocked_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ has expenses associated. Delete their expenses first."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ha delle spese associate. Elimina prima le spese."
+          }
+        }
+      }
+    },
+    "person_remove_blocked_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cannot remove person"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile rimuovere"
+          }
+        }
+      }
+    },
+    "person_remove_confirm_message" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ will be permanently removed from this sheet."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ verrà rimossa definitivamente dal foglio."
+          }
+        }
+      }
+    },
+    "person_remove_confirm_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove person?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rimuovere la persona?"
+          }
+        }
+      }
+    },
     "Persone" : {
       "comment" : "people",
       "localizations" : {
@@ -1803,6 +1840,261 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Persone"
+          }
+        }
+      }
+    },
+    "pro_already_pro" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro active ✦"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro attivo ✦"
+          }
+        }
+      }
+    },
+    "pro_feature_receipt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Receipt photo for each expense"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto dello scontrino per ogni spesa"
+          }
+        }
+      }
+    },
+    "pro_feature_recurring" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic recurring expenses"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spese ricorrenti automatiche"
+          }
+        }
+      }
+    },
+    "pro_feature_splits" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unequal split between participants"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Divisione non equa tra i partecipanti"
+          }
+        }
+      }
+    },
+    "pro_feature_stats" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advanced statistics per sheet"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistiche avanzate per foglio"
+          }
+        }
+      }
+    },
+    "pro_one_time_note" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "One-time purchase. No subscription."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acquisto una tantum. Nessun abbonamento."
+          }
+        }
+      }
+    },
+    "pro_product_unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Purchase unavailable. Try again later."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acquisto non disponibile. Riprova più tardi."
+          }
+        }
+      }
+    },
+    "pro_purchase_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buy — %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acquista — %@"
+          }
+        }
+      }
+    },
+    "pro_restore_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore purchases"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ripristina acquisti"
+          }
+        }
+      }
+    },
+    "pro_section_header" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pro"
+          }
+        }
+      }
+    },
+    "pro_subtitle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlock advanced features with a one-time purchase"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sblocca le funzioni avanzate con un acquisto una tantum"
+          }
+        }
+      }
+    },
+    "pro_title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spese Condivise Pro"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spese Condivise Pro"
+          }
+        }
+      }
+    },
+    "pro_upgrade_button" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Upgrade to Pro"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passa a Pro"
+          }
+        }
+      }
+    },
+    "rename_confirm" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rinomina"
+          }
+        }
+      }
+    },
+    "rename_sheet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rename"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rinomina"
           }
         }
       }
@@ -2313,6 +2605,40 @@
         }
       }
     },
+    "share_not_synced" : {
+      "comment" : "Shown when a sheet hasn't finished syncing to iCloud yet, blocking share",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't prepare sharing for this sheet yet. Close and reopen the app, then try sharing again."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile preparare la condivisione di questo foglio. Chiudi e riapri l'app, poi riprova a condividere."
+          }
+        }
+      }
+    },
+    "select_payer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select payer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seleziona pagante"
+          }
+        }
+      }
+    },
     "share_repair" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2343,23 +2669,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ripristino..."
-          }
-        }
-      }
-    },
-    "share_not_synced" : {
-      "comment" : "Shown when a sheet hasn't finished syncing to iCloud yet, blocking share",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't prepare sharing for this sheet yet. Close and reopen the app, then try sharing again."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Non è stato possibile preparare la condivisione di questo foglio. Chiudi e riapri l'app, poi riprova a condividere."
           }
         }
       }
@@ -2485,6 +2794,23 @@
     },
     "sheet name" : {
       "comment" : "sheet name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sheet name"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome foglio"
+          }
+        }
+      }
+    },
+    "sheet_name_placeholder" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -2708,227 +3034,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Devi %@"
-          }
-        }
-      }
-    },
-    "pro_title" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spese Condivise Pro"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spese Condivise Pro"
-          }
-        }
-      }
-    },
-    "pro_subtitle" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlock advanced features with a one-time purchase"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sblocca le funzioni avanzate con un acquisto una tantum"
-          }
-        }
-      }
-    },
-    "pro_feature_receipt" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Receipt photo for each expense"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foto dello scontrino per ogni spesa"
-          }
-        }
-      }
-    },
-    "pro_feature_splits" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unequal split between participants"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Divisione non equa tra i partecipanti"
-          }
-        }
-      }
-    },
-    "pro_feature_recurring" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatic recurring expenses"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Spese ricorrenti automatiche"
-          }
-        }
-      }
-    },
-    "pro_feature_stats" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Advanced statistics per sheet"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Statistiche avanzate per foglio"
-          }
-        }
-      }
-    },
-    "pro_purchase_button" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Buy — %@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acquista — %@"
-          }
-        }
-      }
-    },
-    "pro_restore_button" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restore purchases"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ripristina acquisti"
-          }
-        }
-      }
-    },
-    "pro_one_time_note" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "One-time purchase. No subscription."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acquisto una tantum. Nessun abbonamento."
-          }
-        }
-      }
-    },
-    "pro_already_pro" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro active ✦"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro attivo ✦"
-          }
-        }
-      }
-    },
-    "pro_upgrade_button" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Upgrade to Pro"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Passa a Pro"
-          }
-        }
-      }
-    },
-    "pro_product_unavailable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Purchase unavailable. Try again later."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Acquisto non disponibile. Riprova più tardi."
-          }
-        }
-      }
-    },
-    "pro_section_header" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro"
           }
         }
       }
