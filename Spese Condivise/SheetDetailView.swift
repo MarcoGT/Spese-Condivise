@@ -20,6 +20,7 @@ struct SheetDetailView: View {
     @State private var personToDelete: Person? = nil
     @State private var showDeletePersonBlocked = false
     @State private var showDeletePersonConfirm = false
+    @State private var personForLongPress: Person? = nil
     @State private var showingShareError = false
     @State private var shareErrorMessage = ""
     @State private var isPreparingShare = false
@@ -96,6 +97,24 @@ struct SheetDetailView: View {
                 if let person = personToClaimAsMe {
                     Text(String(format: NSLocalizedString("identify_confirm_message", comment: ""), person.name ?? ""))
                 }
+            }
+            .confirmationDialog(
+                personForLongPress?.name ?? "",
+                isPresented: Binding(get: { personForLongPress != nil }, set: { if !$0 { personForLongPress = nil } }),
+                titleVisibility: .visible
+            ) {
+                if let person = personForLongPress {
+                    Button(NSLocalizedString("person_remove", comment: ""), role: .destructive) {
+                        personToDelete = person
+                        personForLongPress = nil
+                        if personHasExpenses(person) {
+                            showDeletePersonBlocked = true
+                        } else {
+                            showDeletePersonConfirm = true
+                        }
+                    }
+                }
+                Button(NSLocalizedString("Annulla", comment: ""), role: .cancel) { personForLongPress = nil }
             }
     }
 
@@ -357,17 +376,8 @@ struct SheetDetailView: View {
                                 currencyCode: sheet.currencyCode ?? "EUR",
                                 onTap: claimMode ? { personToClaimAsMe = person } : nil
                             )
-                            .contextMenu {
-                                Button(role: .destructive) {
-                                    personToDelete = person
-                                    if personHasExpenses(person) {
-                                        showDeletePersonBlocked = true
-                                    } else {
-                                        showDeletePersonConfirm = true
-                                    }
-                                } label: {
-                                    Label(NSLocalizedString("person_remove", comment: ""), systemImage: "trash")
-                                }
+                            .onLongPressGesture {
+                                personForLongPress = person
                             }
                         }
                     }
