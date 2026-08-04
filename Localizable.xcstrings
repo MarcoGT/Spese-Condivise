@@ -2622,6 +2622,23 @@
         }
       }
     },
+    "only_payer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solo %@"
+          }
+        }
+      }
+    },
     "select_payer" : {
       "extractionState" : "manual",
       "localizations" : {

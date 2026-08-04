@@ -116,7 +116,17 @@ struct AddExpenseView: View {
                     }
                 }
 
-                Section(header: Text(NSLocalizedString("Per chi è la spesa", comment: "split between"))) {
+                Section(header: HStack {
+                    Text(NSLocalizedString("Per chi è la spesa", comment: "split between"))
+                    Spacer()
+                    if let payer = selectedPayer {
+                        Button(String(format: NSLocalizedString("only_payer", comment: ""), payer.name ?? "")) {
+                            selectedParticipants = [payer]
+                        }
+                        .font(.caption)
+                        .foregroundColor(.accentColor)
+                    }
+                }) {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))], spacing: 10) {
                         ForEach(persons) { person in
                             let isSelected = selectedParticipants.contains(where: { $0.objectID == person.objectID })
@@ -229,6 +239,8 @@ struct AddExpenseView: View {
 
     private func toggleParticipant(_ person: Person) {
         if let existing = selectedParticipants.first(where: { $0.objectID == person.objectID }) {
+            // Non permettere di de-selezionare il pagante: chi paga è sempre nel split
+            guard existing.objectID != selectedPayer?.objectID else { return }
             selectedParticipants.remove(existing)
         } else {
             selectedParticipants.insert(person)
