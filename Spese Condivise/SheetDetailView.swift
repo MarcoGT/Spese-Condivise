@@ -233,7 +233,10 @@ struct SheetDetailView: View {
         .sheet(item: $activeModal) { modal in
             switch modal {
                 case .add:
-                    AddExpenseView(sheetID: sheet.objectID)
+                    AddExpenseView(
+                        sheetID: sheet.objectID,
+                        defaultPayerID: sheet.resolvedMyPerson(using: currentUser)?.objectID
+                    )
                 case .edit(let expense):
                     AddExpenseView(expenseToEdit: expense)
                 case .share(let url):

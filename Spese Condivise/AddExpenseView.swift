@@ -9,6 +9,7 @@ struct AddExpenseView: View {
         // MODE
     private let sheetID: NSManagedObjectID?
     private let expenseToEdit: Expense?
+    private let defaultPayerID: NSManagedObjectID?
 
         // FIELDS
     @State private var amount: String = ""
@@ -19,15 +20,17 @@ struct AddExpenseView: View {
     @State private var selectedCategory: ExpenseCategory = .other
 
         // INIT — ADD
-    init(sheetID: NSManagedObjectID) {
+    init(sheetID: NSManagedObjectID, defaultPayerID: NSManagedObjectID? = nil) {
         self.sheetID = sheetID
         self.expenseToEdit = nil
+        self.defaultPayerID = defaultPayerID
     }
 
         // INIT — EDIT
     init(expenseToEdit: Expense) {
         self.sheetID = nil
         self.expenseToEdit = expenseToEdit
+        self.defaultPayerID = nil
     }
 
     var body: some View {
@@ -228,9 +231,11 @@ struct AddExpenseView: View {
             }
 
         } else {
-            // ADD → default pagante: "Io/Me", altrimenti il primo
+            // ADD → default pagante: l'utente identificato nel foglio; poi una
+            // persona chiamata "Io/Me"; altrimenti la prima in lista.
             let meName = NSLocalizedString("Me", comment: "current user")
-            selectedPayer = persons.first(where: { $0.name == meName })
+            selectedPayer = persons.first(where: { $0.objectID == defaultPayerID })
+                ?? persons.first(where: { $0.name == meName })
                 ?? persons.first(where: { $0.name?.lowercased() == "io" || $0.name?.lowercased() == "me" })
                 ?? persons.first
             selectedParticipants = Set(persons)
