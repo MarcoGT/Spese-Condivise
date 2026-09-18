@@ -140,33 +140,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata
     ) {
-        let persistenceController = PersistenceController.shared
-
-        persistenceController.executeWhenReady {
-            guard let sharedStore = persistenceController.sharedPersistentStore else {
-                DispatchQueue.main.async {
-                    let msg = NSLocalizedString("share_store_not_found", comment: "Shared store not found error")
-                    AppSyncState.current?.pendingShareError = msg
-                    NotificationCenter.default.post(name: .shareAcceptanceFailed, object: msg)
-                }
-                return
-            }
-
-            persistenceController.container.acceptShareInvitations(
-                from: [cloudKitShareMetadata],
-                into: sharedStore
-            ) { _, error in
-                DispatchQueue.main.async {
-                    if let error = error {
-                        let msg = error.localizedDescription
-                        AppSyncState.current?.pendingShareError = msg
-                        NotificationCenter.default.post(name: .shareAcceptanceFailed, object: msg)
-                    } else {
-                        self.waitForImportThenNotify(persistenceController: persistenceController)
-                    }
-                }
-            }
-        }
+        ShareService.acceptInvitation(cloudKitShareMetadata)
     }
 
     // MARK: - Attende import CloudKit dopo accettazione share
@@ -181,6 +155,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         if let obs = importObserver { NotificationCenter.default.removeObserver(obs) }
         importFallbackWork?.cancel()
 
+        // Da qui in poi la lista deve restare in attesa del foglio: il segnale
+        // di "accettata" arriva molto prima dei record veri (CloudKit scarica
+        // la zona condivisa in un secondo momento).
+        AppSyncState.current.isSyncingSharedSheet = true
+
         var fired = false
 
         let notify: () -> Void = { [weak self] in
@@ -193,8 +172,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
             // Le spese già presenti nel foglio appena accettato non devono
             // generare notifiche: registrale tutte come già note.
             LastSeenStore.seedAllKnown(context: persistenceController.container.viewContext)
-            AppSyncState.current?.pendingShareSuccess = true
+            AppSyncState.current.pendingShareSuccess = true
             NotificationCenter.default.post(name: .shareAcceptanceSucceeded, object: nil)
+
+            // L'import che ci ha svegliato può essere quello dello store privato:
+            // continua a rinfrescare per far comparire il foglio quando la zona
+            // condivisa finisce di scaricarsi.
+            self?.startPostAcceptRefresh(persistenceController: persistenceController)
         }
 
         // Ascolta l'evento di import di NSPersistentCloudKitContainer
@@ -208,7 +192,8 @@ class AppDelegate: NSObject, UIApplicationDelegate {
                     NSPersistentCloudKitContainer.eventNotificationUserInfoKey
                 ] as? NSPersistentCloudKitContainer.Event,
                 event.type == .import,
-                event.endDate != nil
+                event.endDate != nil,
+                event.error == nil
             else { return }
 
             if let obs = self?.importObserver {
@@ -225,6 +210,33 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
         // Richiedi subito un refresh per innescare il ciclo di sync
         persistenceController.container.viewContext.refreshAllObjects()
+    }
+
+    private var postAcceptRefreshWork: DispatchWorkItem?
+
+    /// Rinfresca il viewContext ogni 3s per 2 minuti dopo l'accettazione di una
+    /// share. Serve perché l'arrivo dei record della zona condivisa non sempre
+    /// genera un remote-change che la lista riesce a intercettare in tempo.
+    private func startPostAcceptRefresh(persistenceController: PersistenceController) {
+        postAcceptRefreshWork?.cancel()
+
+        let context = persistenceController.container.viewContext
+        var ticks = 0
+        var schedule: (() -> Void)!
+        schedule = {
+            let work = DispatchWorkItem {
+                ticks += 1
+                context.refreshAllObjects()
+                if ticks >= 40 {
+                    AppSyncState.current.isSyncingSharedSheet = false
+                } else if AppSyncState.current.isSyncingSharedSheet {
+                    schedule()
+                }
+            }
+            self.postAcceptRefreshWork = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: work)
+        }
+        schedule()
     }
 
 }

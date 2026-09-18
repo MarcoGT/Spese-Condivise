@@ -2560,13 +2560,29 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shared sheet added! It may take a few seconds to appear."
+            "value" : "Shared sheet added! You can find it in your list."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Foglio condiviso aggiunto! Potrebbe richiedere qualche secondo per apparire."
+            "value" : "Foglio condiviso aggiunto! Lo trovi nella tua lista."
+          }
+        }
+      }
+    },
+    "share_accepted_slow_message" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation accepted. The sheet is still downloading from iCloud and will appear in your list shortly."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invito accettato. Il foglio si sta ancora scaricando da iCloud e comparirà nella lista tra poco."
           }
         }
       }
@@ -2605,6 +2621,198 @@
         }
       }
     },
+    "share_error_account_unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your iCloud account isn't ready yet. Wait a few seconds and open the link again."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'account iCloud non è ancora pronto. Attendi qualche secondo e riapri il link."
+          }
+        }
+      }
+    },
+    "share_error_bad_container" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App configuration error. Please contact support."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Errore di configurazione dell'app. Contatta il supporto."
+          }
+        }
+      }
+    },
+    "share_error_generic" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't open the shared sheet:\n%@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile aprire il foglio condiviso:\n%@"
+          }
+        }
+      }
+    },
+    "share_error_managed_account" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account has restrictions that prevent access to shared sheets."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il tuo account ha restrizioni che impediscono l'accesso ai fogli condivisi."
+          }
+        }
+      }
+    },
+    "share_error_network" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No internet connection. Check your connection and open the link again."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connessione internet non disponibile. Verifica la connessione e riapri il link."
+          }
+        }
+      }
+    },
+    "share_error_not_authenticated" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You need to sign in with your Apple ID.\n\nGo to Settings > [your name] > iCloud."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Devi effettuare l'accesso con il tuo Apple ID.\n\nVai in Impostazioni > [Il tuo nome] > iCloud."
+          }
+        }
+      }
+    },
+    "share_error_quota" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not enough iCloud storage. Free up space and try again."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spazio iCloud insufficiente. Libera spazio e riprova."
+          }
+        }
+      }
+    },
+    "share_error_rate_limited" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too many requests. Wait a few minutes before trying again."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Troppe richieste. Attendi qualche minuto prima di riprovare."
+          }
+        }
+      }
+    },
+    "share_error_service_unavailable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud is unavailable right now. Please try again later."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il servizio iCloud non è disponibile al momento. Riprova più tardi."
+          }
+        }
+      }
+    },
+    "share_error_unknown_item" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This shared sheet is no longer available or has been deleted."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il foglio condiviso non è più disponibile o è stato eliminato."
+          }
+        }
+      }
+    },
+    "share_error_verification" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your account may need verification. Check your iCloud settings."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Potrebbe essere necessario verificare il tuo account. Controlla le impostazioni iCloud."
+          }
+        }
+      }
+    },
+    "share_error_zone_busy" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud is temporarily busy. Try again in a few minutes."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il servizio è temporaneamente occupato. Riprova tra qualche minuto."
+          }
+        }
+      }
+    },
     "share_not_synced" : {
       "comment" : "Shown when a sheet hasn't finished syncing to iCloud yet, blocking share",
       "localizations" : {
@@ -2618,6 +2826,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Non è stato possibile preparare la condivisione di questo foglio. Chiudi e riapri l'app, poi riprova a condividere."
+          }
+        }
+      }
+    },
+    "spent_total" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spent"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Speso"
           }
         }
       }
@@ -2703,6 +2928,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Store condiviso non trovato. Prova a riavviare l'app."
+          }
+        }
+      }
+    },
+    "share_syncing_banner" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloading shared sheet…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scaricamento foglio condiviso…"
           }
         }
       }

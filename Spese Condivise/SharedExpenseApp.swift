@@ -50,7 +50,7 @@ struct SharedExpensesApp: App {
 
     let persistenceController = PersistenceController.shared
     private let cloudContainer = CKContainer(identifier: "iCloud.com.marcolagana.SharedExpenses")
-    @StateObject private var syncState = AppSyncState()
+    @StateObject private var syncState = AppSyncState.current
     @StateObject private var currentUser = CurrentUser()
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
 
@@ -87,8 +87,6 @@ struct SharedExpensesApp: App {
                     }
                 }
                 .onAppear {
-                    // Registra l'istanza live per AppDelegate (no SwiftUI environment)
-                    AppSyncState.current = syncState
                     prewarmCloudKit()
                     observeCloudKitSync()
                     NotificationService.shared.requestPermission()
@@ -137,96 +135,50 @@ CommandGroup(replacing: .printItem) {
     // MARK: - CloudKit Sharing (onOpenURL path)
 
     private func handleIncomingURL(_ url: URL) {
-        if url.absoluteString.contains("icloud.com") && url.absoluteString.contains("share") {
-            handleCloudKitShare(url: url)
-        }
+        guard isCloudKitShareURL(url) else { return }
+        AppSyncState.current.isSyncingSharedSheet = true
+        fetchMetadataThenAccept(url: url, attempt: 0)
     }
 
-    private func handleCloudKitShare(url: URL) {
-        cloudContainer.fetchShareMetadata(with: url) { (metadata, error) in
-            if let error = error {
-                DispatchQueue.main.async {
-                    let msg = self.sharingErrorMessage(for: error)
-                    AppSyncState.current?.pendingShareError = msg
-                    NotificationCenter.default.post(name: .shareAcceptanceFailed, object: msg)
+    private func isCloudKitShareURL(_ url: URL) -> Bool {
+        guard let host = url.host?.lowercased(), host.hasSuffix("icloud.com") else { return false }
+        return url.path.hasPrefix("/share/")
+    }
+
+    /// `fetchShareMetadata` fallisce facilmente quando l'app è appena stata
+    /// lanciata dal link (rete non ancora pronta, account iCloud in warm-up):
+    /// senza retry l'utente vede solo un errore e il foglio non arriva mai.
+    private func fetchMetadataThenAccept(url: URL, attempt: Int) {
+        cloudContainer.fetchShareMetadata(with: url) { metadata, error in
+            if let metadata = metadata, error == nil {
+                ShareService.acceptInvitation(metadata)
+                return
+            }
+
+            let isTransient: Bool = {
+                guard let ck = error as? CKError else { return false }
+                switch ck.code {
+                    case .networkFailure, .networkUnavailable, .serviceUnavailable,
+                         .zoneBusy, .requestRateLimited, .accountTemporarilyUnavailable:
+                        return true
+                    default:
+                        return false
+                }
+            }()
+
+            if isTransient, attempt < 3 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(1 << attempt) * 2) {
+                    self.fetchMetadataThenAccept(url: url, attempt: attempt + 1)
                 }
                 return
             }
 
-            guard let metadata = metadata else {
-                DispatchQueue.main.async {
-                    let msg = NSLocalizedString("share_unknown_error", comment: "Unknown share error")
-                    AppSyncState.current?.pendingShareError = msg
-                    NotificationCenter.default.post(name: .shareAcceptanceFailed, object: msg)
-                }
-                return
-            }
-
-            PersistenceController.shared.executeWhenReady {
-                guard let sharedStore = PersistenceController.shared.sharedPersistentStore else {
-                    DispatchQueue.main.async {
-                        let msg = NSLocalizedString("share_store_not_found", comment: "Shared store not found")
-                        AppSyncState.current?.pendingShareError = msg
-                        NotificationCenter.default.post(name: .shareAcceptanceFailed, object: msg)
-                    }
-                    return
-                }
-
-                PersistenceController.shared.container.acceptShareInvitations(
-                    from: [metadata],
-                    into: sharedStore
-                ) { _, error in
-                    DispatchQueue.main.async {
-                        if let error = error {
-                            let msg = self.sharingErrorMessage(for: error)
-                            AppSyncState.current?.pendingShareError = msg
-                            NotificationCenter.default.post(name: .shareAcceptanceFailed, object: msg)
-                        } else {
-                            self.appDelegate.waitForImportThenNotify(
-                                persistenceController: PersistenceController.shared
-                            )
-                        }
-                    }
-                }
+            DispatchQueue.main.async {
+                ShareService.reportAcceptFailure(
+                    error.map { ShareService.acceptErrorMessage(for: $0) }
+                        ?? NSLocalizedString("share_unknown_error", comment: "")
+                )
             }
         }
-    }
-
-    // MARK: - Error message helper
-
-    private func sharingErrorMessage(for error: Error) -> String {
-        if let ckError = error as? CKError {
-            switch ckError.code {
-            case .notAuthenticated:
-                return "Devi effettuare l'accesso con il tuo Apple ID.\n\nVai in Impostazioni > [Il tuo nome] > iCloud."
-            case .accountTemporarilyUnavailable:
-                return "L'account iCloud non è ancora pronto. Attendi qualche secondo e riprova."
-            case .networkFailure, .networkUnavailable:
-                return "Connessione internet non disponibile. Verifica la connessione e riprova."
-            case .quotaExceeded:
-                return "Spazio iCloud insufficiente. Libera spazio e riprova."
-            case .participantMayNeedVerification:
-                return "Potrebbe essere necessario verificare il tuo account. Controlla le impostazioni iCloud."
-            case .unknownItem:
-                return "Il foglio condiviso non è più disponibile o è stato eliminato."
-            case .badContainer:
-                return "Errore di configurazione dell'app. Contatta il supporto."
-            case .serviceUnavailable:
-                return "Il servizio iCloud non è disponibile al momento. Riprova più tardi."
-            case .zoneBusy:
-                return "Il servizio è temporaneamente occupato. Riprova tra qualche minuto."
-            case .requestRateLimited:
-                return "Troppe richieste. Attendi qualche minuto prima di riprovare."
-            case .alreadyShared:
-                return "Questo foglio è già condiviso con te."
-            case .referenceViolation:
-                return "Errore nei riferimenti dei dati. Il foglio potrebbe essere corrotto."
-            case .managedAccountRestricted:
-                return "Il tuo account ha delle restrizioni che impediscono l'accesso ai fogli condivisi."
-            default:
-                return "Errore CloudKit \(ckError.code.rawValue):\n\(ckError.localizedDescription)"
-            }
-        }
-        return "Errore sconosciuto:\n\(error.localizedDescription)"
     }
 }

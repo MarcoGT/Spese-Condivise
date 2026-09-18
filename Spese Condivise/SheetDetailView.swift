@@ -360,6 +360,9 @@ struct SheetDetailView: View {
     @ViewBuilder private var personsSection: some View {
         if let persons = sheet.persons as? Set<Person>, !persons.isEmpty {
             let balances = balancesPerPerson(sheet: sheet)
+            let spentByPerson: [NSManagedObjectID: Double] = expenses.reduce(into: [:]) { acc, e in
+                if let oid = e.paidBy?.objectID { acc[oid, default: 0] += e.amount }
+            }
             Section {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
@@ -374,6 +377,7 @@ struct SheetDetailView: View {
                                 balanceColor: balanceColor(value),
                                 balanceText: personBalanceText(value, isMe: isMe),
                                 currencyCode: sheet.currencyCode ?? "EUR",
+                                totalSpent: spentByPerson[person.objectID] ?? 0,
                                 onTap: claimMode ? { personToClaimAsMe = person } : nil
                             )
                             .onLongPressGesture {
@@ -764,18 +768,33 @@ private struct PersonBalanceCard: View {
     let balanceColor: Color
     let balanceText: String
     let currencyCode: String
+    let totalSpent: Double
     var onTap: (() -> Void)? = nil
 
+    private var isEven: Bool { abs(value) < 0.01 }
+
     private var balanceLabel: String {
-        if abs(value) < 0.01 { return NSLocalizedString("balance_even_short", comment: "") }
+        if isEven {
+            return totalSpent > 0.01
+                ? NSLocalizedString("spent_total", comment: "")
+                : NSLocalizedString("balance_even_short", comment: "")
+        }
         return value > 0
             ? NSLocalizedString("balance_credit", comment: "")
             : NSLocalizedString("balance_debit", comment: "")
     }
 
     private var formattedAmount: String {
-        if abs(value) < 0.01 { return AmountFormatter.format(0, currencyCode: currencyCode) }
+        if isEven {
+            return totalSpent > 0.01
+                ? AmountFormatter.format(totalSpent, currencyCode: currencyCode)
+                : AmountFormatter.format(0, currencyCode: currencyCode)
+        }
         return AmountFormatter.format(abs(value), currencyCode: currencyCode)
+    }
+
+    private var displayColor: Color {
+        isEven && totalSpent > 0.01 ? .primary : balanceColor
     }
 
     var body: some View {
@@ -795,7 +814,7 @@ private struct PersonBalanceCard: View {
 
             Text(formattedAmount)
                 .font(.system(.title3, design: .rounded).weight(.bold))
-                .foregroundColor(balanceColor)
+                .foregroundColor(displayColor)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
 

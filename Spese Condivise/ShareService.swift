@@ -208,6 +208,147 @@ enum ShareService {
         }
     }
 
+    // MARK: - Accettazione inviti
+
+    /// Metadati già accettati in questa sessione: iOS può consegnare lo stesso
+    /// invito sia via `windowScene(_:userDidAcceptCloudKitShareWith:)` sia via
+    /// universal link, e una doppia `acceptShareInvitations` sullo stesso record
+    /// fa fallire la seconda lasciando la UI in errore su una share in realtà ok.
+    private static var acceptedShareIDs = Set<String>()
+    private static let acceptLock = NSLock()
+
+    private static func markAccepting(_ metadata: CKShare.Metadata) -> Bool {
+        let key = metadata.share.recordID.recordName
+        acceptLock.lock()
+        defer { acceptLock.unlock() }
+        return acceptedShareIDs.insert(key).inserted
+    }
+
+    private static func unmarkAccepting(_ metadata: CKShare.Metadata) {
+        let key = metadata.share.recordID.recordName
+        acceptLock.lock()
+        acceptedShareIDs.remove(key)
+        acceptLock.unlock()
+    }
+
+    /// Unico punto di accettazione di un invito: usato dal SceneDelegate,
+    /// dall'AppDelegate e dal percorso universal link. Attende che gli store
+    /// siano pronti, deduplica gli inviti ripetuti, riprova sugli errori
+    /// transitori e riporta l'esito su `AppSyncState`.
+    static func acceptInvitation(_ metadata: CKShare.Metadata, attempt: Int = 0) {
+        let persistence = PersistenceController.shared
+
+        guard attempt > 0 || markAccepting(metadata) else { return }
+
+        persistence.executeWhenReady {
+            guard let sharedStore = persistence.sharedPersistentStore else {
+                unmarkAccepting(metadata)
+                reportAcceptFailure(NSLocalizedString("share_store_not_found", comment: ""))
+                return
+            }
+
+            persistence.container.acceptShareInvitations(
+                from: [metadata],
+                into: sharedStore
+            ) { _, error in
+                DispatchQueue.main.async {
+                    guard let error = error else {
+                        AppDelegate.shared?.waitForImportThenNotify(
+                            persistenceController: persistence
+                        )
+                        return
+                    }
+
+                    // Già accettata in precedenza: non è un errore per l'utente,
+                    // il foglio è (o sarà) nella lista.
+                    if let ck = error as? CKError, ck.code == .alreadyShared {
+                        AppDelegate.shared?.waitForImportThenNotify(
+                            persistenceController: persistence
+                        )
+                        return
+                    }
+
+                    if isRetryable(error), attempt < 3 {
+                        let delay = retryDelay(for: error, attempt: attempt)
+                        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                            acceptInvitation(metadata, attempt: attempt + 1)
+                        }
+                        return
+                    }
+
+                    unmarkAccepting(metadata)
+                    reportAcceptFailure(acceptErrorMessage(for: error))
+                }
+            }
+        }
+    }
+
+    private static func isRetryable(_ error: Error) -> Bool {
+        guard let ck = error as? CKError else { return false }
+        switch ck.code {
+            case .networkFailure, .networkUnavailable, .serviceUnavailable,
+                 .zoneBusy, .requestRateLimited, .accountTemporarilyUnavailable:
+                return true
+            default:
+                return false
+        }
+    }
+
+    private static func retryDelay(for error: Error, attempt: Int) -> Double {
+        if let ck = error as? CKError,
+           let suggested = ck.retryAfterSeconds, suggested > 0 {
+            return min(suggested, 30)
+        }
+        return Double(1 << attempt) * 2
+    }
+
+    /// Pubblica l'errore PRIMA di spegnere il flag di attesa: la lista reagisce
+    /// al primo dei due e deve mostrare l'errore, non il messaggio generico di
+    /// "sincronizzazione lenta".
+    static func reportAcceptFailure(_ message: String) {
+        AppSyncState.current.pendingShareError = message
+        AppSyncState.current.isSyncingSharedSheet = false
+        NotificationCenter.default.post(name: .shareAcceptanceFailed, object: message)
+    }
+
+    static func acceptErrorMessage(for error: Error) -> String {
+        guard let ck = error as? CKError else {
+            return String(
+                format: NSLocalizedString("share_error_generic", comment: ""),
+                error.localizedDescription
+            )
+        }
+        switch ck.code {
+            case .notAuthenticated:
+                return NSLocalizedString("share_error_not_authenticated", comment: "")
+            case .accountTemporarilyUnavailable:
+                return NSLocalizedString("share_error_account_unavailable", comment: "")
+            case .networkFailure, .networkUnavailable:
+                return NSLocalizedString("share_error_network", comment: "")
+            case .quotaExceeded:
+                return NSLocalizedString("share_error_quota", comment: "")
+            case .participantMayNeedVerification:
+                return NSLocalizedString("share_error_verification", comment: "")
+            case .unknownItem:
+                return NSLocalizedString("share_error_unknown_item", comment: "")
+            case .badContainer:
+                return NSLocalizedString("share_error_bad_container", comment: "")
+            case .serviceUnavailable:
+                return NSLocalizedString("share_error_service_unavailable", comment: "")
+            case .zoneBusy:
+                return NSLocalizedString("share_error_zone_busy", comment: "")
+            case .requestRateLimited:
+                return NSLocalizedString("share_error_rate_limited", comment: "")
+            case .managedAccountRestricted:
+                return NSLocalizedString("share_error_managed_account", comment: "")
+            default:
+                return String(
+                    format: NSLocalizedString("share_error_generic", comment: ""),
+                    ck.localizedDescription
+                )
+        }
+    }
+
     enum ShareError: LocalizedError {
         case sheetNotFound
         case noShareReturned

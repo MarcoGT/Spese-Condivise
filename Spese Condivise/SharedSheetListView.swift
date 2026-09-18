@@ -28,6 +28,10 @@ struct SharedSheetListView: View {
     @State private var sheetEmojis:  [NSManagedObjectID: String] = [:]
     @State private var sheetColors:  [NSManagedObjectID: Color]  = [:]
     @State private var sharedSheetIDs: Set<NSManagedObjectID> = []
+    // Numero di fogli al momento in cui è partita l'accettazione di una share:
+    // serve a capire quando il foglio nuovo è davvero arrivato da CloudKit.
+    @State private var syncPreCount = 0
+    @State private var shareOutcomeShown = true
 
     private let remoteChangePublisher = NotificationCenter.default
         .publisher(for: .NSPersistentStoreRemoteChange)
@@ -98,6 +102,11 @@ struct SharedSheetListView: View {
                         .animation(.spring(response: 0.4), value: sheets.count)
                     }
                 }
+                .overlay(alignment: .top) {
+                    if syncState.isSyncingSharedSheet {
+                        shareSyncBanner
+                    }
+                }
                 .navigationTitle(NSLocalizedString("Shared Expenses", comment: ""))
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
@@ -136,7 +145,6 @@ struct SharedSheetListView: View {
         }
         .onAppear {
             bootstrapCurrentUserIfNeeded()
-            AppSyncState.current = syncState
             loadSavedAppearances()
             refreshSharedStatus()
             updateWidget()
@@ -171,16 +179,38 @@ struct SharedSheetListView: View {
         // Osserva AppSyncState per il risultato dell'accettazione share.
         // .onChange è immune alle race condition tipiche dei publisher Combine:
         // lo stato @Published persiste anche se la view non era ancora attiva.
+        // L'invito è stato accettato, ma i record della zona condivisa possono
+        // arrivare molto dopo: qui si rinfresca soltanto, l'esito si annuncia
+        // quando il foglio compare davvero (o quando scade l'attesa).
         .onChange(of: syncState.pendingShareSuccess) { success in
             guard success else { return }
             viewContext.refreshAllObjects()
+            refreshSharedStatus()
+            syncState.pendingShareSuccess = false
+        }
+        .onChange(of: syncState.isSyncingSharedSheet) { syncing in
+            if syncing {
+                syncPreCount = sheets.count
+                shareOutcomeShown = false
+            } else if !shareOutcomeShown {
+                shareOutcomeShown = true
+                shareAlertIsSuccess = true
+                shareAlertMessage = NSLocalizedString("share_accepted_slow_message", comment: "")
+                showingShareAlert = true
+            }
+        }
+        .onChange(of: sheets.count) { newCount in
+            guard syncState.isSyncingSharedSheet, newCount > syncPreCount else { return }
+            shareOutcomeShown = true
+            syncState.isSyncingSharedSheet = false
+            refreshSharedStatus()
             shareAlertIsSuccess = true
             shareAlertMessage = NSLocalizedString("share_accepted_message", comment: "Share accepted successfully")
             showingShareAlert = true
-            syncState.pendingShareSuccess = false
         }
         .onChange(of: syncState.pendingShareError) { errorMsg in
             guard let msg = errorMsg else { return }
+            shareOutcomeShown = true
             shareAlertIsSuccess = false
             shareAlertMessage = msg
             showingShareAlert = true
@@ -258,6 +288,31 @@ struct SharedSheetListView: View {
     }
 
     // sheetRow ora è una struct separata — vedi SheetRowView in fondo al file
+
+    // MARK: - SHARE SYNC BANNER
+
+    @ViewBuilder
+    private var shareSyncBanner: some View {
+        HStack(spacing: 10) {
+            ProgressView()
+                .scaleEffect(0.8)
+            Text(NSLocalizedString("share_syncing_banner", comment: ""))
+                .font(.footnote)
+                .foregroundColor(.secondary)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(Color(.secondarySystemBackground))
+                .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
+        )
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .animation(.easeInOut(duration: 0.25), value: syncState.isSyncingSharedSheet)
+    }
 
     // MARK: - EMPTY STATE
 
