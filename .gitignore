@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+
+# Xcode — artefatti di build e stato personale dell'IDE
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Credenziali App Store Connect.
+# La chiave vive fuori dal repo (~/.appstoreconnect/), queste righe sono la
+# seconda rete: un .p8 committato è una chiave da revocare, non da rimuovere
+# con un commit successivo — resta nella storia di git per sempre.
+*.p8
+AuthKey_*
+key.json
+fastlane/.env*
+
+# fastlane — output transitorio di ogni esecuzione.
+# I metadati e gli screenshot invece SI versionano: sono la scheda App Store.
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/test_output/
+fastlane/README.md
