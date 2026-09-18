@@ -1,0 +1,15 @@
+Spese Condivise è l'app semplice per dividere le spese con chi vuoi — in viaggio, in casa, ovunque.
+
+Crea un foglio, aggiungi le persone e inizia a registrare le spese. L'app calcola automaticamente i saldi e ti dice chi deve rimborsare chi, con la cifra esatta.
+
+FUNZIONALITÀ PRINCIPALI
+• Fogli condivisi via iCloud — invita chi vuoi con un link
+• Saldi in tempo reale — sempre aggiornati ad ogni spesa
+• Suggerimenti di rimborso — chi paga chi e quanto
+• Categorie — alimentari, trasporti, ristoranti e altro
+• Statistiche — totale, media per persona, spese per categoria
+• Multi-valuta — con tasso di cambio personalizzabile
+• Esporta in PDF — riepilogo completo da condividere
+• Archivio spese — tieni la storia senza ingombrare la vista principale
+
+Niente registrazione, niente account. Solo tu, le tue persone e le spese da dividere.

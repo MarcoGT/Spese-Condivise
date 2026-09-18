@@ -1,0 +1,15 @@
+Shared Expenses is the simple app to split costs with whoever you want — on a trip, at home, anywhere.
+
+Create a sheet, add people, and start logging expenses. The app automatically calculates balances and tells you exactly who needs to pay whom.
+
+KEY FEATURES
+• Shared sheets via iCloud — invite anyone with a link
+• Real-time balances — updated instantly with every expense
+• Settlement suggestions — who pays whom and how much
+• Categories — groceries, transport, restaurants and more
+• Statistics — total, average per person, expenses by category
+• Multi-currency — with customizable exchange rate
+• Export to PDF — full summary ready to share
+• Expense archive — keep history without cluttering the main view
+
+No sign-up, no account. Just you, your people, and the expenses to split.
