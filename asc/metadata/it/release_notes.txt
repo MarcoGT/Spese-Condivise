@@ -1,1 +1,3 @@
-
+• I fogli condivisi ora si aprono in modo affidabile: rifatto da capo il modo in cui l'app accetta un invito e attende i dati da iCloud, con un'indicazione chiara mentre il foglio si scarica.
+• Le spese segnate solo per te ora compaiono correttamente, con il totale speso anche quando il saldo è in pari.
+• Messaggi di errore più chiari quando iCloud non risponde.

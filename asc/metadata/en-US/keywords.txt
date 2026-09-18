@@ -1,1 +1,1 @@
-expenses,split,shared,bills,money,friends,travel,flatmates,iCloud,budget
+split,bill,roommate,trip,group,owe,settle,debt,travel,housemate,tab,shared,flatmate,friends,vacation
