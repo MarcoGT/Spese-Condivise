@@ -306,7 +306,13 @@ struct SheetDetailView: View {
     // MARK: - AZZERAMENTO SALDO
 
     private func performSettle() {
-        try? SettlementService.performSettlement(sheet: sheet, context: viewContext)
+        let hadExpenses = !sheet.activeExpensesArray.isEmpty
+        do {
+            try SettlementService.performSettlement(sheet: sheet, context: viewContext)
+            if hadExpenses { ReviewPrompt.afterSettlement() }
+        } catch {
+            print("❌ Errore azzeramento saldo:", error)
+        }
     }
 
     // MARK: - CONDIVISIONE (CORE)
