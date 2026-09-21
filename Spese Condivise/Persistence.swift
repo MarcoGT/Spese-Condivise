@@ -97,11 +97,23 @@ final class PersistenceController: ObservableObject {
             fatalError("❌ Store description mancante")
         }
         
-        let storesURL = privateStoreDescription.url!.deletingLastPathComponent()
+        var storesURL = privateStoreDescription.url!.deletingLastPathComponent()
+
+        #if DEBUG
+        let demo = DemoData.isEnabled
+        #else
+        let demo = false
+        #endif
+        if demo {
+            storesURL = FileManager.default.temporaryDirectory
+                .appendingPathComponent("demo-\(UUID().uuidString)", isDirectory: true)
+            try? FileManager.default.createDirectory(at: storesURL, withIntermediateDirectories: true)
+            privateStoreDescription.url = storesURL.appendingPathComponent("SharedExpenses.sqlite")
+        }
 
         // Ripristino sincronizzazione richiesto: cancella i file degli store
         // PRIMA di caricarli (niente lock), poi spegne il flag.
-        if UserDefaults.standard.bool(forKey: Self.pendingResetKey) {
+        if !demo, UserDefaults.standard.bool(forKey: Self.pendingResetKey) {
             Self.deleteStoreFiles([
                 privateStoreDescription.url!,
                 storesURL.appendingPathComponent("shared.sqlite")
@@ -138,6 +150,11 @@ final class PersistenceController: ObservableObject {
         sharedStoreDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         sharedStoreDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         
+        if demo {
+            privateStoreDescription.cloudKitContainerOptions = nil
+            sharedStoreDescription.cloudKitContainerOptions = nil
+        }
+
             // Assegna entrambe le descrizioni
         container.persistentStoreDescriptions = [privateStoreDescription, sharedStoreDescription]
         
@@ -160,5 +177,9 @@ final class PersistenceController: ObservableObject {
         } catch {
             print("❌ Errore generazione query: \(error)")
         }
+
+        #if DEBUG
+        if demo { DemoData.seed(into: container.viewContext) }
+        #endif
     }
 }

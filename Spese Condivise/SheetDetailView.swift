@@ -136,6 +136,15 @@ struct SheetDetailView: View {
         .focusedSceneValue(\.exportAction, exportPDF)
         .onAppear {
             LastSeenStore.markSeen(for: sheet)
+            #if DEBUG
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                switch DemoData.screen {
+                    case "add": activeModal = .add
+                    case "stats": showStatistics = true
+                    default: break
+                }
+            }
+            #endif
         }
         .toolbar {
             // Azioni secondarie raccolte in un unico menu "•••": con troppi

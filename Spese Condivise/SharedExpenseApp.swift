@@ -89,6 +89,9 @@ struct SharedExpensesApp: App {
                 .onAppear {
                     prewarmCloudKit()
                     observeCloudKitSync()
+                    #if DEBUG
+                    if DemoData.isEnabled { return }
+                    #endif
                     NotificationService.shared.requestPermission()
                     NotificationService.shared.setupSubscriptions()
                 }

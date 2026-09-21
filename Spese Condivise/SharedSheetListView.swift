@@ -32,6 +32,7 @@ struct SharedSheetListView: View {
     // serve a capire quando il foglio nuovo è davvero arrivato da CloudKit.
     @State private var syncPreCount = 0
     @State private var shareOutcomeShown = true
+    @State private var demoOpenFirstSheet = false
 
     private let remoteChangePublisher = NotificationCenter.default
         .publisher(for: .NSPersistentStoreRemoteChange)
@@ -107,6 +108,9 @@ struct SharedSheetListView: View {
                         shareSyncBanner
                     }
                 }
+                .navigationDestination(isPresented: $demoOpenFirstSheet) {
+                    if let first = sheets.first { SheetDetailView(sheet: first) }
+                }
                 .navigationTitle(NSLocalizedString("Shared Expenses", comment: ""))
                 .navigationBarTitleDisplayMode(.large)
                 .toolbar {
@@ -146,6 +150,11 @@ struct SharedSheetListView: View {
         .onAppear {
             bootstrapCurrentUserIfNeeded()
             loadSavedAppearances()
+            #if DEBUG
+            if DemoData.screen != nil {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { demoOpenFirstSheet = true }
+            }
+            #endif
             refreshSharedStatus()
             updateWidget()
 
@@ -431,7 +440,7 @@ struct SharedSheetListView: View {
     private func sheetBalanceText(_ sheet: SharedSheet) -> String {
         let value = sheetBalance(sheet)
         if value == 0 { return NSLocalizedString("in pari", comment: "") }
-        let formatted = AmountFormatter.format(abs(value))
+        let formatted = AmountFormatter.format(abs(value), currencyCode: sheet.currencyCode ?? "EUR")
         return value > 0 ? "+\(formatted)" : "−\(formatted)"
     }
 
@@ -442,6 +451,11 @@ struct SharedSheetListView: View {
     /// Returns just the formatted amount (e.g. "12,50 €") for the hero card number display.
     private func totalBalanceAmountText() -> String {
         let value = totalBalance()
+        // Con fogli in valute diverse la somma non ha una valuta sensata: resta €.
+        let codes = Set(sheets.map { $0.currencyCode ?? "EUR" })
+        if codes.count == 1, let code = codes.first {
+            return AmountFormatter.format(abs(value), currencyCode: code)
+        }
         return AmountFormatter.format(abs(value))
     }
 

@@ -239,6 +239,14 @@ struct AddExpenseView: View {
                 ?? persons.first(where: { $0.name?.lowercased() == "io" || $0.name?.lowercased() == "me" })
                 ?? persons.first
             selectedParticipants = Set(persons)
+
+            #if DEBUG
+            if DemoData.screen == "add" {
+                amount = DemoData.italianUI ? "58,40" : "58.40"
+                note = DemoData.italianUI ? "Pizzeria" : "Pizza night"
+                selectedCategory = .food
+            }
+            #endif
         }
     }
 

@@ -27,3 +27,7 @@ fastlane/report.xml
 fastlane/Preview.html
 fastlane/test_output/
 fastlane/README.md
+
+# Screenshot: le catture grezze si rigenerano con tools/screenshots/capture.sh
+asc/screenshots/raw/
+__pycache__/
