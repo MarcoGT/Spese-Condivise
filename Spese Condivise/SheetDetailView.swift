@@ -249,7 +249,7 @@ struct SheetDetailView: View {
                 case .edit(let expense):
                     AddExpenseView(expenseToEdit: expense)
                 case .share(let url):
-                    ActivityView(activityItems: [url]) {
+                    ActivityView(activityItems: inviteItems(url)) {
                         activeModal = nil
                     }
             }
@@ -360,10 +360,15 @@ struct SheetDetailView: View {
         }
     }
 
+    private func inviteItems(_ url: URL) -> [Any] {
+        let inviter = sheet.resolvedMyPerson(using: currentUser)?.name ?? currentUser.name
+        return [ShareService.inviteMessage(url: url, sheetName: sheet.name, inviterName: inviter)]
+    }
+
     private func presentShareLink(_ url: URL) {
         guard isPreparingShare else { return }
         isPreparingShare = false
-        presentViewController(UIActivityViewController(activityItems: [url], applicationActivities: nil))
+        presentViewController(UIActivityViewController(activityItems: inviteItems(url), applicationActivities: nil))
     }
 
     private func finishShare(error: String) {
@@ -603,7 +608,7 @@ struct SheetDetailView: View {
             switch result {
             case .success(let url):
                 self.presentViewController(
-                    UIActivityViewController(activityItems: [url], applicationActivities: nil)
+                    UIActivityViewController(activityItems: self.inviteItems(url), applicationActivities: nil)
                 )
             case .failure(let error):
                 self.shareErrorMessage = error.localizedDescription

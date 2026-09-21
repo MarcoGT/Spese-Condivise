@@ -1148,6 +1148,40 @@
         }
       }
     },
+    "invite_message" : {
+      "comment" : "Invite text: 1 inviter name, 2 sheet name, 3 iCloud share link, 4 App Store link",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ invited you to split the expenses for “%2$@” on Split Expenses.\n\nOpen the invite:\n%3$@\n\nDon't have the app yet? It's free:\n%4$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ ti ha invitato a dividere le spese di «%2$@» su Spese Condivise.\n\nApri l'invito:\n%3$@\n\nNon hai ancora l'app? È gratis:\n%4$@"
+          }
+        }
+      }
+    },
+    "invite_message_anonymous" : {
+      "comment" : "Invite text without inviter name: 1 sheet name, 2 iCloud share link, 3 App Store link",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You've been invited to split the expenses for “%1$@” on Split Expenses.\n\nOpen the invite:\n%2$@\n\nDon't have the app yet? It's free:\n%3$@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ti hanno invitato a dividere le spese di «%1$@» su Spese Condivise.\n\nApri l'invito:\n%2$@\n\nNon hai ancora l'app? È gratis:\n%3$@"
+          }
+        }
+      }
+    },
     "in pari" : {
       "comment" : "in pari",
       "localizations" : {
@@ -2971,7 +3005,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shared Expenses"
+            "value" : "Split Expenses"
           }
         },
         "it" : {

@@ -208,6 +208,25 @@ enum ShareService {
         }
     }
 
+    // MARK: - Messaggio d'invito
+
+    static let appStoreURL = "https://apps.apple.com/app/id6746075643"
+
+    /// Testo mandato insieme al link iCloud. Da solo il link arriva anonimo
+    /// (su WhatsApp è "icloud.com/share/…"): chi lo riceve non sa cos'è né
+    /// dove scaricare l'app, e l'invito è il principale canale di nuovi utenti.
+    /// Un'unica stringa invece di [testo, URL]: l'ordine resta quello scritto
+    /// su qualunque app di messaggistica.
+    static func inviteMessage(url: URL, sheetName: String?, inviterName: String?) -> String {
+        let sheet = sheetName?.isEmpty == false ? sheetName! : NSLocalizedString("sheet", comment: "")
+        if let inviter = inviterName, !inviter.isEmpty {
+            return String(format: NSLocalizedString("invite_message", comment: ""),
+                          inviter, sheet, url.absoluteString, appStoreURL)
+        }
+        return String(format: NSLocalizedString("invite_message_anonymous", comment: ""),
+                      sheet, url.absoluteString, appStoreURL)
+    }
+
     // MARK: - Accettazione inviti
 
     /// Metadati già accettati in questa sessione: iOS può consegnare lo stesso
