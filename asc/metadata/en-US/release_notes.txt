@@ -1,3 +1,2 @@
-• Clearer invites: people you invite to a sheet now see who invited them, the sheet name and where to get the app.
-• The sheet list shows each balance in that sheet's currency instead of always in euros.
-• The app is now called Split Expenses in English, matching the App Store.
+• Redesigned PDF export: landscape page, clearer columns and every expense on a single line.
+• Dates and amounts are now always readable, even when your phone is in dark mode.

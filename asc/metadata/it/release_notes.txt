@@ -1,2 +1,2 @@
-• Inviti più chiari: chi riceve il link di un foglio ora vede chi l'ha invitato, il nome del foglio e dove scaricare l'app.
-• La lista dei fogli mostra ogni saldo nella valuta del suo foglio, invece che sempre in euro.
+• Esportazione PDF rifatta: pagina orizzontale, colonne più leggibili e ogni spesa su una sola riga.
+• Date e importi ora si leggono sempre, anche se il telefono è in modalità scura.
