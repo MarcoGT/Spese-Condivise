@@ -1,3 +1,3 @@
-• Shared sheets now open reliably: we rebuilt how the app accepts an invitation and waits for the data from iCloud, with a clear indicator while the sheet downloads.
-• Expenses logged just for yourself now show up correctly, including your total spent when your balance is even.
-• Clearer error messages when iCloud doesn't respond.
+• Clearer invites: people you invite to a sheet now see who invited them, the sheet name and where to get the app.
+• The sheet list shows each balance in that sheet's currency instead of always in euros.
+• The app is now called Split Expenses in English, matching the App Store.

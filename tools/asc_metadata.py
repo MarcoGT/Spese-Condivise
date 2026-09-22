@@ -4,6 +4,8 @@
     python3 tools/asc_metadata.py pull            # scarica la scheda in asc/metadata/
     python3 tools/asc_metadata.py push            # mostra cosa cambierebbe (non scrive)
     python3 tools/asc_metadata.py push --apply    # carica davvero
+    python3 tools/asc_metadata.py new-version 2.3.7        # crea la prossima versione
+    python3 tools/asc_metadata.py screenshots [--apply]    # sostituisce gli screenshot 6,9"
 
 Parla solo con api.appstoreconnect.apple.com. La chiave resta in
 ~/.appstoreconnect/key.json (fuori dal repo) e non viene mai stampata.
@@ -219,19 +221,96 @@ def cmd_push(asc, apply):
     print("Caricato. L'invio in revisione resta manuale.")
 
 
+def cmd_new_version(asc, version_string):
+    """Crea la versione in preparazione; Apple le copia testi e screenshot della precedente."""
+    app_id = find_app(asc)
+    current, editable = pick_version(asc, app_id)
+    if editable:
+        sys.exit(f"Esiste già una versione modificabile: {current['attributes']['versionString']}")
+    asc.request("POST", "/appStoreVersions", {"data": {
+        "type": "appStoreVersions",
+        "attributes": {"platform": "IOS", "versionString": version_string},
+        "relationships": {"app": {"data": {"type": "apps", "id": app_id}}},
+    }})
+    print(f"Creata la versione {version_string} (in preparazione).")
+
+
+SCREENSHOT_DIR = METADATA_DIR.parent / "screenshots"
+SCREENSHOT_TYPE = "APP_IPHONE_67"  # casella del display 6,9" (1320×2868)
+
+
+def upload_screenshot(asc, set_id, path):
+    import hashlib
+    data = path.read_bytes()
+    res = asc.request("POST", "/appScreenshots", {"data": {
+        "type": "appScreenshots",
+        "attributes": {"fileName": path.name, "fileSize": len(data)},
+        "relationships": {"appScreenshotSet": {"data": {"type": "appScreenshotSets", "id": set_id}}},
+    }})["data"]
+    # I blocchi vanno su URL firmati da Apple, senza il nostro token.
+    for op in res["attributes"]["uploadOperations"]:
+        chunk = data[op["offset"]:op["offset"] + op["length"]]
+        req = urllib.request.Request(op["url"], data=chunk, method=op["method"])
+        for h in op.get("requestHeaders", []):
+            req.add_header(h["name"], h["value"])
+        urllib.request.urlopen(req, timeout=120).read()
+    asc.patch("appScreenshots", res["id"],
+              {"uploaded": True, "sourceFileChecksum": hashlib.md5(data).hexdigest()})
+    return res["id"]
+
+
+def cmd_screenshots(asc, apply):
+    """Sostituisce gli screenshot 6,9" della versione in preparazione con asc/screenshots/<lingua>/."""
+    st = load_state(asc)
+    if not st["version_editable"]:
+        sys.exit("Nessuna versione modificabile: crea prima la nuova versione (new-version).")
+    for locale_dir in sorted(p for p in SCREENSHOT_DIR.iterdir() if p.is_dir() and p.name != "raw"):
+        files = sorted(locale_dir.glob("[0-9][0-9].png"))
+        loc = st["version_locs"].get(locale_dir.name)
+        if not files or not loc:
+            continue
+        sets = asc.get(f"/appStoreVersionLocalizations/{loc['id']}/appScreenshotSets")["data"]
+        target = next((s for s in sets if s["attributes"]["screenshotDisplayType"] == SCREENSHOT_TYPE), None)
+        old = asc.get(f"/appScreenshotSets/{target['id']}/appScreenshots")["data"] if target else []
+        print(f"  {locale_dir.name:6} {len(old)} vecchi → {len(files)} nuovi ({', '.join(f.name for f in files)})")
+        if not apply:
+            continue
+        if not target:
+            target = asc.request("POST", "/appScreenshotSets", {"data": {
+                "type": "appScreenshotSets",
+                "attributes": {"screenshotDisplayType": SCREENSHOT_TYPE},
+                "relationships": {"appStoreVersionLocalization": {
+                    "data": {"type": "appStoreVersionLocalizations", "id": loc["id"]}}},
+            }})["data"]
+        for s in old:
+            asc.request("DELETE", f"/appScreenshots/{s['id']}")
+        ids = [upload_screenshot(asc, target["id"], f) for f in files]
+        asc.request("PATCH", f"/appScreenshotSets/{target['id']}/relationships/appScreenshots",
+                    {"data": [{"type": "appScreenshots", "id": i} for i in ids]})
+    print("Caricati." if apply else "\nAnteprima. Per caricare: screenshots --apply")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("pull")
     p = sub.add_parser("push")
     p.add_argument("--apply", action="store_true")
+    nv = sub.add_parser("new-version")
+    nv.add_argument("version")
+    sc = sub.add_parser("screenshots")
+    sc.add_argument("--apply", action="store_true")
     args = ap.parse_args()
 
     asc = ASC()
     if args.cmd == "pull":
         cmd_pull(asc)
-    else:
+    elif args.cmd == "push":
         cmd_push(asc, args.apply)
+    elif args.cmd == "new-version":
+        cmd_new_version(asc, args.version)
+    else:
+        cmd_screenshots(asc, args.apply)
 
 
 if __name__ == "__main__":
