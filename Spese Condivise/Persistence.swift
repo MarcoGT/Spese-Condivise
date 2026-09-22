@@ -101,15 +101,15 @@ final class PersistenceController: ObservableObject {
 
         #if DEBUG
         let demo = DemoData.isEnabled
-        #else
-        let demo = false
-        #endif
         if demo {
             storesURL = FileManager.default.temporaryDirectory
                 .appendingPathComponent("demo-\(UUID().uuidString)", isDirectory: true)
             try? FileManager.default.createDirectory(at: storesURL, withIntermediateDirectories: true)
             privateStoreDescription.url = storesURL.appendingPathComponent("SharedExpenses.sqlite")
         }
+        #else
+        let demo = false
+        #endif
 
         // Ripristino sincronizzazione richiesto: cancella i file degli store
         // PRIMA di caricarli (niente lock), poi spegne il flag.
@@ -150,10 +150,12 @@ final class PersistenceController: ObservableObject {
         sharedStoreDescription.setOption(true as NSNumber, forKey: NSPersistentHistoryTrackingKey)
         sharedStoreDescription.setOption(true as NSNumber, forKey: NSPersistentStoreRemoteChangeNotificationPostOptionKey)
         
+        #if DEBUG
         if demo {
             privateStoreDescription.cloudKitContainerOptions = nil
             sharedStoreDescription.cloudKitContainerOptions = nil
         }
+        #endif
 
             // Assegna entrambe le descrizioni
         container.persistentStoreDescriptions = [privateStoreDescription, sharedStoreDescription]
