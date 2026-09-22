@@ -1148,6 +1148,40 @@
         }
       }
     },
+    "pdf_page" : {
+      "comment" : "PDF footer page number",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page %d"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pagina %d"
+          }
+        }
+      }
+    },
+    "pdf_total" : {
+      "comment" : "PDF total label",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totale"
+          }
+        }
+      }
+    },
     "invite_message" : {
       "comment" : "Invite text: 1 inviter name, 2 sheet name, 3 iCloud share link, 4 App Store link",
       "localizations" : {

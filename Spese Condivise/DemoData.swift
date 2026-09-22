@@ -144,6 +144,41 @@ enum DemoData {
             // Niente pallino "spese nuove": in uno screenshot sembrerebbero arretrati.
             LastSeenStore.markSeen(for: sheet)
         }
+
+        if UserDefaults.standard.bool(forKey: "demoExportPDF") {
+            exportPDFs(context: context, sheets: appearance.map(\.0))
+        }
+    }
+
+    /// `-demoExportPDF YES`: scrive i PDF dei fogli demo nella tmp dell'app, più
+    /// un foglio lungo per verificare cambio pagina e descrizioni troncate.
+    private static func exportPDFs(context: NSManagedObjectContext, sheets: [SharedSheet]) {
+        let long = SharedSheet(context: context)
+        long.id = UUID()
+        long.name = "Test PDF lungo"
+        long.currencyCode = "EUR"
+        let people = ["Marco", "Giorgia", "Reno", "Rosy"].map { name -> Person in
+            let p = Person(context: context); p.id = UUID(); p.name = name; p.sheet = long; return p
+        }
+        let notes = ["Autostrada Lindau", "Benzina", "Cena in trattoria con vista sul lago e dolce della casa",
+                     "Parcheggio", "Colazione", "Traghetto per Bregenz andata e ritorno con biglietti per tutti e quattro più supplemento bagagli e bici",
+                     "Supermercato", "Museo", "Gelato"]
+        let cats: [ExpenseCategory] = [.transport, .transport, .food, .transport, .food, .transport, .shopping, .entertainment, .food]
+        for i in 0..<45 {
+            let e = Expense(context: context)
+            e.id = UUID(); e.sheet = long; e.archived = false
+            e.note = notes[i % notes.count]
+            e.category = cats[i % cats.count].rawValue
+            e.amount = Double((i * 37) % 180) + 4.5
+            e.date = Date().addingTimeInterval(-Double(i) * 3600 * 9)
+            e.createdAt = e.date
+            e.paidBy = people[i % people.count]
+            e.splitBetween = NSSet(array: people)
+        }
+        try? context.save()
+        for sheet in sheets + [long] {
+            print("DEMO_PDF:", PDFExporter.generate(for: sheet).path)
+        }
     }
 }
 #endif

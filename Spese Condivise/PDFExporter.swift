@@ -2,229 +2,21 @@ import UIKit
 
 enum PDFExporter {
 
+    // Colori fissi, non dinamici: con UIColor.label & co. un telefono in
+    // modalità scura disegnava date e importi in bianco su foglio bianco.
+    private static let ink = UIColor(white: 0.10, alpha: 1)
+    private static let muted = UIColor(white: 0.42, alpha: 1)
+    private static let rule = UIColor(white: 0.82, alpha: 1)
+    private static let stripe = UIColor(white: 0.955, alpha: 1)
+    private static let accent = UIColor(red: 0.00, green: 0.44, blue: 0.90, alpha: 1)
+    private static let positive = UIColor(red: 0.10, green: 0.55, blue: 0.27, alpha: 1)
+    private static let negative = UIColor(red: 0.80, green: 0.18, blue: 0.18, alpha: 1)
+
     static func generate(for sheet: SharedSheet) -> URL {
-        let pageRect = CGRect(x: 0, y: 0, width: 595.2, height: 841.8)
-        let renderer = UIGraphicsPDFRenderer(bounds: pageRect)
-        let data = renderer.pdfData { ctx in
-            let margin: CGFloat = 44
-            let contentWidth = pageRect.width - margin * 2
-            var y: CGFloat = 0
-
-            func newPage() {
-                ctx.beginPage()
-                y = margin
-            }
-
-            func checkPageBreak(needed: CGFloat) {
-                if y + needed > pageRect.height - margin {
-                    newPage()
-                }
-            }
-
-            // MARK: - Color helpers
-            let accentColor = UIColor.systemBlue
-            let separatorColor = UIColor.separator
-            let secondaryColor = UIColor.secondaryLabel
-
-            // MARK: - Draw helpers
-
-            func drawText(_ text: String,
-                          x: CGFloat, y: CGFloat, width: CGFloat,
-                          font: UIFont,
-                          color: UIColor = .label,
-                          alignment: NSTextAlignment = .left) {
-                let para = NSMutableParagraphStyle()
-                para.alignment = alignment
-                let attrs: [NSAttributedString.Key: Any] = [
-                    .font: font,
-                    .foregroundColor: color,
-                    .paragraphStyle: para
-                ]
-                let rect = CGRect(x: x, y: y, width: width, height: font.lineHeight * 2)
-                text.draw(in: rect, withAttributes: attrs)
-            }
-
-            func textHeight(_ text: String, width: CGFloat, font: UIFont) -> CGFloat {
-                let para = NSMutableParagraphStyle()
-                para.lineBreakMode = .byWordWrapping
-                let attrs: [NSAttributedString.Key: Any] = [.font: font, .paragraphStyle: para]
-                let size = (text as NSString).boundingRect(
-                    with: CGSize(width: width, height: 9999),
-                    options: .usesLineFragmentOrigin,
-                    attributes: attrs,
-                    context: nil
-                )
-                return ceil(size.height)
-            }
-
-            func drawSectionHeader(_ title: String) {
-                checkPageBreak(needed: 36)
-                let font = UIFont.systemFont(ofSize: 10, weight: .semibold)
-                drawText(title.uppercased(), x: margin, y: y, width: contentWidth, font: font, color: secondaryColor)
-                y += 18
-                let sepRect = CGRect(x: margin, y: y, width: contentWidth, height: 0.5)
-                separatorColor.setFill()
-                UIRectFill(sepRect)
-                y += 8
-            }
-
-            // MARK: - Header
-
-            newPage()
-
-            // Blue banner
-            let bannerHeight: CGFloat = 72
-            let bannerRect = CGRect(x: 0, y: 0, width: pageRect.width, height: bannerHeight)
-            accentColor.setFill()
-            UIRectFill(bannerRect)
-
-            let titleFont = UIFont.systemFont(ofSize: 22, weight: .bold)
-            let sheetName = sheet.name ?? NSLocalizedString("sheet", comment: "")
-            drawText(sheetName, x: margin, y: 14, width: contentWidth - 120,
-                     font: titleFont, color: .white)
-
-            let dateStr = DateFormatter.localizedString(from: Date(), dateStyle: .long, timeStyle: .none)
-            let subtitleFont = UIFont.systemFont(ofSize: 11, weight: .regular)
-            drawText(dateStr, x: margin, y: 44, width: contentWidth,
-                     font: subtitleFont, color: UIColor.white.withAlphaComponent(0.8))
-
-            // Totale spese in alto a destra nel banner
-            let totalAmount = sheet.activeExpensesArray.reduce(0) { $0 + $1.amount }
-            let currency = sheet.currencyCode ?? "EUR"
-            let totalStr = AmountFormatter.format(totalAmount, currencySymbol: currencySymbol(for: currency))
-            let totalFont = UIFont.systemFont(ofSize: 17, weight: .semibold)
-            drawText(totalStr,
-                     x: margin, y: 22,
-                     width: contentWidth, font: totalFont,
-                     color: UIColor.white.withAlphaComponent(0.95),
-                     alignment: .right)
-
-            y = bannerHeight + 24
-
-            // MARK: - Saldi
-
-            let balances = sheet.balancesPerPerson()
-            if !balances.isEmpty {
-                drawSectionHeader(NSLocalizedString("Persone", comment: "people"))
-
-                let persons = sheet.personsArray
-                let rowH: CGFloat = 26
-                for person in persons {
-                    checkPageBreak(needed: rowH)
-                    let value = balances[person] ?? 0
-                    let name = person.name ?? "—"
-                    let nameFont = UIFont.systemFont(ofSize: 13, weight: .regular)
-                    drawText(name, x: margin, y: y, width: contentWidth * 0.6, font: nameFont)
-
-                    let balStr = AmountFormatter.format(abs(value), currencySymbol: currencySymbol(for: currency))
-                    let prefix = value > 0.005 ? "+" : (value < -0.005 ? "−" : "")
-                    let balColor: UIColor = value > 0.005 ? .systemGreen : (value < -0.005 ? .systemRed : .secondaryLabel)
-                    let balFont = UIFont.systemFont(ofSize: 13, weight: .medium)
-                    drawText(prefix + balStr,
-                             x: margin, y: y, width: contentWidth,
-                             font: balFont, color: balColor, alignment: .right)
-                    y += rowH
-                }
-                y += 16
-            }
-
-            // MARK: - Rimborsi
-
-            let transfers = sheet.suggestedTransfers()
-            if !transfers.isEmpty {
-                drawSectionHeader(NSLocalizedString("settle_who_pays_whom", comment: ""))
-
-                let rowH: CGFloat = 26
-                for t in transfers {
-                    checkPageBreak(needed: rowH)
-                    let from = t.from.name ?? "—"
-                    let to   = t.to.name   ?? "—"
-                    let rowFont = UIFont.systemFont(ofSize: 13, weight: .regular)
-                    drawText("\(from)  →  \(to)", x: margin, y: y, width: contentWidth * 0.65, font: rowFont)
-                    let amtFont = UIFont.systemFont(ofSize: 13, weight: .semibold)
-                    drawText(AmountFormatter.format(t.amount, currencySymbol: currencySymbol(for: currency)),
-                             x: margin, y: y, width: contentWidth,
-                             font: amtFont, color: accentColor, alignment: .right)
-                    y += rowH
-                }
-                y += 16
-            }
-
-            // MARK: - Spese
-
-            let expenses = sheet.activeExpensesArray
-            if !expenses.isEmpty {
-                let countStr = "\(NSLocalizedString("Spese", comment: "expenses")) (\(expenses.count))"
-                drawSectionHeader(countStr)
-
-                // Column widths
-                let dateW:  CGFloat = 56
-                let catW:   CGFloat = 72
-                let amtW:   CGFloat = 72
-                let payerW: CGFloat = 70
-                let descW   = contentWidth - dateW - catW - amtW - payerW
-
-                // Column headers
-                let colFont = UIFont.systemFont(ofSize: 9, weight: .semibold)
-                drawText(NSLocalizedString("Data", comment: "date"),
-                         x: margin, y: y, width: dateW, font: colFont, color: secondaryColor)
-                drawText(NSLocalizedString("category", comment: ""),
-                         x: margin + dateW, y: y, width: catW, font: colFont, color: secondaryColor)
-                drawText(NSLocalizedString("Descrizione", comment: "description"),
-                         x: margin + dateW + catW, y: y, width: descW, font: colFont, color: secondaryColor)
-                drawText(NSLocalizedString("paid by", comment: ""),
-                         x: margin + dateW + catW + descW, y: y, width: payerW, font: colFont, color: secondaryColor)
-                drawText(NSLocalizedString("amount_header", comment: ""),
-                         x: margin, y: y, width: contentWidth, font: colFont, color: secondaryColor, alignment: .right)
-                y += 16
-
-                let sep2Rect = CGRect(x: margin, y: y, width: contentWidth, height: 0.5)
-                separatorColor.setFill()
-                UIRectFill(sep2Rect)
-                y += 8
-
-                let df = DateFormatter()
-                df.dateFormat = "dd/MM"
-                let rowFont = UIFont.systemFont(ofSize: 11, weight: .regular)
-                let amtFont = UIFont.systemFont(ofSize: 11, weight: .semibold)
-                let minRowH: CGFloat = 20
-
-                for expense in expenses {
-                    let descText = expense.note?.isEmpty == false ? (expense.note ?? "—") : "—"
-                    let descH = max(minRowH, textHeight(descText, width: descW, font: rowFont))
-                    checkPageBreak(needed: descH + 6)
-
-                    let dateText = df.string(from: expense.date ?? Date())
-                    drawText(dateText, x: margin, y: y, width: dateW, font: rowFont, color: secondaryColor)
-
-                    let cat = ExpenseCategory.from(expense.category)
-                    drawText(cat.localizedName, x: margin + dateW, y: y, width: catW, font: rowFont)
-
-                    let para = NSMutableParagraphStyle()
-                    para.lineBreakMode = .byWordWrapping
-                    let descAttrs: [NSAttributedString.Key: Any] = [.font: rowFont]
-                    let descRect = CGRect(x: margin + dateW + catW, y: y, width: descW, height: descH)
-                    descText.draw(in: descRect, withAttributes: descAttrs)
-
-                    drawText(expense.paidBy?.name ?? "—",
-                             x: margin + dateW + catW + descW, y: y, width: payerW, font: rowFont)
-
-                    drawText(AmountFormatter.format(expense.amount, currencySymbol: currencySymbol(for: currency)),
-                             x: margin, y: y, width: contentWidth,
-                             font: amtFont, alignment: .right)
-
-                    y += descH + 6
-                }
-            }
-
-            // MARK: - Footer
-
-            let footerFont = UIFont.systemFont(ofSize: 9, weight: .regular)
-            let footerY = pageRect.height - 24
-            drawText("Spese Condivise", x: margin, y: footerY, width: contentWidth,
-                     font: footerFont, color: secondaryColor, alignment: .center)
+        var data = Data()
+        UITraitCollection(userInterfaceStyle: .light).performAsCurrent {
+            data = render(sheet)
         }
-
         let fileName = (sheet.name ?? "spese")
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: "/", with: "-")
@@ -234,7 +26,175 @@ enum PDFExporter {
         return url
     }
 
-    private static func currencySymbol(for code: String) -> String {
-        AmountFormatter.symbol(for: code)
+    private static func render(_ sheet: SharedSheet) -> Data {
+        // A4 orizzontale: la tabella spese ha bisogno di larghezza, non di altezza.
+        let page = CGRect(x: 0, y: 0, width: 841.8, height: 595.2)
+        let margin: CGFloat = 36
+        let contentWidth = page.width - margin * 2
+        let bottomLimit = page.height - margin - 14
+        let currency = AmountFormatter.symbol(for: sheet.currencyCode ?? "EUR")
+        let sheetName = sheet.name ?? NSLocalizedString("sheet", comment: "")
+
+        return UIGraphicsPDFRenderer(bounds: page).pdfData { ctx in
+            var y: CGFloat = 0
+            var pageNumber = 0
+
+            /// Sempre una riga sola: se il testo non ci sta viene accorciato con "…".
+            func text(_ s: String, x: CGFloat, y: CGFloat, width: CGFloat, font: UIFont,
+                      color: UIColor = ink, align: NSTextAlignment = .left) {
+                let para = NSMutableParagraphStyle()
+                para.alignment = align
+                para.lineBreakMode = .byTruncatingTail
+                (s as NSString).draw(
+                    in: CGRect(x: x, y: y, width: width, height: ceil(font.lineHeight)),
+                    withAttributes: [.font: font, .foregroundColor: color, .paragraphStyle: para])
+            }
+
+            func fill(_ rect: CGRect, _ color: UIColor) {
+                color.setFill()
+                UIRectFill(rect)
+            }
+
+            func money(_ value: Double) -> String {
+                AmountFormatter.format(value, currencySymbol: currency)
+            }
+
+            func newPage() {
+                ctx.beginPage()
+                pageNumber += 1
+                y = margin
+                let footer = UIFont.systemFont(ofSize: 7.5)
+                text("\(sheetName) · Spese Condivise", x: margin, y: page.height - margin + 6,
+                     width: contentWidth / 2, font: footer, color: muted)
+                text(String(format: NSLocalizedString("pdf_page", comment: ""), pageNumber),
+                     x: margin, y: page.height - margin + 6, width: contentWidth,
+                     font: footer, color: muted, align: .right)
+            }
+
+            func ensure(_ needed: CGFloat, onNewPage: () -> Void = {}) {
+                if y + needed > bottomLimit {
+                    newPage()
+                    onNewPage()
+                }
+            }
+
+            func sectionHeader(_ title: String, x: CGFloat, width: CGFloat) {
+                text(title.uppercased(), x: x, y: y, width: width,
+                     font: .systemFont(ofSize: 8, weight: .semibold), color: muted)
+                fill(CGRect(x: x, y: y + 13, width: width, height: 0.5), rule)
+            }
+
+            // MARK: Intestazione
+
+            newPage()
+            let bannerH: CGFloat = 54
+            fill(CGRect(x: 0, y: 0, width: page.width, height: bannerH), accent)
+            text(sheetName, x: margin, y: 11, width: contentWidth * 0.65,
+                 font: .systemFont(ofSize: 18, weight: .bold), color: .white)
+            text(DateFormatter.localizedString(from: Date(), dateStyle: .long, timeStyle: .none),
+                 x: margin, y: 33, width: contentWidth * 0.65,
+                 font: .systemFont(ofSize: 9), color: UIColor.white.withAlphaComponent(0.85))
+            let total = sheet.activeExpensesArray.reduce(0) { $0 + $1.amount }
+            text(NSLocalizedString("pdf_total", comment: ""), x: margin, y: 12, width: contentWidth,
+                 font: .systemFont(ofSize: 8, weight: .medium),
+                 color: UIColor.white.withAlphaComponent(0.85), align: .right)
+            text(money(total), x: margin, y: 24, width: contentWidth,
+                 font: .systemFont(ofSize: 16, weight: .semibold), color: .white, align: .right)
+            y = bannerH + 18
+
+            // MARK: Saldi e rimborsi, affiancati
+
+            let balances = sheet.balancesPerPerson()
+            let transfers = sheet.suggestedTransfers()
+            let colGap: CGFloat = 32
+            let colW = (contentWidth - colGap) / 2
+            let rightX = margin + colW + colGap
+            let rowH: CGFloat = 15
+            let rowFont = UIFont.systemFont(ofSize: 9)
+            let rowBold = UIFont.systemFont(ofSize: 9, weight: .semibold)
+            let top = y
+
+            if !balances.isEmpty {
+                sectionHeader(NSLocalizedString("Persone", comment: "people"), x: margin, width: colW)
+                var ly = top + 20
+                for person in sheet.personsArray {
+                    let v = balances[person] ?? 0
+                    let sign = v > 0.005 ? "+" : (v < -0.005 ? "−" : "")
+                    let color = v > 0.005 ? positive : (v < -0.005 ? negative : muted)
+                    text(person.name ?? "—", x: margin, y: ly, width: colW * 0.6, font: rowFont)
+                    text(sign + money(abs(v)), x: margin, y: ly, width: colW, font: rowBold,
+                         color: color, align: .right)
+                    ly += rowH
+                }
+                y = max(y, ly)
+            }
+            if !transfers.isEmpty {
+                let saved = y
+                y = top
+                sectionHeader(NSLocalizedString("settle_who_pays_whom", comment: ""), x: rightX, width: colW)
+                var ry = top + 20
+                for t in transfers {
+                    text("\(t.from.name ?? "—")  →  \(t.to.name ?? "—")", x: rightX, y: ry,
+                         width: colW * 0.7, font: rowFont)
+                    text(money(t.amount), x: rightX, y: ry, width: colW, font: rowBold,
+                         color: accent, align: .right)
+                    ry += rowH
+                }
+                y = max(saved, ry)
+            }
+            y += 18
+
+            // MARK: Spese
+
+            let expenses = sheet.activeExpensesArray
+            guard !expenses.isEmpty else { return }
+
+            let dateW: CGFloat = 58, catW: CGFloat = 92, payerW: CGFloat = 96, amtW: CGFloat = 84
+            let descW = contentWidth - dateW - catW - payerW - amtW
+            let catX = margin + dateW, descX = catX + catW, payerX = descX + descW
+            let pad: CGFloat = 6
+
+            func tableHeader() {
+                let f = UIFont.systemFont(ofSize: 7.5, weight: .semibold)
+                text(NSLocalizedString("Data", comment: "date").uppercased(), x: margin + pad, y: y, width: dateW, font: f, color: muted)
+                text(NSLocalizedString("category", comment: "").uppercased(), x: catX, y: y, width: catW, font: f, color: muted)
+                text(NSLocalizedString("Descrizione", comment: "description").uppercased(), x: descX, y: y, width: descW, font: f, color: muted)
+                text(NSLocalizedString("paid by", comment: "").uppercased(), x: payerX, y: y, width: payerW, font: f, color: muted)
+                text(NSLocalizedString("amount_header", comment: "").uppercased(), x: margin, y: y,
+                     width: contentWidth - pad, font: f, color: muted, align: .right)
+                y += 12
+                fill(CGRect(x: margin, y: y, width: contentWidth, height: 0.5), rule)
+                y += 3
+            }
+
+            ensure(40)
+            text("\(NSLocalizedString("Spese", comment: "expenses")) (\(expenses.count))".uppercased(),
+                 x: margin, y: y, width: contentWidth, font: .systemFont(ofSize: 8, weight: .semibold), color: muted)
+            y += 16
+            tableHeader()
+
+            let df = DateFormatter()
+            df.dateFormat = "dd/MM/yy"
+            let lineH: CGFloat = 14
+            for (i, e) in expenses.enumerated() {
+                ensure(lineH, onNewPage: tableHeader)
+                if i % 2 == 1 {
+                    fill(CGRect(x: margin, y: y, width: contentWidth, height: lineH), stripe)
+                }
+                let ty = y + (lineH - ceil(rowFont.lineHeight)) / 2
+                let note = (e.note?.isEmpty == false ? e.note! : "—")
+                    .replacingOccurrences(of: "\n", with: " ")
+                text(df.string(from: e.date ?? Date()), x: margin + pad, y: ty, width: dateW - pad, font: rowFont, color: muted)
+                text(ExpenseCategory.from(e.category).localizedName, x: catX, y: ty, width: catW - pad, font: rowFont)
+                text(note, x: descX, y: ty, width: descW - pad * 2, font: rowFont)
+                text(e.paidBy?.name ?? "—", x: payerX, y: ty, width: payerW - pad, font: rowFont)
+                text(money(e.amount), x: margin, y: ty, width: contentWidth - pad, font: rowBold, align: .right)
+                y += lineH
+            }
+            fill(CGRect(x: margin, y: y, width: contentWidth, height: 0.5), rule)
+            y += 5
+            text(money(total), x: margin, y: y, width: contentWidth - pad, font: rowBold, align: .right)
+            text(NSLocalizedString("pdf_total", comment: ""), x: payerX, y: y, width: payerW, font: rowBold)
+        }
     }
 }
