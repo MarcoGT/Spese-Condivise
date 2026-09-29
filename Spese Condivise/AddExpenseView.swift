@@ -252,8 +252,7 @@ struct AddExpenseView: View {
 
     private func toggleParticipant(_ person: Person) {
         if let existing = selectedParticipants.first(where: { $0.objectID == person.objectID }) {
-            // Non permettere di de-selezionare il pagante: chi paga è sempre nel split
-            guard existing.objectID != selectedPayer?.objectID else { return }
+            // Il pagante si può togliere: "ho pagato io, solo per lei" è un prestito.
             selectedParticipants.remove(existing)
         } else {
             selectedParticipants.insert(person)

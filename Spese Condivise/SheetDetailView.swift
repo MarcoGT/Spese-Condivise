@@ -138,6 +138,8 @@ struct SheetDetailView: View {
             LastSeenStore.markSeen(for: sheet)
             #if DEBUG
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                guard !DemoData.screenShown else { return }
+                DemoData.screenShown = true
                 switch DemoData.screen {
                     case "add": activeModal = .add
                     case "stats": showStatistics = true

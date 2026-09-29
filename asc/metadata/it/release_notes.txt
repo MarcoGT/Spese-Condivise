@@ -1,2 +1,3 @@
+• Ora puoi registrare una spesa pagata da te ma solo per un'altra persona: il pagante si può togliere da "Per chi è la spesa".
 • Esportazione PDF rifatta: pagina orizzontale, colonne più leggibili e ogni spesa su una sola riga.
-• Date e importi ora si leggono sempre, anche se il telefono è in modalità scura.
+• Date e importi del PDF ora si leggono sempre, anche se il telefono è in modalità scura.

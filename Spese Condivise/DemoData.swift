@@ -16,6 +16,9 @@ enum DemoData {
         isEnabled ? UserDefaults.standard.string(forKey: "demoScreen") : nil
     }
 
+    /// La schermata richiesta va aperta una volta sola, non a ogni ritorno sul foglio.
+    static var screenShown = false
+
     static var italianUI: Bool {
         Locale.preferredLanguages.first?.hasPrefix("it") ?? false
     }
