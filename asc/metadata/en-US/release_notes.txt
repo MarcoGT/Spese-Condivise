@@ -1,3 +1,2 @@
-• You can now log an expense you paid just for someone else: the payer can be removed from "Split between".
-• Redesigned PDF export: landscape page, clearer columns and every expense on a single line.
-• PDF dates and amounts are now always readable, even when your phone is in dark mode.
+• Cleaner design: settle-ups now sit in their own card, like people and expenses.
+• Better dark mode: sheet, people, expense and statistics cards now stand out clearly from the background.
