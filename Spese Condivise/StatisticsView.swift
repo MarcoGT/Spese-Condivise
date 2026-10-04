@@ -138,7 +138,7 @@ struct StatisticsView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
     }
@@ -212,7 +212,7 @@ struct StatisticsView: View {
             content()
         }
         .padding(16)
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
         .shadow(color: .black.opacity(0.05), radius: 6, x: 0, y: 2)
     }

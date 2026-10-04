@@ -39,7 +39,7 @@ struct SettlementDetailView: View {
                     } else {
                         ForEach(settlement.expensesArray) { expense in
                             ExpenseRowView(expense: expense)
-                                .background(Color(.systemBackground))
+                                .background(Color(.secondarySystemGroupedBackground))
                                 .cornerRadius(14)
                                 .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
                                 .listRowBackground(Color.clear)

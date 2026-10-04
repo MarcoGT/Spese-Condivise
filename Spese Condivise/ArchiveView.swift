@@ -66,7 +66,7 @@ struct ArchiveView: View {
         .padding(.horizontal, 16)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color(.systemBackground))
+                .fill(Color(.secondarySystemGroupedBackground))
                 .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
         )
     }

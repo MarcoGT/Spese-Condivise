@@ -449,46 +449,59 @@ struct SheetDetailView: View {
             let currSym = AmountFormatter.symbol(for: sheetCurrency)
             let reimbSym = reimbCurrency.map { AmountFormatter.symbol(for: $0) } ?? currSym
             Section {
-                if transfers.isEmpty {
-                    HStack(spacing: 10) {
-                        Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
-                        Text(NSLocalizedString("settle_all_even", comment: "")).foregroundColor(.secondary)
-                        Spacer()
-                    }
-                    .padding(.vertical, 4)
-                } else {
-                    ForEach(transfers) { t in
-                        HStack(spacing: 8) {
-                            Text(t.from.name ?? "—").fontWeight(.medium)
-                            Image(systemName: "arrow.right").font(.caption).foregroundColor(.secondary)
-                            Text(t.to.name ?? "—").fontWeight(.medium)
+                VStack(spacing: 0) {
+                    if transfers.isEmpty {
+                        HStack(spacing: 10) {
+                            Image(systemName: "checkmark.circle.fill").foregroundColor(.green)
+                            Text(NSLocalizedString("settle_all_even", comment: "")).foregroundColor(.secondary)
                             Spacer()
-                            VStack(alignment: .trailing, spacing: 2) {
-                                Text(AmountFormatter.format(t.amount, currencySymbol: currSym))
-                                    .fontWeight(.semibold).foregroundColor(.accentColor)
-                                if hasConversion {
-                                    Text("≈ " + AmountFormatter.format(t.amount * rate, currencySymbol: reimbSym))
-                                        .font(.caption).foregroundColor(.secondary)
+                        }
+                        .padding(.vertical, 14)
+                    } else {
+                        ForEach(Array(transfers.enumerated()), id: \.element.id) { i, t in
+                            if i > 0 { Divider() }
+                            HStack(spacing: 8) {
+                                Text(t.from.name ?? "—").fontWeight(.medium)
+                                Image(systemName: "arrow.right").font(.caption).foregroundColor(.secondary)
+                                Text(t.to.name ?? "—").fontWeight(.medium)
+                                Spacer()
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text(AmountFormatter.format(t.amount, currencySymbol: currSym))
+                                        .fontWeight(.semibold).foregroundColor(.accentColor)
+                                    if hasConversion {
+                                        Text("≈ " + AmountFormatter.format(t.amount * rate, currencySymbol: reimbSym))
+                                            .font(.caption).foregroundColor(.secondary)
+                                    }
                                 }
                             }
+                            .padding(.vertical, 12)
                         }
-                    }
-                    Button {
-                        showExchangeRateEditor = true
-                    } label: {
-                        HStack {
-                            Image(systemName: hasConversion ? "arrow.2.circlepath" : "plusminus.circle")
-                                .foregroundColor(.secondary)
-                            Text(hasConversion
-                                 ? String(format: NSLocalizedString("exchange_rate_edit", comment: ""), sheetCurrency, rate, reimbCurrency ?? "")
-                                 : NSLocalizedString("exchange_rate_set", comment: ""))
-                                .font(.subheadline).foregroundColor(.secondary)
-                            Spacer()
+                        Divider()
+                        Button {
+                            showExchangeRateEditor = true
+                        } label: {
+                            HStack {
+                                Image(systemName: hasConversion ? "arrow.2.circlepath" : "plusminus.circle")
+                                    .foregroundColor(.secondary)
+                                Text(hasConversion
+                                     ? String(format: NSLocalizedString("exchange_rate_edit", comment: ""), sheetCurrency, rate, reimbCurrency ?? "")
+                                     : NSLocalizedString("exchange_rate_set", comment: ""))
+                                    .font(.subheadline).foregroundColor(.secondary)
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                            .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
-                    .padding(.vertical, 2)
                 }
+                .padding(.horizontal, 16)
+                .background(Color(.secondarySystemGroupedBackground))
+                .cornerRadius(16)
+                .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 5, leading: 16, bottom: 5, trailing: 16))
             } header: {
                 SectionHeader(title: NSLocalizedString("settle_who_pays_whom", comment: ""))
             }
@@ -558,7 +571,7 @@ struct SheetDetailView: View {
                     let isNew = (expense.createdAt ?? .distantPast) > LastSeenStore.lastSeen(for: sheet)
                     Button { activeModal = .edit(expense) } label: {
                         ExpenseRowView(expense: expense)
-                            .background(Color(.systemBackground))
+                            .background(Color(.secondarySystemGroupedBackground))
                             .cornerRadius(14)
                             .shadow(color: Color.black.opacity(0.07), radius: 10, x: 0, y: 4)
                             .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.blue.opacity(isNew ? 0.5 : 0), lineWidth: 1.5))
@@ -594,7 +607,7 @@ struct SheetDetailView: View {
                     }
                     .padding(.vertical, 4)
                 }
-                .listRowBackground(Color(.systemBackground))
+                .listRowBackground(Color(.secondarySystemGroupedBackground))
             }
         }
     }
@@ -850,7 +863,7 @@ private struct PersonBalanceCard: View {
         .padding(.vertical, 16)
         .padding(.horizontal, 12)
         .frame(width: 130, alignment: .leading)
-        .background(Color(.systemBackground))
+        .background(Color(.secondarySystemGroupedBackground))
         .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)

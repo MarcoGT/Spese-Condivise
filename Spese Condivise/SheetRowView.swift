@@ -70,7 +70,7 @@ struct SheetRowView: View {
         .background(
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color(.systemBackground))
+                    .fill(Color(.secondarySystemGroupedBackground))
                     .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 3)
                 // Bordo sinistro colorato
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
