@@ -6,7 +6,7 @@ Un post ogni 2–3 settimane, mai lo stesso testo in due posti, rispondere ai co
 | Quando | Dove | Stato |
 |---|---|---|
 | 04/10/2026 | r/iOSProgramming, r/buildtoship, r/iOSAppMarketing | fatto (picco record di visite il 4/10) |
-| prossimo | r/SideProject | post 1 |
+| 06/10/2026 | r/SideProject | fatto |
 | +2/3 settimane | r/iOSApps (max 1 volta ogni 30 giorni per sviluppatore) | post 2 |
 | una domenica | r/apple (autopromozione solo la domenica, solo post di testo: verificare) | post 3 |
 | quando capita | subreddit italiani: rispondere a chi chiede un'app, non postare | post 4 |
