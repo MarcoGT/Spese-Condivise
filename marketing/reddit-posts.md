@@ -23,18 +23,18 @@ Link App Store: https://apps.apple.com/app/id6746075643
 
 **Body:**
 
-For years I tracked shared costs with friends and family in an Excel sheet. It worked until it didn't: someone forgets to update it, nobody agrees on who owes what, and the formulas break.
+I used to track shared costs with friends and family in an Excel sheet. It worked, but keeping it updated and working out who owed whom was a chore, and it was never in sync for everyone.
 
-So I built **Split Expenses** for iPhone. The twist compared to Splitwise or Tricount: there is no signup and no backend. Sheets are shared with a link and sync through each person's own iCloud, so I literally don't have your data.
+So I built **Split Expenses** for iPhone. The twist compared to Splitwise or Tricount: there's no signup and no backend. Sheets are shared with a link and sync through each person's own iCloud, so I don't have your data at all.
 
 What it does today:
-* Shared sheets, live balances, "who pays whom" with the exact amount
+* Shared sheets, live balances, and "who pays whom" with the exact amount
 * Expenses for everyone, a few people, or just one ("I paid, but only for you")
-* Categories, stats, multiple currencies, PDF export, widget
+* Categories, stats, multiple currencies, PDF export, Home Screen widget
 
-It's free and has no ads. Next up is a one-time Pro unlock (receipt photos, uneven splits), no subscription.
+It's free with no ads. I'm working on an optional one-time Pro unlock, no subscription.
 
-The hardest part wasn't the code, it was CloudKit sharing in production. Happy to go into detail if anyone is fighting the same thing.
+The hardest part wasn't the code, it was getting CloudKit sharing to work reliably in production. Happy to go into detail if anyone is fighting the same thing.
 
 What would make you switch from whatever you use now?
 
