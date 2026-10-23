@@ -306,6 +306,7 @@ struct AddExpenseView: View {
             // come import (anche se blocchi il telefono subito dopo).
             if expenseToEdit == nil {
                 LastSeenStore.markExpenseKnown(newExpenseID)
+                ReviewPrompt.afterExpenseAdded()
             }
             dismiss()
         } catch {

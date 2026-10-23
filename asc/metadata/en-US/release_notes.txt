@@ -1,2 +1,2 @@
-• Cleaner design: settle-ups now sit in their own card, like people and expenses.
-• Better dark mode: sheet, people, expense and statistics cards now stand out clearly from the background.
+• Small improvements and fixes.
+• Enjoying Split Expenses? Every now and then the app will ask for a rating: it really helps other people find it.

@@ -15,15 +15,33 @@ enum ReviewPrompt {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
     }
 
+    private static let addedExpensesKey = "reviewAddedExpenseCount"
+    /// Il pareggio da solo non bastava: molti utenti non ci arrivano mai
+    /// (1-2 valutazioni dopo settimane). Queste soglie di spese registrate
+    /// indicano che l'app viene usata davvero.
+    private static let expenseMilestones: Set<Int> = [10, 30, 75]
+
     /// Da chiamare dopo un azzeramento saldo andato a buon fine.
-    /// Al massimo una richiesta per versione dell'app.
     static func afterSettlement() {
+        askOncePerVersion()
+    }
+
+    /// Da chiamare dopo aver registrato una spesa nuova (non una modifica).
+    static func afterExpenseAdded() {
+        let defaults = UserDefaults.standard
+        let count = defaults.integer(forKey: addedExpensesKey) + 1
+        defaults.set(count, forKey: addedExpensesKey)
+        if expenseMilestones.contains(count) { askOncePerVersion() }
+    }
+
+    /// Al massimo una richiesta per versione dell'app, qualunque sia il motivo.
+    private static func askOncePerVersion() {
         let defaults = UserDefaults.standard
         guard defaults.string(forKey: promptedVersionKey) != currentVersion else { return }
         defaults.set(currentVersion, forKey: promptedVersionKey)
 
-        // Lascia finire l'animazione di archiviazione delle spese: un alert che
-        // compare durante la transizione viene chiuso d'istinto.
+        // Lascia finire l'animazione (archiviazione o chiusura del modulo): un
+        // alert che compare durante la transizione viene chiuso d'istinto.
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 1_500_000_000)
             ask()

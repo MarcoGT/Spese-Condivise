@@ -1,2 +1,2 @@
-• Interfaccia più pulita: anche i rimborsi ora sono raccolti in una scheda, come persone e spese.
-• Modalità scura migliorata: le schede di fogli, persone, spese e statistiche ora si distinguono bene dallo sfondo.
+• Piccoli miglioramenti e correzioni.
+• Ti piace Spese Condivise? Ogni tanto l'app ti chiederà una valutazione: ci aiuta tantissimo a farci trovare da altre persone.
