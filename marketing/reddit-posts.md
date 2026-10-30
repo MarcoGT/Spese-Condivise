@@ -7,7 +7,7 @@ Un post ogni 2–3 settimane, mai lo stesso testo in due posti, rispondere ai co
 |---|---|---|
 | 04/10/2026 | r/iOSProgramming, r/buildtoship, r/iOSAppMarketing | fatto (picco record di visite il 4/10) |
 | 06/10/2026 | r/SideProject | fatto |
-| +2/3 settimane | r/iOSApps (max 1 volta ogni 30 giorni per sviluppatore) | post 2 |
+| 30/10/2026 | r/iOSApps (max 1 volta ogni 30 giorni per sviluppatore) | post 2, consegnato a Marco |
 | una domenica | r/apple (autopromozione solo la domenica, solo post di testo: verificare) | post 3 |
 | quando capita | subreddit italiani: rispondere a chi chiede un'app, non postare | post 4 |
 | una volta sola | AlternativeTo, come alternativa a Splitwise e Tricount | testo 5 |
@@ -42,24 +42,26 @@ https://apps.apple.com/app/id6746075643
 
 ---
 
-## 2. r/iOSApps
+## 2. r/iOSApps (versione feste, novembre 2026)
 
-**Title:** [Free] Split Expenses: split costs with friends and roommates, no account needed
+**Title:** [Free] Split Expenses: split costs for Christmas dinners, group gifts and ski trips, no account needed
 
 **Body:**
 
-Hi! I'm the developer. Split Expenses lets you split costs for trips, a shared flat or a dinner without creating any account: you share a sheet with a link and it syncs through iCloud.
+Hi! I'm the solo developer. With the holidays coming up there's always someone collecting money for a dinner, a gift or a weekend away, and somebody ends up keeping track on a notes app or a spreadsheet.
 
-* Live balances and settle-up suggestions
-* Uneven groups: expenses for everyone, a few people or just one
+Split Expenses does it for you, without anyone creating an account: you share a sheet with a link and it syncs through each person's iCloud.
+
+* Live balances and settle-up suggestions: exactly who owes whom
+* Expenses for everyone, a few people, or just one ("I paid, but only for you")
 * Categories, statistics, multiple currencies with custom rates
 * PDF export and Home Screen widget
 * No ads, no tracking ("Data Not Collected" on the App Store)
 
-iPhone, iOS 16.6+, English and Italian.
+Free, iPhone (iOS 16.6+), English and Italian.
 https://apps.apple.com/app/id6746075643
 
-Feedback very welcome, especially on what's missing.
+Feedback very welcome, especially on what's missing for you.
 
 ---
 
