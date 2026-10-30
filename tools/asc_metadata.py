@@ -6,6 +6,7 @@
     python3 tools/asc_metadata.py push --apply    # carica davvero
     python3 tools/asc_metadata.py new-version 2.3.7        # crea la prossima versione
     python3 tools/asc_metadata.py screenshots [--apply]    # sostituisce gli screenshot 6,9"
+    python3 tools/asc_metadata.py promo [--apply]          # solo testo promozionale, anche sulla versione live
 
 Parla solo con api.appstoreconnect.apple.com. La chiave resta in
 ~/.appstoreconnect/key.json (fuori dal repo) e non viene mai stampata.
@@ -290,6 +291,42 @@ def cmd_screenshots(asc, apply):
     print("Caricati." if apply else "\nAnteprima. Per caricare: screenshots --apply")
 
 
+def cmd_promo(asc, apply):
+    """Aggiorna solo il testo promozionale, anche sulla versione già pubblicata:
+    è l'unico campo che Apple permette di cambiare senza revisione."""
+    app_id = find_app(asc)
+    versions = asc.get(f"/apps/{app_id}/appStoreVersions",
+                       **{"filter[platform]": "IOS", "limit": 10})["data"]
+    # Apple lascia "READY_FOR_SALE" anche sulle versioni vecchie: la pubblicata
+    # è solo la più recente fra quelle, più un'eventuale versione in preparazione.
+    versions.sort(key=lambda v: v["attributes"].get("createdDate") or "", reverse=True)
+    live = next((v for v in versions if v["attributes"]["appStoreState"] == "READY_FOR_SALE"), None)
+    targets = [v for v in versions if v["attributes"]["appStoreState"] in EDITABLE_VERSION_STATES]
+    targets += [live] if live else []
+    changes = []
+    for v in targets:
+        for loc in asc.get(f"/appStoreVersions/{v['id']}/appStoreVersionLocalizations")["data"]:
+            locale = loc["attributes"]["locale"]
+            new = read_local(locale, "promotional_text.txt")
+            if new is None:
+                continue
+            if len(new) > LIMITS["promotionalText"]:
+                sys.exit(f"{locale}: {len(new)} caratteri, limite {LIMITS['promotionalText']}")
+            if new != (loc["attributes"].get("promotionalText") or "").rstrip("\n"):
+                changes.append((v["attributes"]["versionString"], locale, loc["id"], new))
+    for ver, locale, _, new in changes:
+        print(f"  {ver} {locale:6} → {new!r}")
+    if not changes:
+        print("Testo promozionale già aggiornato.")
+        return
+    if not apply:
+        print("\nAnteprima. Per caricare: promo --apply")
+        return
+    for _, _, loc_id, new in changes:
+        asc.patch("appStoreVersionLocalizations", loc_id, {"promotionalText": new})
+    print("Testo promozionale aggiornato (visibile subito, senza revisione).")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -300,6 +337,8 @@ def main():
     nv.add_argument("version")
     sc = sub.add_parser("screenshots")
     sc.add_argument("--apply", action="store_true")
+    pr = sub.add_parser("promo")
+    pr.add_argument("--apply", action="store_true")
     args = ap.parse_args()
 
     asc = ASC()
@@ -307,6 +346,8 @@ def main():
         cmd_pull(asc)
     elif args.cmd == "push":
         cmd_push(asc, args.apply)
+    elif args.cmd == "promo":
+        cmd_promo(asc, args.apply)
     elif args.cmd == "new-version":
         cmd_new_version(asc, args.version)
     else:
